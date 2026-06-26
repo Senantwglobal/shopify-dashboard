@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OPLE Shopify 전환 대시보드</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--o:#E8680A;--ol:#FEF0E6;--od:#B84E06;--ob:#F5C49A;--bg:#f8f7f5;--card:#fff;--border:#e5e3dc;--text:#1a1a1a;--muted:#888;--surface:#f3f2ef}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.hdr{background:var(--card);border-bottom:0.5px solid var(--border);padding:10px 20px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;position:sticky;top:0;z-index:50}
+.logo{background:var(--o);color:#fff;font-size:13px;font-weight:600;padding:4px 10px;border-radius:6px}
+.htitle{font-size:14px;font-weight:500}
+.dday{background:var(--ol);color:var(--od);font-size:12px;font-weight:500;padding:3px 10px;border-radius:20px;border:0.5px solid var(--ob)}
+.user-info{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+.av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#fff;cursor:pointer}
+.logout-btn{font-size:12px;padding:4px 10px;border-radius:6px;border:0.5px solid var(--border);background:none;color:var(--muted);cursor:pointer}
+.logout-btn:hover{color:var(--text);border-color:#999}
+.nav{display:flex;padding:0 16px;background:var(--card);border-bottom:0.5px solid var(--border);overflow-x:auto;gap:0}
+.nb{padding:9px 12px;font-size:12px;border:none;background:none;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;white-space:nowrap;display:flex;align-items:center;gap:4px}
+.nb.active{color:var(--o);border-bottom-color:var(--o);font-weight:500}
+.nb:hover:not(.active){color:var(--text)}
+.cnt{padding:16px 20px;max-width:1100px;margin:0 auto}
+.krow{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;margin-bottom:14px}
+.kpi{background:var(--card);border-radius:10px;border:0.5px solid var(--border);padding:12px;text-align:center}
+.kn{font-size:22px;font-weight:500;margin-bottom:2px}
+.kl{font-size:11px;color:var(--muted)}
+.sec{background:var(--card);border:0.5px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px}
+.sec-o{border-color:var(--ob)}
+.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.st{font-size:13px;font-weight:500;display:flex;align-items:center;gap:6px;color:var(--text)}
+.oi{color:var(--o)}
+.btn{font-size:12px;padding:5px 10px;border-radius:8px;border:0.5px solid var(--border);background:none;color:var(--text);cursor:pointer;display:inline-flex;align-items:center;gap:4px}
+.btn:hover{background:var(--surface)}
+.btn-o{background:var(--o);color:#fff;border-color:var(--o)}
+.btn-o:hover{background:var(--od);color:#fff}
+.btn-g{border-color:transparent;color:var(--muted)}
+.btn-g:hover{background:var(--surface);color:var(--text)}
+.badge{font-size:10px;padding:2px 6px;border-radius:9px;font-weight:500;white-space:nowrap}
+.bo{background:var(--ol);color:var(--od)}
+.bb{background:#E6F1FB;color:#185FA5}
+.br{background:#FCEBEB;color:#A32D2D}
+.bg{background:#EAF3DE;color:#3B6D11}
+.bgr{background:#F1EFE8;color:#5F5E5A}
+.bp{background:#EEEDFE;color:#534AB7}
+.inp{width:100%;padding:8px 10px;border:0.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--surface);color:var(--text);margin-bottom:8px;outline:none}
+.inp:focus{border-color:var(--o)}
+textarea.inp{resize:vertical;min-height:64px}
+select.inp{cursor:pointer}
+.pgb{height:4px;border-radius:2px;background:var(--surface);overflow:hidden;margin-top:4px}
+.pgf{height:100%;border-radius:2px;transition:width .4s}
+.dl-chip{font-size:10px;font-weight:500;padding:2px 6px;border-radius:9px;white-space:nowrap}
+.dl-ok{background:#EAF3DE;color:#3B6D11}
+.dl-w{background:var(--ol);color:var(--od)}
+.dl-c{background:#FCEBEB;color:#A32D2D}
+.dl-d{background:#F1EFE8;color:#5F5E5A}
+.ck-row{display:flex;align-items:flex-start;gap:8px;padding:7px 8px;border-radius:8px;margin-bottom:2px}
+.ck-row:hover{background:var(--surface)}
+.ck-row input[type=checkbox]{accent-color:var(--o);margin-top:3px;flex-shrink:0;width:15px;height:15px}
+.sub-items{padding:4px 0 4px 24px;display:none}
+.sub-items.open{display:block}
+.sub-item{display:flex;align-items:flex-start;gap:7px;padding:5px 8px;border-radius:8px;margin-bottom:1px}
+.sub-item:hover{background:var(--surface)}
+.sub-item input[type=checkbox]{accent-color:var(--o);margin-top:2px;flex-shrink:0;width:13px;height:13px}
+.vbadge{font-size:9px;padding:1px 5px;border-radius:6px;background:#EEEDFE;color:#534AB7;white-space:nowrap;cursor:default}
+.vbadge.ok{background:#EAF3DE;color:#3B6D11}
+.comment{background:var(--surface);border-radius:8px;padding:9px;margin-bottom:6px;border-left:3px solid var(--o)}
+.cauth{font-size:11px;font-weight:600;display:flex;align-items:center;gap:5px;margin-bottom:3px}
+.ctext{font-size:13px;color:#444}
+.ctime{font-size:10px;color:var(--muted);font-weight:400}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.gng-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:7px;margin-bottom:10px}
+.gng-c{border-radius:9px;padding:9px 11px;border:0.5px solid var(--border);display:flex;align-items:flex-start;gap:8px;background:var(--card)}
+.gng-l{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:3px}
+.lg-r{background:#E24B4A}
+.lg-o{background:var(--o)}
+.lg-g{background:#639922}
+.mtg-card{padding:11px;border:0.5px solid var(--border);border-radius:10px;margin-bottom:8px;cursor:pointer;background:var(--card)}
+.mtg-card:hover{border-color:var(--ob)}
+.ai-row{display:flex;align-items:flex-start;gap:8px;padding:8px;border-radius:9px;border:0.5px solid var(--border);margin-bottom:6px;background:var(--card)}
+.editable{cursor:pointer;border-radius:4px;padding:1px 3px}
+.editable:hover{background:var(--ol);outline:1px dashed var(--ob)}
+.edit-inp{font-size:inherit;padding:2px 6px;border:1.5px solid var(--o);border-radius:4px;background:#fff;color:var(--text);outline:none}
+.kpi-tbl{width:100%;border-collapse:collapse;font-size:12px}
+.kpi-tbl th{background:var(--surface);padding:8px;text-align:left;font-weight:500;font-size:11px;color:var(--muted);border-bottom:0.5px solid var(--border);white-space:nowrap}
+.kpi-tbl td{padding:7px 8px;border-bottom:0.5px solid var(--border)}
+.kpi-tbl tr:last-child td{border-bottom:none}
+.kpi-cell{width:100%;min-width:70px;padding:4px 6px;border:0.5px solid var(--border);border-radius:5px;font-size:12px;background:var(--surface);color:var(--text)}
+.kpi-cell:focus{outline:none;border-color:var(--o)}
+.hist-r{display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--border);font-size:12px}
+.toast{position:fixed;bottom:20px;right:20px;background:#2d6a27;color:#fff;padding:9px 16px;border-radius:9px;font-size:13px;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.show{opacity:1}
+.realtime-dot{width:7px;height:7px;border-radius:50%;background:#639922;display:inline-block;margin-right:4px;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:flex-start;justify-content:center;padding-top:28px;overflow-y:auto}
+.modal{background:#fff;border-radius:14px;border:0.5px solid var(--border);border-top:3px solid var(--o);width:560px;max-width:95%;max-height:88vh;overflow-y:auto}
+.modal-h{padding:13px 16px;border-bottom:0.5px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.modal-b{padding:16px}
+@media(max-width:600px){.two{grid-template-columns:1fr}.cnt{padding:12px}}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div style="display:flex;align-items:center;gap:10px">
+    <span class="logo">OPLE</span>
+    <span class="htitle">Shopify 전환 프로젝트</span>
+    <span class="dday" id="dday-c">D-18 · 7/14</span>
+    <span style="font-size:11px;color:var(--muted)"><span class="realtime-dot"></span>실시간</span>
+  </div>
+  <div class="user-info">
+    <div class="av" id="user-av" style="background:var(--o)">?</div>
+    <span id="user-name">로딩중</span>
+    <button class="logout-btn" onclick="logout()">로그아웃</button>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nb active" onclick="showTab('dash')" id="tab-dash"><i class="ti ti-layout-dashboard"></i>대시보드</button>
+  <button class="nb" onclick="showTab('ck')" id="tab-ck"><i class="ti ti-checklist"></i>체크리스트</button>
+  <button class="nb" onclick="showTab('kpi')" id="tab-kpi"><i class="ti ti-chart-line"></i>KPI</button>
+  <button class="nb" onclick="showTab('ux')" id="tab-ux"><i class="ti ti-device-mobile"></i>UX 베타</button>
+  <button class="nb" onclick="showTab('ai')" id="tab-ai"><i class="ti ti-list-check"></i>액션아이템<span id="ai-badge" style="background:#E24B4A;color:#fff;border-radius:8px;padding:0 5px;font-size:10px;margin-left:3px"></span></button>
+  <button class="nb" onclick="showTab('mtg')" id="tab-mtg"><i class="ti ti-notes"></i>회의록</button>
+  <button class="nb" onclick="showTab('hist')" id="tab-hist"><i class="ti ti-history"></i>변경이력</button>
+</div>
+
+<div class="cnt" id="mc"><div style="text-align:center;padding:60px;color:var(--muted)">데이터 불러오는 중...</div></div>
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+
+const SURL='https://btutlgcidpjgedpypzri.supabase.co'
+const SKEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ0dXRsZ2NpZHBqZ2VkcHlwenJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0NTE0MjQsImV4cCI6MjA5ODAyNzQyNH0.qZp04DhOmm4oSho3Qsfz8UWEeY-eNhGcIydyVNejqBc'
+const sb=createClient(SURL,SKEY)
+
+const USERS={'handaepyo@ople.co':{name:'한대표',c:'#A32D2D',s:'한'},'minzun@ople.co':{name:'김민준',c:'#534AB7',s:'민'},'younghwan@ople.co':{name:'박영환',c:'#0F6E56',s:'영'},'sungyup@ople.co':{name:'임성엽',c:'#993556',s:'성'},'jihun@ople.co':{name:'정지훈',c:'#185FA5',s:'지'},'sena@ople.co':{name:'세나',c:'#E8680A',s:'세'}}
+
+const TODAY=new Date('2026-06-26')
+let curUser=null,curEmail=null,activeTab='dash'
+let expandCats={},expandCks={}
+let D={cats:[],items:[],subs:[],comments:[],kpiRows:[],kpiAnalysis:{},uxTesters:[],uxSettings:{},actionItems:[],meetings:[],history:[]}
+
+// 인증 확인
+const {data:{session}}=await sb.auth.getSession()
+if(!session){location.href='index.html';throw new Error('no session')}
+curEmail=session.user.email
+curUser=USERS[curEmail]||{name:curEmail.split('@')[0],c:'#888',s:'?'}
+document.getElementById('user-av').textContent=curUser.s
+document.getElementById('user-av').style.background=curUser.c
+document.getElementById('user-name').textContent=curUser.name
+
+window.logout=async()=>{await sb.auth.signOut();location.href='index.html'}
+
+// 날짜 유틸
+function ddu(ds){if(!ds)return 999;return Math.ceil((new Date(ds)-TODAY)/864e5)}
+function ts(){return new Date().toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}
+function calcDD(){return Math.ceil((new Date('2026-07-14')-TODAY)/864e5)}
+function dlc(dl,done){if(done)return`<span class="dl-chip dl-d">완료</span>`;const d=ddu(dl);if(d<0)return`<span class="dl-chip dl-c">D+${Math.abs(d)}초과</span>`;if(d===0)return`<span class="dl-chip dl-c">오늘</span>`;if(d<=3)return`<span class="dl-chip dl-c">D-${d}</span>`;if(d<=7)return`<span class="dl-chip dl-w">D-${d}</span>`;return`<span class="dl-chip dl-ok">D-${d}</span>`}
+function pb(p){return{critical:'<span class="badge br">긴급</span>',high:'<span class="badge bo">중요</span>',medium:'<span class="badge bg">보통</span>'}[p]||''}
+function sb2(s){const m={완료:'bg',진행:'bb',대기:'bgr',이슈:'br'};return`<span class="badge ${m[s]||'bgr'}">${s}</span>`}
+function avEl(name,sz=22){const u=Object.values(USERS).find(u=>u.name===name)||{c:'#888',s:name?name[0]:'?'};return`<div style="width:${sz}px;height:${sz}px;border-radius:50%;background:${u.c};display:flex;align-items:center;justify-content:center;font-size:${Math.round(sz*.42)}px;font-weight:600;color:#fff;flex-shrink:0" title="${name}">${u.s}</div>`}
+function toast(msg,ok=true){const t=document.getElementById('toast');t.textContent=msg;t.style.background=ok?'#2d6a27':'#A32D2D';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
+
+// 데이터 로드
+async function loadAll(){
+  const [catsR,itemsR,subsR,cmtsR,kpiR,kpiAR,uxTR,uxSR,aiR,mtgR,histR]=await Promise.all([
+    sb.from('checklist_categories').select('*').order('sort_order'),
+    sb.from('checklist_items').select('*').order('sort_order'),
+    sb.from('checklist_subs').select('*').order('sort_order'),
+    sb.from('checklist_comments').select('*').order('created_at'),
+    sb.from('kpi_data').select('*'),
+    sb.from('kpi_analysis').select('*').eq('id','main').single(),
+    sb.from('ux_testers').select('*').order('sort_order'),
+    sb.from('ux_settings').select('*').eq('id','main').single(),
+    sb.from('action_items').select('*').order('created_at'),
+    sb.from('meetings').select('*').order('date',{ascending:false}),
+    sb.from('history').select('*').order('created_at',{ascending:false}).limit(100),
+  ])
+  D.cats=catsR.data||[]
+  D.items=itemsR.data||[]
+  D.subs=subsR.data||[]
+  D.comments=cmtsR.data||[]
+  D.kpiRows=kpiR.data||[]
+  D.kpiAnalysis=kpiAR.data||{}
+  D.uxTesters=uxTR.data||[]
+  D.uxSettings=uxSR.data||{}
+  D.actionItems=aiR.data||[]
+  D.meetings=mtgR.data||[]
+  D.history=histR.data||[]
+  render()
+}
+
+// 실시간 구독
+sb.channel('ople-realtime')
+  .on('postgres_changes',{event:'*',schema:'public',table:'checklist_items'},()=>loadAll())
+  .on('postgres_changes',{event:'*',schema:'public',table:'checklist_subs'},()=>loadAll())
+  .on('postgres_changes',{event:'*',schema:'public',table:'checklist_comments'},()=>loadAll())
+  .on('postgres_changes',{event:'*',schema:'public',table:'action_items'},()=>loadAll())
+  .on('postgres_changes',{event:'*',schema:'public',table:'kpi_data'},()=>loadAll())
+  .on('postgres_changes',{event:'*',schema:'public',table:'history'},()=>loadAll())
+  .subscribe()
+
+async function logH(action,target){
+  await sb.from('history').insert({user_name:curUser.name,action,target})
+}
+
+// 탭 전환
+window.showTab=(t)=>{
+  activeTab=t
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'))
+  document.getElementById('tab-'+t).classList.add('active')
+  render()
+}
+
+function render(){
+  document.getElementById('dday-c').textContent=`D-${calcDD()} · 7/14`
+  const pending=D.actionItems.filter(a=>a.status!=='완료').length
+  const ab=document.getElementById('ai-badge')
+  ab.textContent=pending>0?pending:'';ab.style.display=pending>0?'':'none'
+  const mc=document.getElementById('mc')
+  if(activeTab==='dash')mc.innerHTML=renderDash()
+  else if(activeTab==='ck')mc.innerHTML=renderCK()
+  else if(activeTab==='kpi')mc.innerHTML=renderKPI()
+  else if(activeTab==='ux')mc.innerHTML=renderUX()
+  else if(activeTab==='ai')mc.innerHTML=renderAI()
+  else if(activeTab==='mtg')mc.innerHTML=renderMTG()
+  else mc.innerHTML=renderHist()
+}
+
+// ── 대시보드 ──
+function renderDash(){
+  let tot=0,dn=0
+  D.items.forEach(i=>{tot++;if(i.done)dn++;D.subs.filter(s=>s.item_id===i.id).forEach(s=>{tot++;if(s.done)dn++;})})
+  const prog=tot?Math.round(dn/tot*100):0
+  const aiDone=D.actionItems.filter(a=>a.status==='완료').length
+  const catProgress=D.cats.map(cat=>{
+    const its=D.items.filter(i=>i.category_id===cat.id)
+    const t=its.reduce((s,i)=>s+1+D.subs.filter(s=>s.item_id===i.id).length,0)
+    const d=its.reduce((s,i)=>s+(i.done?1:0)+D.subs.filter(s=>s.item_id===i.id&&s.done).length,0)
+    const pct=t?Math.round(d/t*100):0
+    return{...cat,t,d,pct}
+  })
+  const urgent=D.items.filter(i=>!i.done&&ddu(i.deadline)<=3).sort((a,b)=>new Date(a.deadline)-new Date(b.deadline)).slice(0,5)
+
+  return`
+<div class="krow">
+  <div class="kpi"><div class="kn" style="color:var(--o)">${calcDD()}</div><div class="kl">D-day까지</div></div>
+  <div class="kpi"><div class="kn" style="color:${prog>=70?'#3B6D11':'var(--text)'}">${prog}%</div><div class="kl">전체 진행률</div></div>
+  <div class="kpi"><div class="kn">${aiDone}/${D.actionItems.length}</div><div class="kl">액션 완료</div></div>
+  <div class="kpi"><div class="kn" style="color:var(--o)">${D.actionItems.filter(a=>a.status==='진행').length}</div><div class="kl">진행중</div></div>
+  <div class="kpi"><div class="kn" style="color:#A32D2D">${D.actionItems.filter(a=>a.status!=='완료').length}</div><div class="kl">미완료</div></div>
+</div>
+
+<div class="sec sec-o">
+  <div class="sh"><span class="st"><i class="ti ti-list-check oi"></i> 카테고리별 진행률</span><button class="btn" onclick="showTab('ck')">전체 보기</button></div>
+  ${catProgress.map(cat=>`
+  <div style="margin-bottom:9px">
+    <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+      <div style="display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:50%;background:${cat.color};display:inline-block"></span><span style="font-size:12px">${cat.label}</span></div>
+      <span style="font-size:11px;color:var(--muted)">${cat.d}/${cat.t}</span>
+    </div>
+    <div class="pgb"><div class="pgf" style="width:${cat.pct}%;background:${cat.pct===100?'#639922':cat.color}"></div></div>
+  </div>`).join('')}
+</div>
+
+<div class="two">
+<div class="sec">
+  <div class="sh"><span class="st"><i class="ti ti-alarm oi"></i> 마감 임박 (3일 이내)</span></div>
+  ${urgent.length?urgent.map(i=>`
+  <div style="display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:0.5px solid var(--border)">
+    <div style="flex:1;min-width:0"><div style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${i.text}</div><div style="font-size:10px;color:var(--muted)">${i.owner}</div></div>
+    ${dlc(i.deadline,i.done)}
+  </div>`).join(''):'<div style="font-size:13px;color:var(--muted)">없음</div>'}
+</div>
+<div class="sec">
+  <div class="sh"><span class="st"><i class="ti ti-notes oi"></i> 최근 회의</span><button class="btn" onclick="showTab('mtg')">전체</button></div>
+  ${D.meetings.slice(0,2).map(m=>`
+  <div class="mtg-card" onclick="openMtg('${m.id}')">
+    <div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:12px;font-weight:500">${m.title}</span><span style="font-size:10px;color:var(--muted)">${m.date}</span></div>
+    <div style="font-size:11px;color:var(--muted)">결정 ${(m.decisions||[]).length}건 · 미확인 ${(m.pending||[]).length}건</div>
+  </div>`).join('')}
+</div>
+</div>`
+}
+
+// ── 체크리스트 ──
+function renderCK(){
+  return D.cats.map(cat=>{
+    const items=D.items.filter(i=>i.category_id===cat.id)
+    const tot=items.reduce((s,i)=>s+1+D.subs.filter(s=>s.item_id===i.id).length,0)
+    const dn=items.reduce((s,i)=>s+(i.done?1:0)+D.subs.filter(s=>s.item_id===i.id&&s.done).length,0)
+    const isOpen=expandCats[cat.id]!==false
+    return`<div class="sec" style="border-left:3px solid ${cat.color}">
+    <div style="display:flex;align-items:center;gap:7px;cursor:pointer;padding:4px 0" onclick="toggleCat('${cat.id}')">
+      <i class="ti ${cat.icon}" style="color:${cat.color};font-size:16px"></i>
+      <span style="flex:1;font-size:13px;font-weight:500">${cat.label}</span>
+      <span style="font-size:11px;color:var(--muted)">${dn}/${tot}</span>
+      <button class="btn btn-o" style="padding:2px 8px;font-size:11px" onclick="event.stopPropagation();openAddItem('${cat.id}')"><i class="ti ti-plus"></i> 추가</button>
+      <i class="ti ti-chevron-${isOpen?'up':'down'}" style="color:var(--muted)"></i>
+    </div>
+    ${isOpen?items.map(item=>{
+      const subs=D.subs.filter(s=>s.item_id===item.id)
+      const cmts=D.comments.filter(c=>c.item_id===item.id)
+      const sdone=subs.filter(s=>s.done).length
+      const isExp=expandCks[item.id]!==false
+      return`<div style="margin:10px 0">
+      <div class="ck-row" onclick="toggleCkExp('${item.id}')">
+        <input type="checkbox" ${item.done?'checked':''} onclick="event.stopPropagation()" onchange="toggleItem('${item.id}',this.checked)">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;${item.done?'text-decoration:line-through;color:var(--muted)':''}" class="editable" onclick="event.stopPropagation();inlineEdit(this,'checklist_items','${item.id}','text')">${item.text}</div>
+          <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:3px;align-items:center">
+            ${pb(item.priority)}${sb2(item.status)}
+            <span class="editable" style="font-size:11px;color:var(--muted)" onclick="event.stopPropagation();inlineEditSel(this,'checklist_items','${item.id}','owner',['한대표','김민준','박영환','임성엽','개발팀','마케팅','CS','전체'])">${item.owner}</span>
+            <span class="editable" style="font-size:11px;color:var(--muted)" onclick="event.stopPropagation();inlineEditDate(this,'checklist_items','${item.id}','deadline')">${item.deadline||'—'}</span>
+            ${dlc(item.deadline,item.done)}
+            <span style="font-size:10px;color:var(--muted)">${sdone}/${subs.length}</span>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:5px;flex-shrink:0">
+          <button class="btn btn-g" style="padding:2px 7px;font-size:11px" onclick="event.stopPropagation();openCkCmt('${item.id}')"><i class="ti ti-message-circle"></i>${cmts.length>0?' '+cmts.length:''}</button>
+          <button class="btn btn-g" style="padding:2px 6px;font-size:11px;color:#A32D2D" onclick="event.stopPropagation();deleteItem('${item.id}')"><i class="ti ti-trash"></i></button>
+          <i class="ti ti-chevron-${isExp?'up':'down'}" style="font-size:13px;color:var(--muted);cursor:pointer"></i>
+        </div>
+      </div>
+      <div class="sub-items ${isExp?'open':''}" id="sub-${item.id}">
+        ${subs.map(s=>`<div class="sub-item">
+        <input type="checkbox" ${s.done?'checked':''} onchange="toggleSub('${s.id}','${item.id}',this.checked)">
+        <label style="${s.done?'text-decoration:line-through;color:var(--muted);':''}flex:1;font-size:12px;cursor:pointer" class="editable" onclick="event.preventDefault();inlineEditSubText(this,'${s.id}')">${s.text}</label>
+        <div style="display:flex;align-items:center;gap:5px;flex-shrink:0">
+          <span class="vbadge ${s.verified?'ok':''}">${s.verified?'✓'+(s.verified_by||''):s.done?'검증대기':'미완료'}</span>
+          ${s.done&&!s.verified?`<button class="btn btn-o" style="font-size:10px;padding:1px 6px" onclick="verifySub('${s.id}','${item.id}')">검증</button>`:''}
+          <button class="btn btn-g" style="padding:1px 4px;font-size:10px;color:#A32D2D" onclick="deleteSub('${s.id}','${item.id}')"><i class="ti ti-x"></i></button>
+        </div>
+        </div>`).join('')}
+        <div style="display:flex;gap:5px;padding:4px 8px;margin-top:3px">
+          <input id="newsub-${item.id}" style="flex:1;font-size:12px;padding:5px 8px;border:0.5px solid var(--border);border-radius:7px;background:var(--surface);color:var(--text);outline:none" placeholder="세부 항목 추가..." onkeydown="if(event.key==='Enter'){addSub('${item.id}');event.preventDefault()}">
+          <button class="btn btn-o" style="padding:4px 9px;font-size:11px;flex-shrink:0" onclick="addSub('${item.id}')"><i class="ti ti-plus"></i></button>
+        </div>
+      </div>
+      </div>`
+    }).join(''):''}
+    </div>`
+  }).join('')
+}
+
+window.toggleCat=(id)=>{expandCats[id]=expandCats[id]===false?true:false;render()}
+window.toggleCkExp=(id)=>{expandCks[id]=expandCks[id]===false?true:false;render()}
+
+window.toggleItem=async(id,checked)=>{
+  const item=D.items.find(i=>i.id===id);if(!item)return
+  await sb.from('checklist_items').update({done:checked,done_by:checked?curUser.name:null,done_at:checked?new Date().toISOString():null,updated_at:new Date().toISOString()}).eq('id',id)
+  await logH(`항목 ${checked?'완료':'취소'}`,item.text)
+  await loadAll()
+}
+
+window.toggleSub=async(sid,itemId,checked)=>{
+  const s=D.subs.find(s=>s.id===sid);if(!s)return
+  await sb.from('checklist_subs').update({done:checked,done_by:checked?curUser.name:null,done_at:checked?new Date().toISOString():null,verified:false,verified_by:null}).eq('id',sid)
+  const item=D.items.find(i=>i.id===itemId)
+  await logH(`세부 ${checked?'완료':'취소'}`,`${item?.text||''} > ${s.text}`)
+  await loadAll()
+}
+
+window.verifySub=async(sid,itemId)=>{
+  const s=D.subs.find(s=>s.id===sid);if(!s)return
+  await sb.from('checklist_subs').update({verified:true,verified_by:curUser.name,verified_at:new Date().toISOString()}).eq('id',sid)
+  const item=D.items.find(i=>i.id===itemId)
+  await logH('검증 완료',`${item?.text||''} > ${s.text}`)
+  toast(`✓ ${s.text} 검증 완료`)
+  await loadAll()
+}
+
+window.addSub=async(itemId)=>{
+  const inp=document.getElementById('newsub-'+itemId);if(!inp||!inp.value.trim())return
+  const text=inp.value.trim()
+  await sb.from('checklist_subs').insert({item_id:itemId,text,verifier:curUser.name})
+  const item=D.items.find(i=>i.id===itemId)
+  await logH('세부 추가',`${item?.text||''} > ${text}`)
+  inp.value='';toast('추가됨')
+  await loadAll()
+}
+
+window.deleteSub=async(sid,itemId)=>{
+  const s=D.subs.find(s=>s.id===sid);if(!s||!confirm(`"${s.text}" 삭제?`))return
+  await sb.from('checklist_subs').delete().eq('id',sid)
+  await logH('세부 삭제',s.text)
+  await loadAll()
+}
+
+window.deleteItem=async(id)=>{
+  const item=D.items.find(i=>i.id===id);if(!item||!confirm(`"${item.text}" 삭제?`))return
+  await sb.from('checklist_items').delete().eq('id',id)
+  await logH('항목 삭제',item.text)
+  await loadAll()
+}
+
+// 인라인 편집
+window.inlineEdit=(el,table,id,field)=>{
+  const item=table==='checklist_items'?D.items.find(i=>i.id===id):D.actionItems.find(i=>i.id===id)
+  if(!item)return
+  const old=item[field]
+  const inp=document.createElement('input');inp.className='edit-inp';inp.value=old||'';inp.style.width='100%';inp.style.fontSize='13px'
+  el.replaceWith(inp);inp.focus();inp.select()
+  const save=async()=>{
+    const v=inp.value.trim()||old
+    if(v!==old){
+      await sb.from(table).update({[field]:v,updated_at:new Date().toISOString()}).eq('id',id)
+      await logH(`${field} 수정`,`${old}→${v}`)
+      await loadAll()
+    } else render()
+  }
+  inp.onblur=save;inp.onkeydown=e=>{if(e.key==='Enter')save();if(e.key==='Escape')render()}
+}
+
+window.inlineEditSubText=(el,sid)=>{
+  const s=D.subs.find(s=>s.id===sid);if(!s)return
+  const old=s.text
+  const inp=document.createElement('input');inp.className='edit-inp';inp.value=old;inp.style.width='200px';inp.style.fontSize='12px'
+  el.replaceWith(inp);inp.focus();inp.select()
+  const save=async()=>{
+    const v=inp.value.trim()||old
+    if(v!==old){await sb.from('checklist_subs').update({text:v}).eq('id',sid);await logH('세부 수정',`${old}→${v}`);await loadAll()}else render()
+  }
+  inp.onblur=save;inp.onkeydown=e=>{if(e.key==='Enter')save();if(e.key==='Escape')render()}
+}
+
+window.inlineEditSel=(el,table,id,field,options)=>{
+  const item=table==='checklist_items'?D.items.find(i=>i.id===id):D.actionItems.find(i=>i.id===id)
+  if(!item)return
+  const old=item[field]
+  const sel=document.createElement('select');sel.className='edit-inp';sel.style.fontSize='11px'
+  options.forEach(o=>{const opt=document.createElement('option');opt.value=o;opt.textContent=o;if(o===old)opt.selected=true;sel.appendChild(opt)})
+  el.replaceWith(sel);sel.focus()
+  const save=async()=>{
+    const v=sel.value
+    if(v!==old){await sb.from(table).update({[field]:v,updated_at:new Date().toISOString()}).eq('id',id);await logH(`${field} 변경`,`${item.text}: ${old}→${v}`);await loadAll()}else render()
+  }
+  sel.onblur=save;sel.onchange=save
+}
+
+window.inlineEditDate=(el,table,id,field)=>{
+  const item=table==='checklist_items'?D.items.find(i=>i.id===id):D.actionItems.find(i=>i.id===id)
+  if(!item)return
+  const old=item[field]
+  const inp=document.createElement('input');inp.type='date';inp.className='edit-inp';inp.value=old||'';inp.style.fontSize='11px'
+  el.replaceWith(inp);inp.focus()
+  const save=async()=>{
+    const v=inp.value
+    if(v!==old){await sb.from(table).update({[field]:v,updated_at:new Date().toISOString()}).eq('id',id);await logH('마감일 변경',`${item.text}: →${v}`);await loadAll()}else render()
+  }
+  inp.onblur=save;inp.onchange=save
+}
+
+// 모달 헬퍼
+function mkOverlay(id){
+  const old=document.getElementById(id);if(old)old.remove()
+  const w=document.createElement('div');w.id=id;w.className='overlay'
+  w.onclick=e=>{if(e.target===w)w.remove()}
+  return w
+}
+
+// 항목 추가 모달
+window.openAddItem=(catId)=>{
+  const w=mkOverlay('add-item-ov')
+  w.innerHTML=`<div class="modal">
+  <div class="modal-h"><span style="font-weight:500">체크리스트 항목 추가</span><button class="btn btn-g" onclick="document.getElementById('add-item-ov').remove()"><i class="ti ti-x"></i></button></div>
+  <div class="modal-b">
+    <input class="inp" id="ni-text" placeholder="항목 이름">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <select class="inp" id="ni-owner" style="margin:0"><option>개발팀</option><option>마케팅</option><option>CS</option><option>한대표</option><option>김민준</option><option>박영환</option><option>임성엽</option><option>전체</option></select>
+      <input class="inp" type="date" id="ni-dl" style="margin:0">
+    </div>
+    <select class="inp" id="ni-pri" style="margin-top:8px"><option value="critical">긴급</option><option value="high">중요</option><option value="medium">보통</option></select>
+    <div style="font-size:12px;color:var(--muted);margin:8px 0 4px">세부 항목 (Enter로 추가)</div>
+    <div id="ni-subs-list" style="margin-bottom:6px"></div>
+    <div style="display:flex;gap:5px">
+      <input id="ni-sub-inp" style="flex:1;font-size:12px;padding:5px 8px;border:0.5px solid var(--border);border-radius:7px;background:var(--surface);color:var(--text);outline:none" placeholder="세부 항목" onkeydown="if(event.key==='Enter'){addNiSub();event.preventDefault()}">
+      <button class="btn btn-o" style="flex-shrink:0;padding:4px 9px" onclick="addNiSub()"><i class="ti ti-plus"></i></button>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:6px;margin-top:14px;border-top:0.5px solid var(--border);padding-top:12px">
+      <button class="btn" onclick="document.getElementById('add-item-ov').remove()">취소</button>
+      <button class="btn btn-o" onclick="saveNewItem('${catId}')">추가</button>
+    </div>
+  </div></div>`
+  document.body.appendChild(w)
+  window._niSubs=[]
+}
+
+window.addNiSub=()=>{
+  const inp=document.getElementById('ni-sub-inp');if(!inp||!inp.value.trim())return
+  window._niSubs=window._niSubs||[]
+  window._niSubs.push(inp.value.trim());inp.value=''
+  document.getElementById('ni-subs-list').innerHTML=(window._niSubs||[]).map((t,i)=>`
+  <div style="display:flex;align-items:center;gap:5px;padding:3px 6px;margin-bottom:2px;background:var(--ol);border-radius:7px;font-size:12px">
+    <span style="flex:1">${t}</span>
+    <button class="btn btn-g" style="padding:0 4px" onclick="window._niSubs.splice(${i},1);addNiSub()"><i class="ti ti-x"></i></button>
+  </div>`).join('')
+}
+
+window.saveNewItem=async(catId)=>{
+  const text=document.getElementById('ni-text')?.value.trim();if(!text)return
+  const {data:newItem}=await sb.from('checklist_items').insert({category_id:catId,text,owner:document.getElementById('ni-owner').value,deadline:document.getElementById('ni-dl').value||null,priority:document.getElementById('ni-pri').value,created_by:curUser.name}).select().single()
+  if(newItem&&window._niSubs?.length){
+    await sb.from('checklist_subs').insert(window._niSubs.map((t,i)=>({item_id:newItem.id,text:t,verifier:curUser.name,sort_order:i})))
+  }
+  await logH('항목 추가',text)
+  document.getElementById('add-item-ov').remove()
+  toast('항목 추가됨')
+  await loadAll()
+}
+
+// 댓글 모달
+window.openCkCmt=async(itemId)=>{
+  const item=D.items.find(i=>i.id===itemId);if(!item)return
+  const cmts=D.comments.filter(c=>c.item_id===itemId)
+  const w=mkOverlay('ck-cmt-ov')
+  w.innerHTML=`<div class="modal">
+  <div class="modal-h">
+    <div><div style="font-size:14px;font-weight:500">${item.text}</div><div style="font-size:11px;color:var(--muted);margin-top:2px">${item.owner} · ${item.deadline||'—'}</div></div>
+    <button class="btn btn-g" onclick="document.getElementById('ck-cmt-ov').remove()"><i class="ti ti-x"></i></button>
+  </div>
+  <div class="modal-b">
+    <div style="display:flex;gap:5px;margin-bottom:12px">${pb(item.priority)}${sb2(item.status)}${dlc(item.deadline,item.done)}</div>
+    <div style="font-size:13px;font-weight:500;margin-bottom:8px">댓글 & 결과 링크 (${cmts.length})</div>
+    ${cmts.map(c=>`<div class="comment">
+    <div class="cauth">${avEl(c.user_name,16)} ${c.user_name} <span class="ctime">${new Date(c.created_at).toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}</span></div>
+    <div class="ctext">${c.text}</div>
+    ${c.link?`<a href="${c.link}" target="_blank" style="display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--o);background:var(--ol);padding:2px 8px;border-radius:7px;text-decoration:none;margin-top:3px"><i class="ti ti-external-link"></i>${c.link}</a>`:''}</div>`).join('')}
+    <div style="border-top:0.5px solid var(--border);padding-top:12px;margin-top:4px">
+      <textarea class="inp" id="cc-text" placeholder="진행 상황, 테스트 결과, 이슈..."></textarea>
+      <input class="inp" id="cc-link" placeholder="원드라이브 / 구글닥스 링크 (선택)">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <select class="inp" id="cc-st" style="width:auto;margin:0">${['대기','진행','완료','이슈'].map(s=>`<option ${item.status===s?'selected':''}>${s}</option>`).join('')}</select>
+        <button class="btn btn-o" onclick="saveCkCmt('${itemId}')"><i class="ti ti-check"></i> 저장</button>
+      </div>
+    </div>
+  </div></div>`
+  document.body.appendChild(w)
+}
+
+window.saveCkCmt=async(itemId)=>{
+  const item=D.items.find(i=>i.id===itemId);if(!item)return
+  const txt=document.getElementById('cc-text')?.value.trim()
+  const lnk=document.getElementById('cc-link')?.value.trim()
+  const ns=document.getElementById('cc-st')?.value
+  if(txt)await sb.from('checklist_comments').insert({item_id:itemId,user_name:curUser.name,text:txt,link:lnk||null})
+  if(ns&&ns!==item.status){await sb.from('checklist_items').update({status:ns,updated_at:new Date().toISOString()}).eq('id',itemId);await logH(`상태 변경 →${ns}`,item.text)}
+  if(txt)await logH('댓글 등록',item.text)
+  document.getElementById('ck-cmt-ov').remove()
+  toast('저장됨')
+  await loadAll()
+}
+
+// ── KPI ──
+function renderKPI(){
+  const metrics=['일매출','주문수','전환율','결제실패율','404오류','SUPLA누락']
+  const cols=[{k:'baseline',l:'전환 전 기준값'},{k:'d1',l:'D+1 (7/15)'},{k:'d3',l:'D+3 (7/17)'},{k:'d7',l:'D+7 (7/21)'},{k:'d14',l:'D+14 (7/28)'}]
+  const getVal=(col,metric)=>{const r=D.kpiRows.find(r=>r.col===col&&r.metric===metric);return r?.value||''}
+  return`
+<div style="background:var(--ol);border:0.5px solid var(--ob);border-radius:8px;padding:9px 13px;margin-bottom:12px;font-size:12px;color:var(--od)">
+  <i class="ti ti-pencil"></i> 모든 셀 직접 입력 → Tab/Enter로 이동 → 자동 저장됩니다.
+</div>
+<div class="sec">
+  <div class="sh"><span class="st"><i class="ti ti-chart-line oi"></i> KPI 추적표</span></div>
+  <div style="overflow-x:auto">
+  <table class="kpi-tbl">
+    <thead><tr><th>지표</th>${cols.map(c=>`<th>${c.l}</th>`).join('')}<th>허용 하락</th><th>조치 임계치</th></tr></thead>
+    <tbody>
+    ${metrics.map(m=>`<tr>
+    <td style="font-weight:500;white-space:nowrap">${m}</td>
+    ${cols.map(c=>`<td><input class="kpi-cell" value="${getVal(c.k,m)}" placeholder="—" onchange="saveKPI('${c.k}','${m}',this.value)"></td>`).join('')}
+    <td style="color:var(--o);white-space:nowrap">-15%</td>
+    <td style="color:#A32D2D;white-space:nowrap">-20% 즉시 대응</td>
+    </tr>`).join('')}
+    </tbody>
+  </table>
+  </div>
+  <div style="font-size:11px;color:var(--muted);margin-top:8px"><i class="ti ti-info-circle"></i> 전환 전 기준값은 최근 3개월 평균 기반으로 입력해주세요.</div>
+</div>
+<div class="two">
+<div class="sec">
+  <div class="sh"><span class="st"><i class="ti ti-trending-down oi"></i> 매출 하락 분석</span></div>
+  <textarea class="inp" style="min-height:120px" placeholder="하락 원인·기간·금액 분석..." onchange="saveKPIAnalysis('sales_analysis',this.value)">${D.kpiAnalysis.sales_analysis||''}</textarea>
+</div>
+<div class="sec">
+  <div class="sh"><span class="st"><i class="ti ti-trending-up oi"></i> 손실 산정 & 회복 계획</span></div>
+  <textarea class="inp" style="min-height:120px" placeholder="일매출 ___원 × ___% × ___일 = ___원&#10;회복 근거..." onchange="saveKPIAnalysis('recovery_plan',this.value)">${D.kpiAnalysis.recovery_plan||''}</textarea>
+</div>
+</div>`
+}
+
+window.saveKPI=async(col,metric,value)=>{
+  await sb.from('kpi_data').upsert({col,metric,value,updated_by:curUser.name,updated_at:new Date().toISOString()},{onConflict:'col,metric'})
+  toast('KPI 저장됨')
+  await loadAll()
+}
+
+window.saveKPIAnalysis=async(field,value)=>{
+  await sb.from('kpi_analysis').update({[field]:value,updated_by:curUser.name,updated_at:new Date().toISOString()}).eq('id','main')
+  toast('저장됨')
+}
+
+// ── UX 베타 ──
+function renderUX(){
+  const u=D.uxSettings
+  return`
+<div style="background:var(--ol);border:0.5px solid var(--ob);border-radius:8px;padding:9px 13px;margin-bottom:12px;font-size:12px;color:var(--od)">
+  <i class="ti ti-pencil"></i> 클릭해서 수정 가능. 테스터 그룹 추가/삭제 가능.
+</div>
+<div class="sec sec-o">
+  <div class="sh"><span class="st"><i class="ti ti-users oi"></i> 베타 테스터 구성</span><button class="btn btn-o" onclick="addTester()"><i class="ti ti-plus"></i> 그룹 추가</button></div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:8px">
+  ${D.uxTesters.map(t=>`
+  <div style="background:var(--surface);border-radius:10px;border:0.5px solid var(--border);padding:10px;position:relative">
+    <button class="btn btn-g" style="position:absolute;top:5px;right:5px;padding:1px 4px;font-size:10px;color:#A32D2D" onclick="deleteTester('${t.id}')"><i class="ti ti-x"></i></button>
+    <div class="editable" style="font-size:12px;font-weight:500;color:var(--o);margin-bottom:4px" onclick="inlineEditUX(this,'${t.id}','grp')">${t.grp}</div>
+    <div style="font-size:22px;font-weight:500;margin-bottom:3px" class="editable" onclick="inlineEditUX(this,'${t.id}','n')">${t.n}</div>
+    <div style="font-size:11px;color:var(--muted)" class="editable" onclick="inlineEditUX(this,'${t.id}','note')">${t.note||'메모 추가'}</div>
+  </div>`).join('')}
+  </div>
+</div>
+<div class="sec">
+  <div class="sh"><span class="st"><i class="ti ti-target oi"></i> 성공 기준</span></div>
+  <textarea class="inp" style="min-height:70px" onchange="saveUXSettings('success_criteria',this.value)">${u.success_criteria||''}</textarea>
+</div>
+<div class="sec">
+  <div class="sh"><span class="st"><i class="ti ti-link oi"></i> 결과 보고 링크 (원드라이브)</span></div>
+  <input class="inp" style="margin:0" placeholder="완료 후 원드라이브 링크..." value="${u.result_link||''}" onchange="saveUXSettings('result_link',this.value)">
+</div>
+<div class="sec">
+  <div class="sh"><span class="st"><i class="ti ti-checklist oi"></i> UX 핵심 점검 항목</span></div>
+  ${['원하는 상품을 바로 찾을 수 있는가','기존처럼 빠르게 주문 가능한가','통관번호/배송/결제가 헷갈리지 않는가 (직구 고객 핵심)','즐겨찾기 상품으로 정상 연결되는가','적립금/주문내역/회원정보가 유지되는가','PC vs 모바일 전환율 차이 (임성엽 프로)','기존 고객 주요 구매 플로우 분석 (임성엽 프로)','리셀러 빠른 주문 가능 여부 & 별도 접속 방안 (한대표)','장바구니/즐겨찾기/재주문 고객 처리 (한대표)','고객 리뉴얼 안내 방식 (영환 프로)'].map((q,i)=>`
+  <div style="display:flex;gap:8px;padding:8px;margin-bottom:4px;border-radius:8px;background:var(--surface)">
+    <span style="background:var(--ol);color:var(--od);font-size:10px;font-weight:500;padding:2px 6px;border-radius:5px;flex-shrink:0;height:fit-content;margin-top:1px">${i+1}</span>
+    <span style="font-size:13px">${q}</span>
+  </div>`).join('')}
+  <div style="margin-top:10px">
+    <div style="font-size:11px;color:var(--muted);margin-bottom:4px">추가 메모</div>
+    <textarea class="inp" style="min-height:60px;margin:0" placeholder="추가 항목..." onchange="saveUXSettings('notes',this.value)">${u.notes||''}</textarea>
+  </div>
+</div>`
+}
+
+window.addTester=async()=>{
+  await sb.from('ux_testers').insert({grp:'새 그룹',n:'0',note:'',sort_order:D.uxTesters.length+1})
+  await loadAll()
+}
+
+window.deleteTester=async(id)=>{
+  if(!confirm('삭제?'))return
+  await sb.from('ux_testers').delete().eq('id',id)
+  await loadAll()
+}
+
+window.inlineEditUX=(el,id,field)=>{
+  const t=D.uxTesters.find(t=>t.id===id);if(!t)return
+  const old=t[field]
+  const inp=document.createElement('input');inp.className='edit-inp';inp.value=old||'';inp.style.width='100%';inp.style.fontSize=field==='n'?'18px':'12px'
+  el.replaceWith(inp);inp.focus();inp.select()
+  const save=async()=>{
+    const v=inp.value.trim()||old
+    await sb.from('ux_testers').update({[field]:v}).eq('id',id)
+    await loadAll()
+  }
+  inp.onblur=save;inp.onkeydown=e=>{if(e.key==='Enter')save();if(e.key==='Escape')render()}
+}
+
+window.saveUXSettings=async(field,value)=>{
+  await sb.from('ux_settings').update({[field]:value,updated_by:curUser.name,updated_at:new Date().toISOString()}).eq('id','main')
+  toast('저장됨')
+}
+
+// ── 액션아이템 ──
+function renderAI(){
+  const cats=[...new Set(D.actionItems.map(a=>a.cat))]
+  const done=D.actionItems.filter(a=>a.status==='완료').length
+  const inprog=D.actionItems.filter(a=>a.status==='진행').length
+  const wait=D.actionItems.filter(a=>a.status==='대기').length
+  return`
+<div class="krow" style="grid-template-columns:repeat(3,1fr)">
+  <div class="kpi"><div class="kn" style="color:#3B6D11">${done}</div><div class="kl">완료</div></div>
+  <div class="kpi"><div class="kn" style="color:#185FA5">${inprog}</div><div class="kl">진행중</div></div>
+  <div class="kpi"><div class="kn" style="color:var(--muted)">${wait}</div><div class="kl">대기</div></div>
+</div>
+<div style="display:flex;justify-content:flex-end;margin-bottom:8px">
+  <button class="btn btn-o" onclick="openAddAI()"><i class="ti ti-plus"></i> 액션 추가</button>
+</div>
+<div class="sec">
+${cats.map(cat=>{
+  const its=D.actionItems.filter(a=>a.cat===cat).sort((a,b)=>{const o={완료:3,진행:1,대기:2};return(o[a.status]||0)-(o[b.status]||0)})
+  return`<div style="margin-bottom:14px">
+  <div style="font-size:11px;font-weight:500;color:var(--muted);margin-bottom:5px;padding:4px 6px;background:var(--surface);border-radius:7px">${cat}</div>
+  ${its.map(a=>`<div class="ai-row">
+  <div style="flex:1;min-width:0">
+    <div class="editable" style="font-size:13px;${a.status==='완료'?'text-decoration:line-through;color:var(--muted)':''}" onclick="inlineEdit(this,'action_items','${a.id}','text')">${a.text}</div>
+    <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:3px;align-items:center">
+      <select style="font-size:10px;padding:2px 5px;border:0.5px solid var(--border);border-radius:5px;background:var(--surface);cursor:pointer;color:var(--text)" onchange="updateAI('${a.id}','status',this.value)">
+        ${['완료','진행','대기','이슈'].map(s=>`<option ${a.status===s?'selected':''}>${s}</option>`).join('')}
+      </select>
+      <span class="editable" style="font-size:11px;color:var(--muted)" onclick="inlineEditSel(this,'action_items','${a.id}','owner',['개발팀','마케팅','CS','한대표','김민준','박영환','임성엽','전체'])">${a.owner}</span>
+      <span class="editable" style="font-size:10px;color:var(--muted)" onclick="inlineEditDate(this,'action_items','${a.id}','deadline')">${a.deadline||'—'}</span>
+      ${dlc(a.deadline,a.status==='완료')}
+      ${a.note?`<span style="font-size:11px;color:var(--muted)">${a.note}</span>`:''}
+    </div>
+  </div>
+  <button class="btn btn-g" style="padding:2px 5px;font-size:11px;color:#A32D2D;flex-shrink:0" onclick="deleteAI('${a.id}')"><i class="ti ti-trash"></i></button>
+  </div>`).join('')}
+  </div>`
+}).join('')}
+</div>`
+}
+
+window.updateAI=async(id,field,value)=>{
+  const a=D.actionItems.find(a=>a.id===id);if(!a)return
+  await sb.from('action_items').update({[field]:value,updated_at:new Date().toISOString()}).eq('id',id)
+  await logH(`액션 ${field} 변경`,`${a.text}: →${value}`)
+  await loadAll()
+}
+
+window.deleteAI=async(id)=>{
+  const a=D.actionItems.find(a=>a.id===id);if(!a||!confirm(`"${a.text}" 삭제?`))return
+  await sb.from('action_items').delete().eq('id',id)
+  await logH('액션 삭제',a.text)
+  await loadAll()
+}
+
+window.openAddAI=()=>{
+  const w=mkOverlay('add-ai-ov')
+  w.innerHTML=`<div class="modal" style="width:420px">
+  <div class="modal-h"><span style="font-weight:500">액션 추가</span><button class="btn btn-g" onclick="document.getElementById('add-ai-ov').remove()"><i class="ti ti-x"></i></button></div>
+  <div class="modal-b">
+    <input class="inp" id="nai-text" placeholder="액션 내용">
+    <input class="inp" id="nai-cat" placeholder="카테고리 (예: 로그인, CS)">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <select class="inp" id="nai-owner" style="margin:0"><option>개발팀</option><option>마케팅</option><option>CS</option><option>한대표</option><option>김민준</option><option>박영환</option><option>임성엽</option><option>전체</option></select>
+      <input class="inp" type="date" id="nai-dl" style="margin:0">
+    </div>
+    <input class="inp" id="nai-note" placeholder="비고 (선택)" style="margin-top:8px">
+    <div style="display:flex;justify-content:flex-end;gap:6px;margin-top:12px;border-top:0.5px solid var(--border);padding-top:12px">
+      <button class="btn" onclick="document.getElementById('add-ai-ov').remove()">취소</button>
+      <button class="btn btn-o" onclick="saveNewAI()">추가</button>
+    </div>
+  </div></div>`
+  document.body.appendChild(w)
+}
+
+window.saveNewAI=async()=>{
+  const text=document.getElementById('nai-text')?.value.trim();if(!text)return
+  await sb.from('action_items').insert({cat:document.getElementById('nai-cat').value||'기타',text,owner:document.getElementById('nai-owner').value,deadline:document.getElementById('nai-dl').value||null,note:document.getElementById('nai-note').value,created_by:curUser.name})
+  await logH('액션 추가',text)
+  document.getElementById('add-ai-ov').remove()
+  toast('추가됨')
+  await loadAll()
+}
+
+// ── 회의록 ──
+function renderMTG(){
+  return`<div class="sec">
+  <div class="sh"><span class="st"><i class="ti ti-notes oi"></i> 회의록 (${D.meetings.length}건)</span><button class="btn btn-o" onclick="openAddMtg()"><i class="ti ti-plus"></i> 추가</button></div>
+  ${D.meetings.map(m=>`<div class="mtg-card" onclick="openMtg('${m.id}')">
+  <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:13px;font-weight:500">${m.title}</span><span style="font-size:10px;color:var(--muted)">${m.date}</span></div>
+  <div style="display:flex;gap:5px;margin-bottom:5px">
+    <span class="badge bg">결정 ${(m.decisions||[]).length}</span>
+    <span class="badge br">미확인 ${(m.pending||[]).length}</span>
+    <span class="badge bb">액션 ${(m.actions||[]).length}</span>
+  </div>
+  <div style="display:flex;gap:3px">${(m.attendees||[]).map(a=>avEl(a,18)).join('')}</div>
+  </div>`).join('')}
+  </div>`
+}
+
+window.openMtg=(id)=>{
+  const m=D.meetings.find(m=>m.id===id);if(!m)return
+  const w=mkOverlay('mtg-ov')
+  w.innerHTML=`<div class="modal">
+  <div class="modal-h"><div><div style="font-weight:500">${m.title}</div><div style="font-size:11px;color:var(--muted)">${m.date}</div></div><button class="btn btn-g" onclick="document.getElementById('mtg-ov').remove()"><i class="ti ti-x"></i></button></div>
+  <div class="modal-b">
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">${(m.attendees||[]).map(a=>`<div style="display:flex;align-items:center;gap:4px">${avEl(a,20)}<span style="font-size:12px">${a}</span></div>`).join('')}</div>
+    <div style="font-size:12px;font-weight:500;color:#3B6D11;margin-bottom:5px"><i class="ti ti-check"></i> 결정사항</div>
+    ${(m.decisions||[]).map(d=>`<div style="padding:5px 8px;margin-bottom:2px;background:#EAF3DE;border-radius:7px;font-size:12px;color:#27500A">${d}</div>`).join('')}
+    <div style="font-size:12px;font-weight:500;color:#A32D2D;margin:10px 0 5px"><i class="ti ti-question-mark"></i> 미확인/후속</div>
+    ${(m.pending||[]).map(p=>`<div style="padding:5px 8px;margin-bottom:2px;background:#FCEBEB;border-radius:7px;font-size:12px;color:#791F1F">${p}</div>`).join('')}
+    <div style="font-size:12px;font-weight:500;color:var(--o);margin:10px 0 5px"><i class="ti ti-arrow-right"></i> 다음 액션</div>
+    ${(m.actions||[]).map(a=>`<div style="padding:5px 8px;margin-bottom:2px;background:var(--ol);border-radius:7px;font-size:12px;color:var(--od)">${a}</div>`).join('')}
+  </div></div>`
+  document.body.appendChild(w)
+}
+
+window.openAddMtg=()=>{
+  const w=mkOverlay('add-mtg-ov')
+  w.innerHTML=`<div class="modal">
+  <div class="modal-h"><span style="font-weight:500">회의록 추가</span><button class="btn btn-g" onclick="document.getElementById('add-mtg-ov').remove()"><i class="ti ti-x"></i></button></div>
+  <div class="modal-b">
+    <input class="inp" type="date" id="am-date" value="${new Date().toISOString().slice(0,10)}">
+    <input class="inp" id="am-title" placeholder="회의 제목">
+    <input class="inp" id="am-att" placeholder="참석자 (쉼표 구분: 한대표,김민준)">
+    <textarea class="inp" id="am-dec" placeholder="결정사항 (줄 구분)"></textarea>
+    <textarea class="inp" id="am-pend" placeholder="미확인/후속 사항 (줄 구분)"></textarea>
+    <textarea class="inp" id="am-act" placeholder="다음 액션 (줄 구분)"></textarea>
+    <div style="display:flex;justify-content:flex-end;gap:6px;margin-top:12px;border-top:0.5px solid var(--border);padding-top:12px">
+      <button class="btn" onclick="document.getElementById('add-mtg-ov').remove()">취소</button>
+      <button class="btn btn-o" onclick="saveMtg()">저장</button>
+    </div>
+  </div></div>`
+  document.body.appendChild(w)
+}
+
+window.saveMtg=async()=>{
+  const title=document.getElementById('am-title')?.value.trim();if(!title)return
+  const sp=id=>document.getElementById(id).value.split('\n').map(s=>s.trim()).filter(Boolean)
+  await sb.from('meetings').insert({
+    date:document.getElementById('am-date').value,title,
+    attendees:document.getElementById('am-att').value.split(',').map(s=>s.trim()).filter(Boolean),
+    decisions:sp('am-dec'),pending:sp('am-pend'),actions:sp('am-act'),
+    created_by:curUser.name
+  })
+  await logH('회의록 등록',title)
+  document.getElementById('add-mtg-ov').remove()
+  toast('회의록 저장됨')
+  await loadAll()
+}
+
+// ── 변경이력 ──
+function renderHist(){
+  return`<div class="sec">
+  <div class="sh"><span class="st"><i class="ti ti-history oi"></i> 변경이력 (${D.history.length}건)</span></div>
+  ${D.history.map(h=>`<div class="hist-r">
+  ${avEl(h.user_name,20)}
+  <div style="flex:1"><span style="font-weight:500">${h.user_name}</span> · ${h.action}<span style="color:var(--muted)"> (${h.target||''})</span></div>
+  <div style="color:var(--muted);white-space:nowrap;font-size:10px">${new Date(h.created_at).toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}</div>
+  </div>`).join('')}
+  </div>`
+}
+
+// 시작
+await loadAll()
+</script>
+</body>
+</html>

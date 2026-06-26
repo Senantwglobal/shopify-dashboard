@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OPLE 대시보드 — 로그인</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f8f7f5;min-height:100vh;display:flex;align-items:center;justify-content:center;color:#1a1a1a}
+  .card{background:#fff;border-radius:16px;border:0.5px solid #e5e3dc;padding:40px 36px;width:100%;max-width:400px}
+  .logo-row{display:flex;align-items:center;gap:10px;margin-bottom:32px;justify-content:center}
+  .logo{background:#E8680A;color:#fff;font-size:16px;font-weight:600;padding:6px 14px;border-radius:8px}
+  .title{font-size:20px;font-weight:500;text-align:center;margin-bottom:6px}
+  .sub{font-size:13px;color:#888;text-align:center;margin-bottom:28px}
+  label{display:block;font-size:12px;font-weight:500;color:#555;margin-bottom:5px}
+  input{width:100%;padding:10px 12px;border:0.5px solid #d0cec6;border-radius:8px;font-size:14px;background:#fafaf8;color:#1a1a1a;outline:none;margin-bottom:14px;transition:border-color .15s}
+  input:focus{border-color:#E8680A}
+  .btn{width:100%;padding:11px;background:#E8680A;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;margin-top:4px}
+  .btn:hover{background:#B84E06}
+  .btn:disabled{background:#ccc;cursor:not-allowed}
+  .err{background:#FCEBEB;color:#A32D2D;font-size:12px;padding:8px 12px;border-radius:6px;margin-bottom:12px;display:none}
+  .user-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:20px;padding-top:20px;border-top:0.5px solid #e5e3dc}
+  .ubtn{padding:8px;border:0.5px solid #e5e3dc;border-radius:8px;background:#fafaf8;font-size:12px;cursor:pointer;text-align:center}
+  .ubtn:hover{border-color:#E8680A;color:#E8680A;background:#FEF0E6}
+  .hint{font-size:11px;color:#aaa;text-align:center;margin-top:16px}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo-row"><span class="logo">OPLE</span></div>
+  <div class="title">Shopify 전환 대시보드</div>
+  <div class="sub">팀 협업 프로젝트 관리 시스템</div>
+  <div class="err" id="err-msg"></div>
+  <label>이메일</label>
+  <input type="email" id="email" placeholder="이메일 입력" autocomplete="email">
+  <label>비밀번호</label>
+  <input type="password" id="password" placeholder="비밀번호 입력" onkeydown="if(event.key==='Enter')login()">
+  <button class="btn" id="login-btn" onclick="login()">로그인</button>
+  <div class="user-btns">
+    <div class="ubtn" onclick="quickFill('handaepyo@ople.co')">한대표</div>
+    <div class="ubtn" onclick="quickFill('minzun@ople.co')">김민준</div>
+    <div class="ubtn" onclick="quickFill('younghwan@ople.co')">박영환</div>
+    <div class="ubtn" onclick="quickFill('sungyup@ople.co')">임성엽</div>
+    <div class="ubtn" onclick="quickFill('jihun@ople.co')">정지훈</div>
+    <div class="ubtn" onclick="quickFill('sena@ople.co')">세나</div>
+  </div>
+  <div class="hint">초기 비밀번호: ople2026!</div>
+</div>
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+const sb = createClient('https://btutlgcidpjgedpypzri.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ0dXRsZ2NpZHBqZ2VkcHlwenJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0NTE0MjQsImV4cCI6MjA5ODAyNzQyNH0.qZp04DhOmm4oSho3Qsfz8UWEeY-eNhGcIydyVNejqBc')
+const {data:{session}} = await sb.auth.getSession()
+if(session) location.href='dashboard.html'
+window.quickFill=(e)=>{document.getElementById('email').value=e;document.getElementById('password').value='ople2026!'}
+window.login=async()=>{
+  const email=document.getElementById('email').value.trim()
+  const pw=document.getElementById('password').value
+  const btn=document.getElementById('login-btn')
+  const err=document.getElementById('err-msg')
+  if(!email||!pw){err.textContent='이메일과 비밀번호를 입력해주세요.';err.style.display='block';return}
+  btn.disabled=true;btn.textContent='로그인 중...';err.style.display='none'
+  let {error}=await sb.auth.signInWithPassword({email,password:pw})
+  if(error){
+    const {error:e2}=await sb.auth.signUp({email,password:pw})
+    if(!e2){
+      const {error:e3}=await sb.auth.signInWithPassword({email,password:pw})
+      if(!e3){location.href='dashboard.html';return}
+    }
+    err.textContent='로그인 실패: '+error.message;err.style.display='block'
+    btn.disabled=false;btn.textContent='로그인';return
+  }
+  location.href='dashboard.html'
+}
+</script>
+</body>
+</html>
