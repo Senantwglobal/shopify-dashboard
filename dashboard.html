@@ -109,6 +109,9 @@ select.inp{cursor:pointer}
 .cal-num{font-size:11px;font-weight:500;margin-bottom:2px}
 .cal-cell.today .cal-num{color:var(--o)}
 .cal-ev{font-size:9px;padding:2px 4px;border-radius:3px;margin-bottom:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cal-cell.drag-over{border-color:var(--o);background:var(--ol);border-style:dashed}
+.cal-ev[draggable]{user-select:none}
+.cal-ev.dragging{opacity:.4}
 .cal-add{position:absolute;bottom:3px;right:3px;width:16px;height:16px;border-radius:50%;background:var(--o);color:#fff;font-size:12px;line-height:16px;text-align:center;display:none;border:none;cursor:pointer}
 .cal-cell:hover .cal-add{display:block}
 .owner-chips{display:flex;flex-wrap:wrap;gap:4px;min-height:28px;padding:4px;border:0.5px solid var(--bd);border-radius:8px;background:var(--sf);margin-bottom:8px}
@@ -448,9 +451,19 @@ function renderCal(){
     const ds=`${yr}-${String(mo+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`
     const evs=evsOn(d),wk=(d+first-1)%7
     const isToday=ds===TODAY.toISOString().slice(0,10)
-    cells+=`<div class="cal-cell${wk===0||wk===6?' wknd':''}${isToday?' today':''}" onclick="calClick('${ds}')">
+    cells+=`<div class="cal-cell${wk===0||wk===6?' wknd':''}${isToday?' today':''}"
+      onclick="calClick('${ds}')"
+      ondragover="event.preventDefault();this.classList.add('drag-over')"
+      ondragleave="this.classList.remove('drag-over')"
+      ondrop="event.preventDefault();this.classList.remove('drag-over');calDrop('${ds}',event)">
     <div class="cal-num">${d}</div>
-    ${evs.slice(0,3).map(e=>`<div class="cal-ev" style="background:${getCatColor(e.category_id)}22;color:${getCatColor(e.category_id)};border-left:2px solid ${getCatColor(e.category_id)}" onclick="event.stopPropagation();location.href='detail.html?type=item&id=${e.id}'">${e.text}</div>`).join('')}
+    ${evs.slice(0,3).map(e=>`<div class="cal-ev"
+      draggable="true"
+      style="background:${getCatColor(e.category_id)}22;color:${getCatColor(e.category_id)};border-left:2px solid ${getCatColor(e.category_id)};cursor:grab"
+      onclick="event.stopPropagation();location.href='detail.html?type=item&id=${e.id}'"
+      ondragstart="event.stopPropagation();calDragStart('${e.id}',event)"
+      ondragend="calDragEnd(event)"
+      >${e.text}</div>`).join('')}
     ${evs.length>3?`<div style="font-size:9px;color:var(--muted)">+${evs.length-3}</div>`:''}
     <button class="cal-add" onclick="event.stopPropagation();openAddItemModal('${ds}')">+</button>
     </div>`
@@ -483,6 +496,34 @@ function renderCal(){
   </div>`).join('')||'<div style="font-size:13px;color:var(--muted)">이번 달 항목 없음</div>'}
   </div>`
 }
+let _dragItemId=null
+
+window.calDragStart=(itemId,event)=>{
+  _dragItemId=itemId
+  event.target.classList.add('dragging')
+  event.dataTransfer.effectAllowed='move'
+  event.dataTransfer.setData('text/plain',itemId)
+}
+
+window.calDragEnd=(event)=>{
+  event.target.classList.remove('dragging')
+  document.querySelectorAll('.drag-over').forEach(el=>el.classList.remove('drag-over'))
+}
+
+window.calDrop=async(newDate,event)=>{
+  const itemId=event.dataTransfer.getData('text/plain')||_dragItemId
+  if(!itemId||!newDate)return
+  const item=D.items.find(i=>i.id===itemId)
+  if(!item)return
+  const oldDate=item.deadline
+  if(oldDate===newDate)return
+  await sb.from('checklist_items').update({deadline:newDate,updated_at:new Date().toISOString()}).eq('id',itemId)
+  await logH(`마감일 변경 (드래그)`,`${item.text}: ${oldDate||'없음'} → ${newDate}`)
+  toast(`${item.text.slice(0,20)}... → ${newDate}`)
+  _dragItemId=null
+  await loadAll()
+}
+
 window.calNav=(dir)=>{calMonth+=dir;if(calMonth>11){calMonth=0;calYear++}if(calMonth<0){calMonth=11;calYear--};render()}
 window.calClick=(ds)=>{const evs=D.items.filter(i=>i.deadline===ds);if(evs.length===1)location.href=`detail.html?type=item&id=${evs[0].id}`;else if(evs.length===0)openAddItemModal(ds)}
 
