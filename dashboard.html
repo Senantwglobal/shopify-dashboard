@@ -812,6 +812,8 @@ window.saveUS=async(field,value)=>{await sb.from('ux_settings').update({[field]:
 // ══════════════════════════════
 window.aiStatusFilter=''
 window.aiCatFilter=''
+window.setAIStatus=(val)=>{window.aiStatusFilter=val;window.aiCatFilter='';render()}
+window.setAICat=(cat)=>{window.aiCatFilter=cat;render()}
 function renderAI(){
   const cats=[...new Set(D.actionItems.map(a=>a.cat))]
   const done=D.actionItems.filter(a=>a.status==='완료').length
@@ -828,19 +830,26 @@ function renderAI(){
   ]
 
   return`
-  <!-- 상태 필터 버튼 -->
   <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px">
-    ${statusBtns.map(s=>`<button onclick="window.aiStatusFilter='${s.val}';window.aiCatFilter='';render()" style="padding:7px 14px;border-radius:20px;border:1.5px solid ${window.aiStatusFilter===s.val?s.color:'var(--bd)'};background:${window.aiStatusFilter===s.val?s.color+'18':'var(--card)'};color:${s.color};font-size:12px;font-weight:${window.aiStatusFilter===s.val?'600':'400'};cursor:pointer;display:flex;align-items:center;gap:5px">
-      ${s.label} <span style="background:${window.aiStatusFilter===s.val?s.color:'var(--sf)'};color:${window.aiStatusFilter===s.val?'#fff':s.color};border-radius:10px;padding:0 6px;font-size:11px">${s.count}</span>
-    </button>`).join('')}
+    ${[
+      {label:'전체',val:'',count:D.actionItems.length,color:'#1a1a1a'},
+      {label:'완료',val:'완료',count:done,color:'#3B6D11'},
+      {label:'진행중',val:'진행중',count:inprog,color:'#185FA5'},
+      {label:'진행전',val:'진행전',count:wait,color:'#888'},
+      {label:'이슈',val:'이슈',count:issue,color:'#A32D2D'},
+    ].map(s=>{
+      const active=window.aiStatusFilter===s.val
+      return`<button data-val="${s.val}" onclick="setAIStatus(this.dataset.val)" style="padding:7px 14px;border-radius:20px;border:1.5px solid ${active?s.color:'var(--bd)'};background:${active?s.color+'18':'var(--card)'};color:${s.color};font-size:12px;font-weight:${active?600:400};cursor:pointer;display:inline-flex;align-items:center;gap:5px">${s.label}<span style="background:${active?s.color:'var(--sf)'};color:${active?'#fff':s.color};border-radius:10px;padding:0 6px;font-size:11px">${s.count}</span></button>`
+    }).join('')}
     <button class="btn btn-o" style="margin-left:auto" onclick="openAddAI()"><i class="ti ti-plus"></i> 액션 추가</button>
   </div>
-
-  <!-- 카테고리 빠른 필터 -->
   <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px;padding:8px 10px;background:var(--sf);border-radius:9px">
     <span style="font-size:11px;color:var(--muted);align-self:center;margin-right:4px">카테고리:</span>
-    <button onclick="window.aiCatFilter='';render()" style="padding:3px 10px;border-radius:20px;border:1px solid ${window.aiCatFilter===''?'var(--o)':'var(--bd)'};background:${window.aiCatFilter===''?'var(--ol)':'var(--card)'};color:${window.aiCatFilter===''?'var(--o)':'var(--muted)'};font-size:11px;cursor:pointer">전체</button>
-    ${cats.map(cat=>`<button onclick="window.aiCatFilter='${cat}';render()" style="padding:3px 10px;border-radius:20px;border:1px solid ${window.aiCatFilter===cat?'var(--o)':'var(--bd)'};background:${window.aiCatFilter===cat?'var(--ol)':'var(--card)'};color:${window.aiCatFilter===cat?'var(--o)':'var(--muted)'};font-size:11px;cursor:pointer">${cat}</button>`).join('')}
+    ${['전체',...cats].map(cat=>{
+      const v=cat==='전체'?'':cat
+      const active=window.aiCatFilter===v
+      return`<button data-cat="${v}" onclick="setAICat(this.dataset.cat)" style="padding:3px 10px;border-radius:20px;border:1px solid ${active?'var(--o)':'var(--bd)'};background:${active?'var(--ol)':'var(--card)'};color:${active?'var(--o)':'var(--muted)'};font-size:11px;cursor:pointer">${cat}</button>`
+    }).join('')}
   </div>
   <div class="sec">
   ${(window.aiCatFilter?[window.aiCatFilter]:cats).map(cat=>{
@@ -1060,10 +1069,10 @@ window.saveParsedMtg=async()=>{
   toast('회의록 저장됨');await loadAll();showTab('mtg')
 }
 
-window.addParsedActions=async()=>{
+window.addParsedActions=async(mtgId)=>{
   const p=window._parsedMtg;if(!p||!p.actions?.length)return
   for(const a of p.actions){
-    await sb.from('action_items').insert({cat:'회의록',text:a,owner:null,owners:[],status:'진행전',comments:[],created_by:curUser.name})
+    await sb.from('action_items').insert({cat:'회의록',text:a,owner:null,owners:[],status:'진행전',comments:[],meeting_id:mtgId||null,created_by:curUser.name})
   }
   await logH('회의록에서 액션 '+p.actions.length+'건 추가',p.title)
   toast('액션아이템 '+p.actions.length+'건 추가됨')
@@ -1154,9 +1163,19 @@ window.saveMtgEdit=async(id)=>{
 
 window.deleteMtg=async(id)=>{
   const m=D.meetings.find(m=>m.id===id)
-  if(!m||!confirm(`"${m.title}" 회의록을 삭제할까요?`))return
+  if(!m)return
+  // 연결된 액션아이템 확인
+  const linked=D.actionItems.filter(a=>a.meeting_id===id||a.cat==='회의록')
+  const linkedFromThis=D.actionItems.filter(a=>a.meeting_id===id)
+  const msg=linkedFromThis.length
+    ? `"${m.title}" 회의록과 연결된 액션아이템 ${linkedFromThis.length}건도 함께 삭제할까요?`
+    : `"${m.title}" 회의록을 삭제할까요?`
+  if(!confirm(msg))return
+  if(linkedFromThis.length){
+    await sb.from('action_items').delete().in('id',linkedFromThis.map(a=>a.id))
+  }
   await sb.from('meetings').delete().eq('id',id)
-  await logH('회의록 삭제',m.title)
+  await logH('회의록 삭제'+(linkedFromThis.length?` (액션 ${linkedFromThis.length}건 포함)`:''),m.title)
   document.getElementById('mtg-ov').remove()
   toast('삭제됨');await loadAll()
 }
