@@ -810,7 +810,8 @@ window.saveUS=async(field,value)=>{await sb.from('ux_settings').update({[field]:
 // ══════════════════════════════
 // 액션아이템
 // ══════════════════════════════
-let aiStatusFilter='', aiCatFilter=''
+window.aiStatusFilter=''
+window.aiCatFilter=''
 function renderAI(){
   const cats=[...new Set(D.actionItems.map(a=>a.cat))]
   const done=D.actionItems.filter(a=>a.status==='완료').length
@@ -829,8 +830,8 @@ function renderAI(){
   return`
   <!-- 상태 필터 버튼 -->
   <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px">
-    ${statusBtns.map(s=>`<button onclick="aiStatusFilter='${s.val}';aiCatFilter='';render()" style="padding:7px 14px;border-radius:20px;border:1.5px solid ${aiStatusFilter===s.val?s.color:'var(--bd)'};background:${aiStatusFilter===s.val?s.color+'18':'var(--card)'};color:${s.color};font-size:12px;font-weight:${aiStatusFilter===s.val?'600':'400'};cursor:pointer;display:flex;align-items:center;gap:5px">
-      ${s.label} <span style="background:${aiStatusFilter===s.val?s.color:'var(--sf)'};color:${aiStatusFilter===s.val?'#fff':s.color};border-radius:10px;padding:0 6px;font-size:11px">${s.count}</span>
+    ${statusBtns.map(s=>`<button onclick="window.aiStatusFilter='${s.val}';window.aiCatFilter='';render()" style="padding:7px 14px;border-radius:20px;border:1.5px solid ${window.aiStatusFilter===s.val?s.color:'var(--bd)'};background:${window.aiStatusFilter===s.val?s.color+'18':'var(--card)'};color:${s.color};font-size:12px;font-weight:${window.aiStatusFilter===s.val?'600':'400'};cursor:pointer;display:flex;align-items:center;gap:5px">
+      ${s.label} <span style="background:${window.aiStatusFilter===s.val?s.color:'var(--sf)'};color:${window.aiStatusFilter===s.val?'#fff':s.color};border-radius:10px;padding:0 6px;font-size:11px">${s.count}</span>
     </button>`).join('')}
     <button class="btn btn-o" style="margin-left:auto" onclick="openAddAI()"><i class="ti ti-plus"></i> 액션 추가</button>
   </div>
@@ -838,13 +839,13 @@ function renderAI(){
   <!-- 카테고리 빠른 필터 -->
   <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px;padding:8px 10px;background:var(--sf);border-radius:9px">
     <span style="font-size:11px;color:var(--muted);align-self:center;margin-right:4px">카테고리:</span>
-    <button onclick="aiCatFilter='';render()" style="padding:3px 10px;border-radius:20px;border:1px solid ${aiCatFilter===''?'var(--o)':'var(--bd)'};background:${aiCatFilter===''?'var(--ol)':'var(--card)'};color:${aiCatFilter===''?'var(--o)':'var(--muted)'};font-size:11px;cursor:pointer">전체</button>
-    ${cats.map(cat=>`<button onclick="aiCatFilter='${cat}';render()" style="padding:3px 10px;border-radius:20px;border:1px solid ${aiCatFilter===cat?'var(--o)':'var(--bd)'};background:${aiCatFilter===cat?'var(--ol)':'var(--card)'};color:${aiCatFilter===cat?'var(--o)':'var(--muted)'};font-size:11px;cursor:pointer">${cat}</button>`).join('')}
+    <button onclick="window.aiCatFilter='';render()" style="padding:3px 10px;border-radius:20px;border:1px solid ${window.aiCatFilter===''?'var(--o)':'var(--bd)'};background:${window.aiCatFilter===''?'var(--ol)':'var(--card)'};color:${window.aiCatFilter===''?'var(--o)':'var(--muted)'};font-size:11px;cursor:pointer">전체</button>
+    ${cats.map(cat=>`<button onclick="window.aiCatFilter='${cat}';render()" style="padding:3px 10px;border-radius:20px;border:1px solid ${window.aiCatFilter===cat?'var(--o)':'var(--bd)'};background:${window.aiCatFilter===cat?'var(--ol)':'var(--card)'};color:${window.aiCatFilter===cat?'var(--o)':'var(--muted)'};font-size:11px;cursor:pointer">${cat}</button>`).join('')}
   </div>
   <div class="sec">
-  ${(aiCatFilter?[aiCatFilter]:cats).map(cat=>{
+  ${(window.aiCatFilter?[window.aiCatFilter]:cats).map(cat=>{
     let its=D.actionItems.filter(a=>a.cat===cat)
-    if(aiStatusFilter)its=its.filter(a=>a.status===aiStatusFilter)
+    if(window.aiStatusFilter)its=its.filter(a=>a.status===window.aiStatusFilter)
     if(!its.length)return''
     its=its.sort((a,b)=>{const o={'완료':3,'진행중':1,'진행전':0,'대기':0,'보류':2,'이슈':1};return(o[a.status]||0)-(o[b.status]||0)})
     return`<div style="margin-bottom:14px">
