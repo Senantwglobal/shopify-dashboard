@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>상세 — OPLE 대시보드</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--o:#E8680A;--ol:#FEF0E6;--od:#B84E06;--ob:#F5C49A;--bg:#f8f7f5;--card:#fff;--bd:#e5e3dc;--text:#1a1a1a;--muted:#888;--surface:#f3f2ef}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.hdr{background:var(--card);border-bottom:0.5px solid var(--bd);padding:10px 20px;display:flex;align-items:center;gap:12px}
+.logo{background:var(--o);color:#fff;font-size:13px;font-weight:600;padding:4px 10px;border-radius:6px;text-decoration:none}
+.back-btn{display:flex;align-items:center;gap:4px;font-size:13px;color:var(--muted);text-decoration:none;padding:5px 10px;border-radius:8px;border:0.5px solid var(--bd);background:none;cursor:pointer}
+.back-btn:hover{color:var(--text);background:var(--surface)}
+.page{max-width:820px;margin:0 auto;padding:24px 20px}
+.card{background:var(--card);border:0.5px solid var(--bd);border-radius:14px;padding:20px;margin-bottom:16px}
+.card-title{font-size:13px;font-weight:500;color:var(--muted);margin-bottom:14px;display:flex;align-items:center;gap:6px;padding-bottom:10px;border-bottom:0.5px solid var(--bd)}
+.card-title i{color:var(--o)}
+.main-title{font-size:22px;font-weight:500;line-height:1.4;margin-bottom:8px}
+.meta-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:6px}
+.badge{font-size:11px;padding:3px 8px;border-radius:9px;font-weight:500;white-space:nowrap}
+.bo{background:var(--ol);color:var(--od)}
+.bb{background:#E6F1FB;color:#185FA5}
+.br{background:#FCEBEB;color:#A32D2D}
+.bg{background:#EAF3DE;color:#3B6D11}
+.bgr{background:#F1EFE8;color:#5F5E5A}
+.dl-chip{font-size:11px;font-weight:500;padding:3px 8px;border-radius:9px;white-space:nowrap}
+.dl-ok{background:#EAF3DE;color:#3B6D11}
+.dl-w{background:var(--ol);color:var(--od)}
+.dl-c{background:#FCEBEB;color:#A32D2D}
+.dl-d{background:#F1EFE8;color:#5F5E5A}
+.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:11px;font-weight:500;color:var(--muted)}
+.inp{width:100%;padding:9px 11px;border:0.5px solid var(--bd);border-radius:9px;font-size:13px;background:var(--surface);color:var(--text);outline:none;transition:border-color .15s}
+.inp:focus{border-color:var(--o)}
+select.inp{cursor:pointer}
+textarea.inp{resize:vertical;min-height:80px;line-height:1.6}
+.btn{font-size:13px;padding:8px 14px;border-radius:9px;border:0.5px solid var(--bd);background:none;color:var(--text);cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all .15s}
+.btn:hover{background:var(--surface)}
+.btn-o{background:var(--o);color:#fff;border-color:var(--o)}
+.btn-o:hover{background:var(--od);color:#fff}
+.btn-g{border-color:transparent;color:var(--muted)}
+.btn-g:hover{color:var(--text);background:var(--surface)}
+.btn-red{color:#A32D2D;border-color:#F09595}
+.btn-red:hover{background:#FCEBEB}
+.sub-item{display:flex;align-items:flex-start;gap:10px;padding:12px;border:0.5px solid var(--bd);border-radius:10px;margin-bottom:8px;background:var(--card)}
+.sub-item:hover{border-color:var(--ob)}
+.sub-item input[type=checkbox]{accent-color:var(--o);width:16px;height:16px;margin-top:2px;flex-shrink:0}
+.sub-body{flex:1;min-width:0}
+.sub-text{font-size:14px;margin-bottom:6px;line-height:1.4}
+.sub-meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.vbadge{font-size:10px;padding:2px 7px;border-radius:7px;background:#EEEDFE;color:#534AB7;white-space:nowrap}
+.vbadge.ok{background:#EAF3DE;color:#3B6D11}
+.comment-item{background:var(--surface);border-radius:10px;padding:14px;margin-bottom:10px;border-left:4px solid var(--o)}
+.comment-header{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.av{border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;color:#fff;flex-shrink:0}
+.comment-author{font-size:13px;font-weight:500}
+.comment-time{font-size:11px;color:var(--muted)}
+.comment-text{font-size:14px;color:#333;line-height:1.6;white-space:pre-wrap}
+.comment-link{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--o);background:var(--ol);padding:4px 10px;border-radius:7px;text-decoration:none;margin-top:8px;border:0.5px solid var(--ob)}
+.comment-link:hover{background:#fde8d4}
+.write-box{background:var(--surface);border-radius:12px;padding:16px;border:0.5px solid var(--bd)}
+.write-box:focus-within{border-color:var(--ob)}
+.write-author{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.write-author span{font-size:13px;font-weight:500;color:var(--text)}
+.pgb{height:6px;border-radius:3px;background:var(--surface);overflow:hidden;margin-top:6px;border:0.5px solid var(--bd)}
+.pgf{height:100%;border-radius:3px;transition:width .4s}
+.toast{position:fixed;bottom:20px;right:20px;background:#2d6a27;color:#fff;padding:10px 18px;border-radius:10px;font-size:13px;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.show{opacity:1}
+.section-divider{height:1px;background:var(--bd);margin:20px 0}
+.progress-label{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:4px}
+.add-sub-row{display:flex;gap:8px;margin-top:12px;padding-top:12px;border-top:0.5px solid var(--bd)}
+.add-sub-row input{flex:1;padding:9px 11px;border:0.5px solid var(--bd);border-radius:9px;font-size:13px;background:var(--surface);color:var(--text);outline:none}
+.add-sub-row input:focus{border-color:var(--o)}
+.empty-state{text-align:center;padding:40px 20px;color:var(--muted);font-size:14px}
+.history-row{display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:0.5px solid var(--bd);font-size:12px}
+.history-row:last-child{border-bottom:none}
+@media(max-width:600px){.field-grid{grid-template-columns:1fr}.page{padding:16px 14px}}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <a href="dashboard.html" class="logo">OPLE</a>
+  <button class="back-btn" onclick="history.back()"><i class="ti ti-arrow-left"></i> 돌아가기</button>
+  <span style="font-size:13px;color:var(--muted);margin-left:4px" id="breadcrumb"></span>
+</div>
+
+<div class="page" id="page-content">
+  <div class="empty-state">로딩 중...</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+const sb = createClient(
+  'https://btutlgcidpjgedpypzri.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ0dXRsZ2NpZHBqZ2VkcHlwenJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0NTE0MjQsImV4cCI6MjA5ODAyNzQyNH0.qZp04DhOmm4oSho3Qsfz8UWEeY-eNhGcIydyVNejqBc'
+)
+
+const {data:{session}}=await sb.auth.getSession()
+if(!session){location.href='index.html';throw new Error('no session')}
+
+const MEMBER_COLORS=['#E8680A','#534AB7','#0F6E56','#A32D2D','#185FA5','#854F0B','#993556','#5F5E5A']
+function getMembers(){try{const s=localStorage.getItem('ople-members');return(s?JSON.parse(s):[{name:'한덕희',email:'handeokhee@ople.co'},{name:'박영환',email:'younghwan@ople.co'},{name:'천세나',email:'sena@ople.co'},{name:'권현정',email:'hyunjeong@ople.co'},{name:'김현수',email:'hyunsu@ople.co'}]).map((m,i)=>({...m,color:MEMBER_COLORS[i%MEMBER_COLORS.length]}))}catch{return[]}}
+
+const MEMBERS=getMembers()
+const curEmail=session.user.email
+const curUser=MEMBERS.find(m=>m.email===curEmail)||{name:curEmail.split('@')[0],color:'#888'}
+
+const params=new URLSearchParams(location.search)
+const type=params.get('type')||'item'
+const id=params.get('id')
+
+function toast(msg,ok=true){const t=document.getElementById('toast');t.textContent=msg;t.style.background=ok?'#2d6a27':'#A32D2D';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
+function ts(){return new Date().toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}
+function ddu(ds){if(!ds)return 999;return Math.ceil((new Date(ds)-new Date())/864e5)}
+function dlc(dl,done){
+  if(!dl&&!done)return''
+  if(done)return`<span class="dl-chip dl-d">완료</span>`
+  const d=ddu(dl)
+  if(d<0)return`<span class="dl-chip dl-c">D+${Math.abs(d)} 초과</span>`
+  if(d===0)return`<span class="dl-chip dl-c">오늘 마감</span>`
+  if(d<=3)return`<span class="dl-chip dl-c">D-${d}</span>`
+  if(d<=7)return`<span class="dl-chip dl-w">D-${d}</span>`
+  return`<span class="dl-chip dl-ok">D-${d}</span>`
+}
+function pb(p){return{critical:'<span class="badge br">긴급</span>',high:'<span class="badge bo">중요</span>',medium:'<span class="badge bg">보통</span>'}[p]||''}
+function sb2(s){const m={'완료':'bg','진행중':'bb','진행전':'bgr','보류':'br','이슈':'br'};return`<span class="badge ${m[s]||'bgr'}">${s||'진행전'}</span>`}
+function avEl(name,sz=32){const m=MEMBERS.find(m=>m.name===name);const c=m?m.color:'#888';return`<div class="av" style="width:${sz}px;height:${sz}px;font-size:${Math.round(sz*.4)}px;background:${c}">${name?name[0]:'?'}</div>`}
+
+async function logH(action,target){await sb.from('history').insert({user_name:curUser.name,action,target})}
+
+if(type==='item'&&id){
+  await loadItemDetail(id)
+} else if(type==='ux'){
+  await loadUXDetail(params.get('q'), params.get('idx'))
+} else {
+  document.getElementById('page-content').innerHTML=`<div class="empty-state">잘못된 접근입니다.</div>`
+}
+
+async function loadItemDetail(itemId){
+  const [{data:item},{data:subs},{data:comments},{data:cats}]=await Promise.all([
+    sb.from('checklist_items').select('*').eq('id',itemId).single(),
+    sb.from('checklist_subs').select('*').eq('item_id',itemId).order('sort_order'),
+    sb.from('checklist_comments').select('*').eq('item_id',itemId).order('created_at'),
+    sb.from('checklist_categories').select('*'),
+  ])
+  if(!item){document.getElementById('page-content').innerHTML=`<div class="empty-state">항목을 찾을 수 없습니다.</div>`;return}
+  const cat=cats?.find(c=>c.id===item.category_id)
+  document.getElementById('breadcrumb').textContent=`${cat?.label||''} > ${item.text}`
+  renderItemDetail(item,subs||[],comments||[],cats||[])
+}
+
+function renderItemDetail(item,subs,comments,cats){
+  const doneSubs=subs.filter(s=>s.done).length
+  const prog=subs.length?Math.round(doneSubs/subs.length*100):0
+  const STATUSES=['진행전','진행중','완료','보류','이슈']
+
+  document.getElementById('page-content').innerHTML=`
+  <!-- 기본 정보 -->
+  <div class="card">
+    <div class="card-title"><i class="ti ti-info-circle"></i> 항목 정보</div>
+    <div class="main-title" id="item-title">${item.text}</div>
+    <div class="meta-row" style="margin-top:10px">
+      ${pb(item.priority)}${sb2(item.status)}
+      ${item.deadline?dlc(item.deadline,item.done):''}
+      ${item.done?`<span class="badge bg"><i class="ti ti-check"></i> 완료 · ${item.done_by||''}</span>`:''}
+    </div>
+
+    <div class="field-grid" style="margin-top:16px">
+      <div class="field">
+        <label>담당자</label>
+        <select class="inp" onchange="updateField('${item.id}','owner',this.value)">
+          <option value="">없음</option>
+          ${MEMBERS.map(m=>`<option value="${m.name}" ${item.owner===m.name?'selected':''}>${m.name}</option>`).join('')}
+        </select>
+      </div>
+      <div class="field">
+        <label>마감일</label>
+        <input class="inp" type="date" value="${item.deadline||''}" onchange="updateField('${item.id}','deadline',this.value)">
+      </div>
+      <div class="field">
+        <label>상태</label>
+        <select class="inp" onchange="updateField('${item.id}','status',this.value)">
+          ${STATUSES.map(s=>`<option ${item.status===s?'selected':''}>${s}</option>`).join('')}
+        </select>
+      </div>
+      <div class="field">
+        <label>우선순위</label>
+        <select class="inp" onchange="updateField('${item.id}','priority',this.value)">
+          ${[['critical','긴급'],['high','중요'],['medium','보통']].map(([v,l])=>`<option value="${v}" ${item.priority===v?'selected':''}>${l}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- 세부 항목 -->
+  <div class="card">
+    <div class="card-title"><i class="ti ti-checklist"></i> 세부 항목 <span style="margin-left:auto;font-weight:400">${doneSubs}/${subs.length} 완료</span></div>
+    ${subs.length?`
+    <div class="progress-label"><span>전체 진행률</span><span>${prog}%</span></div>
+    <div class="pgb" style="margin-bottom:16px"><div class="pgf" style="width:${prog}%;background:${prog===100?'#3B6D11':'var(--o)'}"></div></div>`:''}
+    
+    ${subs.map(s=>`
+    <div class="sub-item" id="sub-${s.id}">
+      <input type="checkbox" ${s.done?'checked':''} onchange="toggleSub('${s.id}','${item.id}',this.checked)">
+      <div class="sub-body">
+        <div class="sub-text" style="${s.done?'text-decoration:line-through;color:var(--muted)':''}">${s.text}</div>
+        <div class="sub-meta">
+          <input type="date" style="font-size:11px;padding:3px 7px;border:0.5px solid var(--bd);border-radius:6px;background:var(--surface);color:var(--text);outline:none" value="${s.deadline||''}" onchange="updateSubField('${s.id}','deadline',this.value)" title="마감일">
+          <select style="font-size:11px;padding:3px 7px;border:0.5px solid var(--bd);border-radius:6px;background:var(--surface);color:var(--text);outline:none" onchange="updateSubField('${s.id}','verifier',this.value)" title="검증 담당자">
+            ${MEMBERS.map(m=>`<option ${s.verifier===m.name?'selected':''}>${m.name}</option>`).join('')}
+          </select>
+          <span class="vbadge ${s.verified?'ok':''}">${s.verified?`✓ ${s.verified_by||''}님 검증`:'미검증'}</span>
+          ${s.done&&!s.verified?`<button class="btn btn-o" style="font-size:11px;padding:3px 10px" onclick="verifySub('${s.id}','${item.id}')"><i class="ti ti-check"></i> 검증</button>`:''}
+          ${s.done&&s.done_by?`<span style="font-size:11px;color:var(--muted)">${s.done_by} 완료</span>`:''}
+          <button class="btn btn-g btn-red" style="font-size:11px;padding:2px 7px;margin-left:auto" onclick="deleteSub('${s.id}','${item.id}')"><i class="ti ti-trash"></i></button>
+        </div>
+      </div>
+    </div>`).join('')}
+
+    <div class="add-sub-row">
+      <input id="new-sub-inp" placeholder="새 세부 항목 입력 후 Enter..." onkeydown="if(event.key==='Enter'){addSub('${item.id}');event.preventDefault()}">
+      <button class="btn btn-o" onclick="addSub('${item.id}')"><i class="ti ti-plus"></i> 추가</button>
+    </div>
+  </div>
+
+  <!-- 댓글 & 파일 -->
+  <div class="card">
+    <div class="card-title"><i class="ti ti-message-circle"></i> 댓글 & 파일 첨부 <span style="margin-left:auto;font-weight:400">${comments.length}개</span></div>
+    
+    ${comments.length?comments.map(c=>`
+    <div class="comment-item">
+      <div class="comment-header">
+        ${avEl(c.user_name,32)}
+        <div>
+          <div class="comment-author">${c.user_name}</div>
+          <div class="comment-time">${new Date(c.created_at).toLocaleString('ko-KR',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}</div>
+        </div>
+      </div>
+      <div class="comment-text">${c.text}</div>
+      ${c.link?`<a href="${c.link}" target="_blank" class="comment-link"><i class="ti ti-external-link"></i> ${c.link.length>50?c.link.slice(0,50)+'...':c.link}</a>`:''}
+    </div>`).join(''):`<div class="empty-state" style="padding:24px">아직 댓글이 없어요.<br>아래에서 첫 댓글을 남겨보세요.</div>`}
+
+    <div class="section-divider"></div>
+
+    <!-- 댓글 작성 -->
+    <div class="write-box">
+      <div class="write-author">
+        ${avEl(curUser.name,32)}
+        <span>${curUser.name}</span>
+      </div>
+      <textarea class="inp" id="cmt-text" placeholder="댓글, 진행 상황, 테스트 결과, 이슈 등을 입력하세요..." rows="4"></textarea>
+      <div style="margin-top:8px">
+        <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:5px"><i class="ti ti-paperclip"></i> 파일 링크 첨부 (OneDrive / Google Drive / URL)</label>
+        <input class="inp" id="cmt-link" placeholder="https://...">
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;flex-wrap:wrap;gap:8px">
+        <select class="inp" id="cmt-status" style="width:auto;font-size:13px">
+          <option value="">상태 변경 없음</option>
+          ${STATUSES.map(s=>`<option value="${s}" ${item.status===s?'selected':''}>${s}</option>`).join('')}
+        </select>
+        <button class="btn btn-o" onclick="submitComment('${item.id}')"><i class="ti ti-send"></i> 댓글 등록</button>
+      </div>
+    </div>
+  </div>`
+
+  // 전역 함수 등록
+  window.updateField=async(id,field,val)=>{
+    await sb.from('checklist_items').update({[field]:val||null,updated_at:new Date().toISOString()}).eq('id',id)
+    await logH(`${field} 변경`,item.text)
+    toast('저장됨')
+    await loadItemDetail(id)
+  }
+  window.toggleSub=async(sid,itemId,checked)=>{
+    await sb.from('checklist_subs').update({done:checked,done_by:checked?curUser.name:null,verified:false}).eq('id',sid)
+    await logH(`세부 ${checked?'완료':'취소'}`,`${item.text} > ${subs.find(s=>s.id===sid)?.text||''}`)
+    await loadItemDetail(itemId)
+  }
+  window.verifySub=async(sid,itemId)=>{
+    await sb.from('checklist_subs').update({verified:true,verified_by:curUser.name,verified_at:new Date().toISOString()}).eq('id',sid)
+    await logH('검증 완료',subs.find(s=>s.id===sid)?.text||'')
+    toast('✓ 검증 완료')
+    await loadItemDetail(itemId)
+  }
+  window.updateSubField=async(sid,field,val)=>{
+    await sb.from('checklist_subs').update({[field]:val||null}).eq('id',sid)
+    toast('저장됨')
+  }
+  window.addSub=async(itemId)=>{
+    const inp=document.getElementById('new-sub-inp');if(!inp?.value.trim())return
+    const text=inp.value.trim()
+    await sb.from('checklist_subs').insert({item_id:itemId,text,verifier:curUser.name})
+    await logH('세부 추가',text)
+    inp.value='';toast('추가됨')
+    await loadItemDetail(itemId)
+  }
+  window.deleteSub=async(sid,itemId)=>{
+    const s=subs.find(s=>s.id===sid)
+    if(!s||!confirm(`"${s.text}" 삭제?`))return
+    await sb.from('checklist_subs').delete().eq('id',sid)
+    await logH('세부 삭제',s.text)
+    await loadItemDetail(itemId)
+  }
+  window.submitComment=async(itemId)=>{
+    const txt=document.getElementById('cmt-text')?.value.trim()
+    const lnk=document.getElementById('cmt-link')?.value.trim()
+    const ns=document.getElementById('cmt-status')?.value
+    if(!txt){toast('댓글 내용을 입력해주세요.',false);return}
+    await sb.from('checklist_comments').insert({item_id:itemId,user_name:curUser.name,text:txt,link:lnk||null})
+    if(ns){await sb.from('checklist_items').update({status:ns,updated_at:new Date().toISOString()}).eq('id',itemId)}
+    await logH(`댓글 등록${ns?` + 상태 ${ns}`:''}`,item.text)
+    toast('댓글 등록됨')
+    await loadItemDetail(itemId)
+  }
+}
+
+async function loadUXDetail(q,idx){
+  const question=decodeURIComponent(q||'')
+  document.getElementById('breadcrumb').textContent=`UX 베타 > 점검항목 ${parseInt(idx||0)+1}`
+  const {data:comments}=await sb.from('checklist_comments').select('*').eq('item_id','ux-'+idx).order('created_at')
+  const STATUSES=['진행전','진행중','완료','보류']
+  document.getElementById('page-content').innerHTML=`
+  <div class="card">
+    <div class="card-title"><i class="ti ti-device-mobile"></i> UX 핵심 점검 항목</div>
+    <div style="background:var(--ol);border:0.5px solid var(--ob);border-radius:8px;padding:6px 12px;font-size:11px;color:var(--od);margin-bottom:12px">항목 ${parseInt(idx||0)+1}</div>
+    <div class="main-title">${question}</div>
+    <div class="field-grid" style="margin-top:16px">
+      <div class="field">
+        <label>담당자</label>
+        <select class="inp">
+          <option value="">없음</option>
+          ${MEMBERS.map(m=>`<option>${m.name}</option>`).join('')}
+        </select>
+      </div>
+      <div class="field">
+        <label>마감일</label>
+        <input class="inp" type="date">
+      </div>
+      <div class="field">
+        <label>상태</label>
+        <select class="inp" id="ux-status">
+          ${STATUSES.map(s=>`<option>${s}</option>`).join('')}
+        </select>
+      </div>
+      <div class="field">
+        <label>결과 링크</label>
+        <input class="inp" placeholder="원드라이브 / 구글닥스 URL...">
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><i class="ti ti-message-circle"></i> 댓글 & 결과 공유 <span style="margin-left:auto;font-weight:400">${(comments||[]).length}개</span></div>
+    ${(comments||[]).length?(comments||[]).map(c=>`
+    <div class="comment-item">
+      <div class="comment-header">
+        ${avEl(c.user_name,32)}
+        <div>
+          <div class="comment-author">${c.user_name}</div>
+          <div class="comment-time">${new Date(c.created_at).toLocaleString('ko-KR',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}</div>
+        </div>
+      </div>
+      <div class="comment-text">${c.text}</div>
+      ${c.link?`<a href="${c.link}" target="_blank" class="comment-link"><i class="ti ti-external-link"></i> ${c.link.length>50?c.link.slice(0,50)+'...':c.link}</a>`:''}
+    </div>`).join(''):`<div class="empty-state" style="padding:24px">아직 댓글이 없어요.<br>아래에서 테스트 결과나 의견을 공유해주세요.</div>`}
+
+    <div class="section-divider"></div>
+    <div class="write-box">
+      <div class="write-author">${avEl(curUser.name,32)}<span>${curUser.name}</span></div>
+      <textarea class="inp" id="ux-cmt-text" placeholder="테스트 결과, 이슈, 특이사항, 개선안 등을 자유롭게 입력하세요..." rows="5"></textarea>
+      <div style="margin-top:8px">
+        <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:5px"><i class="ti ti-paperclip"></i> 파일 링크 (OneDrive / Google Drive)</label>
+        <input class="inp" id="ux-cmt-link" placeholder="https://...">
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin-top:12px">
+        <button class="btn btn-o" onclick="submitUXComment('ux-${idx}','${question}')"><i class="ti ti-send"></i> 등록</button>
+      </div>
+    </div>
+  </div>`
+
+  window.submitUXComment=async(uxId,title)=>{
+    const txt=document.getElementById('ux-cmt-text')?.value.trim()
+    const lnk=document.getElementById('ux-cmt-link')?.value.trim()
+    if(!txt){toast('내용을 입력해주세요.',false);return}
+    await sb.from('checklist_comments').insert({item_id:uxId,user_name:curUser.name,text:txt,link:lnk||null})
+    await logH('UX 댓글 등록',title)
+    toast('등록됨')
+    await loadUXDetail(q,idx)
+  }
+}
+</script>
+</body>
+</html>
