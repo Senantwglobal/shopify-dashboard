@@ -6,71 +6,272 @@
 <title>OPLE 대시보드 — 로그인</title>
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f8f7f5;min-height:100vh;display:flex;align-items:center;justify-content:center;color:#1a1a1a}
-  .card{background:#fff;border-radius:16px;border:0.5px solid #e5e3dc;padding:40px 36px;width:100%;max-width:400px}
-  .logo-row{display:flex;align-items:center;gap:10px;margin-bottom:32px;justify-content:center}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f8f7f5;min-height:100vh;display:flex;align-items:center;justify-content:center;color:#1a1a1a;padding:20px}
+  .card{background:#fff;border-radius:16px;border:0.5px solid #e5e3dc;padding:40px 36px;width:100%;max-width:420px}
+  .logo-row{display:flex;justify-content:center;margin-bottom:28px}
   .logo{background:#E8680A;color:#fff;font-size:16px;font-weight:600;padding:6px 14px;border-radius:8px}
   .title{font-size:20px;font-weight:500;text-align:center;margin-bottom:6px}
   .sub{font-size:13px;color:#888;text-align:center;margin-bottom:28px}
+  .err{background:#FCEBEB;color:#A32D2D;font-size:12px;padding:9px 12px;border-radius:8px;margin-bottom:14px;display:none}
+  .suc{background:#EAF3DE;color:#3B6D11;font-size:12px;padding:9px 12px;border-radius:8px;margin-bottom:14px;display:none}
   label{display:block;font-size:12px;font-weight:500;color:#555;margin-bottom:5px}
   input{width:100%;padding:10px 12px;border:0.5px solid #d0cec6;border-radius:8px;font-size:14px;background:#fafaf8;color:#1a1a1a;outline:none;margin-bottom:14px;transition:border-color .15s}
   input:focus{border-color:#E8680A}
-  .btn{width:100%;padding:11px;background:#E8680A;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;margin-top:4px}
+  .btn{width:100%;padding:11px;background:#E8680A;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;transition:background .15s}
   .btn:hover{background:#B84E06}
   .btn:disabled{background:#ccc;cursor:not-allowed}
-  .err{background:#FCEBEB;color:#A32D2D;font-size:12px;padding:8px 12px;border-radius:6px;margin-bottom:12px;display:none}
-  .user-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:20px;padding-top:20px;border-top:0.5px solid #e5e3dc}
-  .ubtn{padding:8px;border:0.5px solid #e5e3dc;border-radius:8px;background:#fafaf8;font-size:12px;cursor:pointer;text-align:center}
-  .ubtn:hover{border-color:#E8680A;color:#E8680A;background:#FEF0E6}
-  .hint{font-size:11px;color:#aaa;text-align:center;margin-top:16px}
+  .btn-outline{background:#fff;color:#E8680A;border:0.5px solid #E8680A}
+  .btn-outline:hover{background:#FEF0E6}
+  .divider{border-top:0.5px solid #e5e3dc;margin:22px 0 16px;text-align:center}
+  .divider span{background:#fff;padding:0 10px;font-size:11px;color:#aaa;position:relative;top:-8px}
+  .team-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+  .mbtn{padding:10px 8px;border:0.5px solid #e5e3dc;border-radius:8px;background:#fafaf8;font-size:13px;cursor:pointer;text-align:center;transition:all .15s;display:flex;align-items:center;justify-content:space-between;gap:4px}
+  .mbtn:hover{border-color:#E8680A;color:#E8680A;background:#FEF0E6}
+  .mbtn-name{flex:1;text-align:center}
+  .mbtn-del{font-size:11px;color:transparent;padding:0 2px}
+  .mbtn:hover .mbtn-del{color:#E8680A}
+  .toggle-add{background:none;border:0.5px dashed #d0cec6;border-radius:8px;color:#aaa;font-size:12px;cursor:pointer;padding:9px;width:100%;margin-top:8px;transition:all .15s}
+  .toggle-add:hover{border-color:#E8680A;color:#E8680A;background:#FEF0E6}
+  .add-form{display:none;margin-top:10px;background:#f8f7f5;border-radius:10px;padding:14px}
+  .add-form.open{display:block}
+  .add-form input{font-size:13px;padding:8px 10px;margin-bottom:8px}
+  .hint{font-size:11px;color:#bbb;text-align:center;margin-top:16px}
+
+  /* 비밀번호 변경 화면 */
+  .pw-change{display:none}
+  .pw-change.active{display:block}
+  .login-form{display:block}
+  .login-form.hidden{display:none}
+  .step-badge{background:#FEF0E6;color:#E8680A;font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;display:inline-block;margin-bottom:16px}
+  .pw-rules{font-size:11px;color:#aaa;margin-bottom:14px;line-height:1.6;padding:8px 12px;background:#f8f7f5;border-radius:7px}
 </style>
 </head>
 <body>
 <div class="card">
   <div class="logo-row"><span class="logo">OPLE</span></div>
-  <div class="title">Shopify 전환 대시보드</div>
-  <div class="sub">팀 협업 프로젝트 관리 시스템</div>
-  <div class="err" id="err-msg"></div>
-  <label>이메일</label>
-  <input type="email" id="email" placeholder="이메일 입력" autocomplete="email">
-  <label>비밀번호</label>
-  <input type="password" id="password" placeholder="비밀번호 입력" onkeydown="if(event.key==='Enter')login()">
-  <button class="btn" id="login-btn" onclick="login()">로그인</button>
-  <div class="user-btns">
-    <div class="ubtn" onclick="quickFill('handaepyo@ople.co')">한대표</div>
-    <div class="ubtn" onclick="quickFill('minzun@ople.co')">김민준</div>
-    <div class="ubtn" onclick="quickFill('younghwan@ople.co')">박영환</div>
-    <div class="ubtn" onclick="quickFill('sungyup@ople.co')">임성엽</div>
-    <div class="ubtn" onclick="quickFill('jihun@ople.co')">정지훈</div>
-    <div class="ubtn" onclick="quickFill('sena@ople.co')">세나</div>
+
+  <!-- 로그인 화면 -->
+  <div id="login-screen" class="login-form">
+    <div class="title">Shopify 전환 대시보드</div>
+    <div class="sub">팀 협업 프로젝트 관리 시스템</div>
+
+    <div class="err" id="err-msg"></div>
+
+    <label>이름</label>
+    <input type="text" id="username" placeholder="예: 천세나" autocomplete="name" onkeydown="if(event.key==='Enter')document.getElementById('password').focus()">
+    <label>비밀번호</label>
+    <input type="password" id="password" placeholder="비밀번호 입력" onkeydown="if(event.key==='Enter')login()">
+    <button class="btn" id="login-btn" onclick="login()">로그인</button>
+
+    <div class="divider"><span>팀원 빠른 선택</span></div>
+    <div class="team-grid" id="team-grid"></div>
+    <button class="toggle-add" onclick="toggleAdd()">+ 팀원 추가</button>
+    <div class="add-form" id="add-form">
+      <label>이름</label>
+      <input id="new-name" placeholder="예: 홍길동">
+      <label>이메일 (내부용)</label>
+      <input id="new-email" type="email" placeholder="예: hong@ople.co" onkeydown="if(event.key==='Enter')addMember()">
+      <button class="btn" onclick="addMember()" style="margin-top:2px">추가</button>
+    </div>
+    <div class="hint">초기 비밀번호: ople2026!</div>
   </div>
-  <div class="hint">초기 비밀번호: ople2026!</div>
+
+  <!-- 비밀번호 변경 화면 -->
+  <div id="pw-change-screen" class="pw-change">
+    <div style="text-align:center;margin-bottom:20px">
+      <div class="logo-row" style="margin-bottom:12px"><span class="logo">OPLE</span></div>
+      <span class="step-badge">첫 로그인 — 비밀번호 설정</span>
+      <div style="font-size:16px;font-weight:500;margin-top:8px" id="pw-welcome">안녕하세요!</div>
+      <div style="font-size:13px;color:#888;margin-top:4px">새 비밀번호를 설정해주세요</div>
+    </div>
+
+    <div class="err" id="pw-err"></div>
+    <div class="suc" id="pw-suc"></div>
+
+    <div class="pw-rules">
+      비밀번호 조건: 8자 이상 · 숫자 포함
+    </div>
+
+    <label>새 비밀번호</label>
+    <input type="password" id="new-pw1" placeholder="새 비밀번호 (8자 이상)" onkeydown="if(event.key==='Enter')document.getElementById('new-pw2').focus()">
+    <label>새 비밀번호 확인</label>
+    <input type="password" id="new-pw2" placeholder="비밀번호 다시 입력" onkeydown="if(event.key==='Enter')changePw()">
+    <button class="btn" id="pw-btn" onclick="changePw()">비밀번호 설정 완료</button>
+    <button class="btn btn-outline" style="margin-top:8px" onclick="skipPwChange()">나중에 변경</button>
+  </div>
 </div>
+
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-const sb = createClient('https://btutlgcidpjgedpypzri.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ0dXRsZ2NpZHBqZ2VkcHlwenJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0NTE0MjQsImV4cCI6MjA5ODAyNzQyNH0.qZp04DhOmm4oSho3Qsfz8UWEeY-eNhGcIydyVNejqBc')
-const {data:{session}} = await sb.auth.getSession()
-if(session) location.href='dashboard.html'
-window.quickFill=(e)=>{document.getElementById('email').value=e;document.getElementById('password').value='ople2026!'}
-window.login=async()=>{
-  const email=document.getElementById('email').value.trim()
-  const pw=document.getElementById('password').value
-  const btn=document.getElementById('login-btn')
-  const err=document.getElementById('err-msg')
-  if(!email||!pw){err.textContent='이메일과 비밀번호를 입력해주세요.';err.style.display='block';return}
-  btn.disabled=true;btn.textContent='로그인 중...';err.style.display='none'
-  let {error}=await sb.auth.signInWithPassword({email,password:pw})
-  if(error){
-    const {error:e2}=await sb.auth.signUp({email,password:pw})
-    if(!e2){
-      const {error:e3}=await sb.auth.signInWithPassword({email,password:pw})
-      if(!e3){location.href='dashboard.html';return}
-    }
-    err.textContent='로그인 실패: '+error.message;err.style.display='block'
-    btn.disabled=false;btn.textContent='로그인';return
+const sb = createClient(
+  'https://btutlgcidpjgedpypzri.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ0dXRsZ2NpZHBqZ2VkcHlwenJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0NTE0MjQsImV4cCI6MjA5ODAyNzQyNH0.qZp04DhOmm4oSho3Qsfz8UWEeY-eNhGcIydyVNejqBc'
+)
+
+const INIT_PW = 'ople2026!'
+
+// 이미 로그인 → 대시보드로
+const { data: { session } } = await sb.auth.getSession()
+if (session) {
+  // 최초 로그인 체크 (메타데이터로 관리)
+  const meta = session.user.user_metadata
+  if (!meta?.pw_changed) {
+    showPwChange(session.user)
+  } else {
+    location.href = 'dashboard.html'
   }
-  location.href='dashboard.html'
 }
+
+// 기본 팀원
+const DEFAULT_MEMBERS = [
+  { name: '한덕희',  email: 'handeokhee@ople.co' },
+  { name: '박영환',  email: 'younghwan@ople.co' },
+  { name: '천세나',  email: 'sena@ople.co' },
+  { name: '권현정',  email: 'hyunjeong@ople.co' },
+  { name: '김현수',  email: 'hyunsu@ople.co' },
+]
+
+function getMembers() {
+  try { const s = localStorage.getItem('ople-members'); return s ? JSON.parse(s) : DEFAULT_MEMBERS }
+  catch { return DEFAULT_MEMBERS }
+}
+function saveMembers(m) { localStorage.setItem('ople-members', JSON.stringify(m)) }
+
+function nameToEmail(name) {
+  const m = getMembers().find(m => m.name === name)
+  return m ? m.email : null
+}
+
+function renderGrid() {
+  const members = getMembers()
+  document.getElementById('team-grid').innerHTML = members.map((m, i) => `
+    <div class="mbtn" onclick="quickSelect('${m.name}')">
+      <span class="mbtn-name">${m.name}</span>
+      <span class="mbtn-del" onclick="event.stopPropagation();removeMember(${i})">✕</span>
+    </div>`).join('')
+}
+
+window.quickSelect = (name) => {
+  document.getElementById('username').value = name
+  document.getElementById('password').value = ''
+  document.getElementById('password').focus()
+}
+
+window.removeMember = (i) => {
+  const members = getMembers()
+  if (!confirm(`"${members[i].name}" 삭제?`)) return
+  members.splice(i, 1); saveMembers(members); renderGrid()
+}
+
+window.toggleAdd = () => {
+  const f = document.getElementById('add-form')
+  f.classList.toggle('open')
+  if (f.classList.contains('open')) document.getElementById('new-name').focus()
+}
+
+window.addMember = () => {
+  const name = document.getElementById('new-name').value.trim()
+  const email = document.getElementById('new-email').value.trim()
+  if (!name || !email) { alert('이름과 이메일을 모두 입력해주세요.'); return }
+  if (!email.includes('@')) { alert('올바른 이메일 형식을 입력해주세요.'); return }
+  const members = getMembers()
+  if (members.find(m => m.email === email)) { alert('이미 등록된 이메일입니다.'); return }
+  members.push({ name, email }); saveMembers(members)
+  document.getElementById('new-name').value = ''
+  document.getElementById('new-email').value = ''
+  document.getElementById('add-form').classList.remove('open')
+  renderGrid()
+}
+
+// 로그인
+window.login = async () => {
+  const name = document.getElementById('username').value.trim()
+  const pw = document.getElementById('password').value
+  const btn = document.getElementById('login-btn')
+  const err = document.getElementById('err-msg')
+
+  if (!name) { showErr(err, '이름을 입력해주세요.'); return }
+  if (!pw)   { showErr(err, '비밀번호를 입력해주세요.'); return }
+
+  const email = nameToEmail(name)
+  if (!email) { showErr(err, `"${name}"은 등록되지 않은 팀원입니다. 아래에서 팀원을 추가해주세요.`); return }
+
+  btn.disabled = true; btn.textContent = '로그인 중...'; err.style.display = 'none'
+
+  let { data, error } = await sb.auth.signInWithPassword({ email, password: pw })
+
+  if (error) {
+    // 계정 없으면 초기 비밀번호로 자동 생성 후 재로그인
+    if (error.message.includes('Invalid login credentials') && pw === INIT_PW) {
+      const { error: e2 } = await sb.auth.signUp({ email, password: pw, options: { data: { name, pw_changed: false } } })
+      if (!e2) {
+        const { data: d2, error: e3 } = await sb.auth.signInWithPassword({ email, password: pw })
+        if (!e3) { data = d2; error = null }
+      }
+    }
+    if (error) {
+      showErr(err, '비밀번호가 올바르지 않습니다.')
+      btn.disabled = false; btn.textContent = '로그인'; return
+    }
+  }
+
+  // 로그인 성공 — 최초 여부 확인
+  const meta = data.user.user_metadata
+  if (!meta?.pw_changed) {
+    showPwChange(data.user)
+  } else {
+    location.href = 'dashboard.html'
+  }
+}
+
+// 비밀번호 변경 화면 표시
+function showPwChange(user) {
+  document.getElementById('login-screen').classList.add('hidden')
+  document.getElementById('pw-change-screen').classList.add('active')
+  const name = user.user_metadata?.name || user.email?.split('@')[0] || ''
+  document.getElementById('pw-welcome').textContent = `${name}님, 안녕하세요!`
+}
+
+window.changePw = async () => {
+  const pw1 = document.getElementById('new-pw1').value
+  const pw2 = document.getElementById('new-pw2').value
+  const err = document.getElementById('pw-err')
+  const suc = document.getElementById('pw-suc')
+  const btn = document.getElementById('pw-btn')
+
+  err.style.display = 'none'; suc.style.display = 'none'
+
+  if (pw1.length < 8)     { showErr(err, '비밀번호는 8자 이상이어야 합니다.'); return }
+  if (!/\d/.test(pw1))    { showErr(err, '숫자를 포함해야 합니다.'); return }
+  if (pw1 !== pw2)        { showErr(err, '비밀번호가 일치하지 않습니다.'); return }
+  if (pw1 === INIT_PW)    { showErr(err, '초기 비밀번호와 다른 비밀번호를 설정해주세요.'); return }
+
+  btn.disabled = true; btn.textContent = '저장 중...'
+
+  const { error } = await sb.auth.updateUser({
+    password: pw1,
+    data: { pw_changed: true }
+  })
+
+  if (error) {
+    showErr(err, '변경 실패: ' + error.message)
+    btn.disabled = false; btn.textContent = '비밀번호 설정 완료'
+    return
+  }
+
+  suc.textContent = '비밀번호가 설정되었습니다! 대시보드로 이동합니다...'
+  suc.style.display = 'block'
+  setTimeout(() => location.href = 'dashboard.html', 1500)
+}
+
+window.skipPwChange = async () => {
+  // 나중에 변경 — pw_changed 플래그 없이 바로 이동
+  location.href = 'dashboard.html'
+}
+
+function showErr(el, msg) { el.textContent = msg; el.style.display = 'block' }
+
+renderGrid()
 </script>
 </body>
 </html>
