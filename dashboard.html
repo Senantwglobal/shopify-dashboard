@@ -1028,9 +1028,9 @@ window.runAIMtg=async()=>{
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({text:raw})
     })
-    if(!resp.ok)throw new Error('서버 오류 '+resp.status)
-    const parsed=await resp.json()
-    if(parsed.error)throw new Error(parsed.error)
+    const respData=await resp.json().catch(()=>({error:'응답 파싱 실패'}))
+    if(!resp.ok||respData.error)throw new Error(respData.error||'서버 오류 '+resp.status)
+    const parsed=respData
     window._parsedMtg={...parsed,
       title:document.getElementById('aim-title')?.value.trim()||'AI 회의록',
       date:document.getElementById('aim-date')?.value,
