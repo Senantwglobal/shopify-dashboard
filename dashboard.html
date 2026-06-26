@@ -810,22 +810,45 @@ window.saveUS=async(field,value)=>{await sb.from('ux_settings').update({[field]:
 // ══════════════════════════════
 // 액션아이템
 // ══════════════════════════════
+let aiStatusFilter='', aiCatFilter=''
 function renderAI(){
   const cats=[...new Set(D.actionItems.map(a=>a.cat))]
   const done=D.actionItems.filter(a=>a.status==='완료').length
+  const inprog=D.actionItems.filter(a=>a.status==='진행중').length
+  const wait=D.actionItems.filter(a=>['진행전','대기'].includes(a.status)).length
+  const issue=D.actionItems.filter(a=>a.status==='이슈').length
+
+  const statusBtns=[
+    {label:'전체',val:'',count:D.actionItems.length,color:'var(--text)'},
+    {label:'완료',val:'완료',count:done,color:'#3B6D11'},
+    {label:'진행중',val:'진행중',count:inprog,color:'#185FA5'},
+    {label:'진행전',val:'진행전',count:wait,color:'var(--muted)'},
+    {label:'이슈',val:'이슈',count:issue,color:'#A32D2D'},
+  ]
+
   return`
-  <div class="krow" style="grid-template-columns:repeat(4,1fr)">
-    <div class="kpi"><div class="kn" style="color:#3B6D11">${done}</div><div class="kl">완료</div></div>
-    <div class="kpi"><div class="kn" style="color:#185FA5">${D.actionItems.filter(a=>a.status==='진행중').length}</div><div class="kl">진행중</div></div>
-    <div class="kpi"><div class="kn" style="color:var(--muted)">${D.actionItems.filter(a=>['진행전','대기'].includes(a.status)).length}</div><div class="kl">진행전</div></div>
-    <div class="kpi"><div class="kn" style="color:#A32D2D">${D.actionItems.filter(a=>a.status==='이슈').length}</div><div class="kl">이슈</div></div>
+  <!-- 상태 필터 버튼 -->
+  <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px">
+    ${statusBtns.map(s=>`<button onclick="aiStatusFilter='${s.val}';aiCatFilter='';render()" style="padding:7px 14px;border-radius:20px;border:1.5px solid ${aiStatusFilter===s.val?s.color:'var(--bd)'};background:${aiStatusFilter===s.val?s.color+'18':'var(--card)'};color:${s.color};font-size:12px;font-weight:${aiStatusFilter===s.val?'600':'400'};cursor:pointer;display:flex;align-items:center;gap:5px">
+      ${s.label} <span style="background:${aiStatusFilter===s.val?s.color:'var(--sf)'};color:${aiStatusFilter===s.val?'#fff':s.color};border-radius:10px;padding:0 6px;font-size:11px">${s.count}</span>
+    </button>`).join('')}
+    <button class="btn btn-o" style="margin-left:auto" onclick="openAddAI()"><i class="ti ti-plus"></i> 액션 추가</button>
   </div>
-  <div style="display:flex;justify-content:flex-end;margin-bottom:8px"><button class="btn btn-o" onclick="openAddAI()"><i class="ti ti-plus"></i> 액션 추가</button></div>
+
+  <!-- 카테고리 빠른 필터 -->
+  <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px;padding:8px 10px;background:var(--sf);border-radius:9px">
+    <span style="font-size:11px;color:var(--muted);align-self:center;margin-right:4px">카테고리:</span>
+    <button onclick="aiCatFilter='';render()" style="padding:3px 10px;border-radius:20px;border:1px solid ${aiCatFilter===''?'var(--o)':'var(--bd)'};background:${aiCatFilter===''?'var(--ol)':'var(--card)'};color:${aiCatFilter===''?'var(--o)':'var(--muted)'};font-size:11px;cursor:pointer">전체</button>
+    ${cats.map(cat=>`<button onclick="aiCatFilter='${cat}';render()" style="padding:3px 10px;border-radius:20px;border:1px solid ${aiCatFilter===cat?'var(--o)':'var(--bd)'};background:${aiCatFilter===cat?'var(--ol)':'var(--card)'};color:${aiCatFilter===cat?'var(--o)':'var(--muted)'};font-size:11px;cursor:pointer">${cat}</button>`).join('')}
+  </div>
   <div class="sec">
-  ${cats.map(cat=>{
-    const its=D.actionItems.filter(a=>a.cat===cat).sort((a,b)=>{const o={'완료':3,'진행중':1,'진행전':0,'대기':0,'보류':2,'이슈':1};return(o[a.status]||0)-(o[b.status]||0)})
+  ${(aiCatFilter?[aiCatFilter]:cats).map(cat=>{
+    let its=D.actionItems.filter(a=>a.cat===cat)
+    if(aiStatusFilter)its=its.filter(a=>a.status===aiStatusFilter)
+    if(!its.length)return''
+    its=its.sort((a,b)=>{const o={'완료':3,'진행중':1,'진행전':0,'대기':0,'보류':2,'이슈':1};return(o[a.status]||0)-(o[b.status]||0)})
     return`<div style="margin-bottom:14px">
-    <div style="font-size:11px;font-weight:500;color:var(--muted);margin-bottom:5px;padding:4px 8px;background:var(--sf);border-radius:7px">${cat}</div>
+    <div style="font-size:11px;font-weight:500;color:var(--muted);margin-bottom:5px;padding:4px 8px;background:var(--sf);border-radius:7px">${cat} <span style="float:right">${its.length}건</span></div>
     ${its.map(a=>{
       const owners=getOwners(a)
       const isMyTask=owners.includes(curUser.name)&&a.status!=='완료'

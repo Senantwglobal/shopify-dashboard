@@ -163,7 +163,13 @@ function renderItemDetail(item,subs,comments,cats){
   <!-- 기본 정보 -->
   <div class="card">
     <div class="card-title"><i class="ti ti-info-circle"></i> 항목 정보</div>
-    <div class="main-title" id="item-title">${item.text}</div>
+    <div class="main-title" id="item-title" contenteditable="true" spellcheck="false"
+      style="outline:none;border-bottom:2px solid transparent;cursor:text"
+      onfocus="this.style.borderBottomColor='var(--o)'"
+      onblur="this.style.borderBottomColor='transparent';updateField('${item.id}','text',this.innerText.trim())"
+      onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}"
+    >${item.text}</div>
+    <div style="font-size:11px;color:var(--muted);margin-top:4px">클릭해서 제목 수정 가능</div>
     <div class="meta-row" style="margin-top:10px">
       ${pb(item.priority)}${sb2(item.status)}
       ${item.deadline?dlc(item.deadline,item.done):''}
