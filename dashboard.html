@@ -711,9 +711,12 @@ function renderUX(){
   <div class="sec sec-o"><div class="sh"><span class="st"><i class="ti ti-users oi"></i> 베타 테스터 구성</span><button class="btn btn-o" onclick="addTester()"><i class="ti ti-plus"></i></button></div>
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px">
   ${D.uxItems.map(t=>`<div style="background:var(--sf);border-radius:9px;border:0.5px solid var(--bd);padding:10px;position:relative">
-    <button class="btn btn-g btn-red" style="position:absolute;top:4px;right:4px;padding:1px 4px;font-size:10px" onclick="delTester('${t.id}')"><i class="ti ti-x"></i></button>
-    <div style="font-size:12px;font-weight:500;color:var(--o);margin-bottom:2px">${t.grp}</div>
-    <div style="font-size:22px;font-weight:500;margin-bottom:2px">${t.n}</div>
+    <div style="position:absolute;top:4px;right:4px;display:flex;gap:3px">
+      <button class="btn btn-g" style="padding:1px 4px;font-size:10px" onclick="editTester('${t.id}')"><i class="ti ti-pencil"></i></button>
+      <button class="btn btn-g btn-red" style="padding:1px 4px;font-size:10px" onclick="delTester('${t.id}')"><i class="ti ti-x"></i></button>
+    </div>
+    <div style="font-size:12px;font-weight:500;color:var(--o);margin-bottom:2px;padding-right:48px">${t.grp}</div>
+    <div style="font-size:22px;font-weight:500;margin-bottom:2px">${t.n}명</div>
     <div style="font-size:11px;color:var(--muted)">${t.note||''}</div>
   </div>`).join('')}
   </div></div>
@@ -732,6 +735,34 @@ function renderUX(){
   </div>`
 }
 window.addTester=async()=>{await sb.from('ux_testers').insert({grp:'새 그룹',n:'0',note:'',sort_order:D.uxItems.length+1});await loadAll()}
+window.editTester=(id)=>{
+  const t=D.uxItems.find(t=>t.id===id);if(!t)return
+  const w=mkOv('edit-tester-ov')
+  w.innerHTML=`<div class="modal" style="width:380px">
+  <div class="mh"><span style="font-weight:500">테스터 그룹 수정</span><button class="btn btn-g" onclick="document.getElementById('edit-tester-ov').remove()"><i class="ti ti-x"></i></button></div>
+  <div class="mb">
+    <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">그룹명</label>
+    <input class="inp" id="et-grp" value="${t.grp}">
+    <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">인원 수</label>
+    <input class="inp" id="et-n" value="${t.n}">
+    <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">메모</label>
+    <input class="inp" id="et-note" value="${t.note||''}">
+  </div>
+  <div class="mf">
+    <button class="btn" onclick="document.getElementById('edit-tester-ov').remove()">취소</button>
+    <button class="btn btn-o" onclick="saveTesterEdit('${t.id}')">저장</button>
+  </div></div>`
+  document.body.appendChild(w)
+}
+window.saveTesterEdit=async(id)=>{
+  await sb.from('ux_testers').update({
+    grp:document.getElementById('et-grp')?.value.trim(),
+    n:document.getElementById('et-n')?.value.trim(),
+    note:document.getElementById('et-note')?.value.trim(),
+  }).eq('id',id)
+  document.getElementById('edit-tester-ov').remove()
+  toast('저장됨');await loadAll()
+}
 window.delTester=async(id)=>{if(!confirm('삭제?'))return;await sb.from('ux_testers').delete().eq('id',id);await loadAll()}
 window.saveUS=async(field,value)=>{await sb.from('ux_settings').update({[field]:value,updated_by:curUser.name}).eq('id','main');toast('저장됨')}
 
@@ -958,7 +989,7 @@ window.runAIMtg=async()=>{
 
 window.saveParsedMtg=async()=>{
   const p=window._parsedMtg;if(!p)return
-  await sb.from('meetings').insert({date:p.date,title:p.title,attendees:p.attendees,decisions:p.decisions||[],pending:p.pending||[],actions:p.actions||[],created_by:curUser.name})
+  await sb.from('meetings').insert({date:p.date,title:p.title,attendees:p.attendees,decisions:p.decisions||[],pending:p.pending||[],actions:p.actions||[],full_text:p.raw||null,created_by:curUser.name})
   await logH('AI 회의록 저장',p.title)
   document.getElementById('ai-mtg-ov').remove()
   toast('회의록 저장됨');await loadAll();showTab('mtg')
@@ -975,20 +1006,94 @@ window.addParsedActions=async()=>{
   await loadAll();showTab('ai')
 }
 
-window.openMtg=(id)=>{
+window.openMtg=(id,editMode=false)=>{
   const m=D.meetings.find(m=>m.id===id);if(!m)return
   const w=mkOv('mtg-ov')
-  w.innerHTML=`<div class="modal"><div class="mh"><div><div style="font-weight:500">${m.title}</div><div style="font-size:11px;color:var(--muted)">${m.date}</div></div><button class="btn btn-g" onclick="document.getElementById('mtg-ov').remove()"><i class="ti ti-x"></i></button></div>
-  <div class="mb">
-    <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px">${(m.attendees||[]).map(a=>`<div style="display:flex;align-items:center;gap:4px">${avEl(a,20)}<span style="font-size:12px">${a}</span></div>`).join('')}</div>
-    <div style="font-size:12px;font-weight:500;color:#3B6D11;margin-bottom:5px"><i class="ti ti-check"></i> 결정사항</div>
-    ${(m.decisions||[]).map(d=>`<div style="padding:5px 8px;margin-bottom:2px;background:#EAF3DE;border-radius:7px;font-size:12px;color:#27500A">${d}</div>`).join('')}
-    <div style="font-size:12px;font-weight:500;color:#A32D2D;margin:10px 0 5px"><i class="ti ti-question-mark"></i> 미확인</div>
-    ${(m.pending||[]).map(p=>`<div style="padding:5px 8px;margin-bottom:2px;background:#FCEBEB;border-radius:7px;font-size:12px;color:#791F1F">${p}</div>`).join('')}
-    <div style="font-size:12px;font-weight:500;color:var(--o);margin:10px 0 5px"><i class="ti ti-arrow-right"></i> 다음 액션</div>
-    ${(m.actions||[]).map(a=>`<div style="padding:5px 8px;margin-bottom:2px;background:var(--ol);border-radius:7px;font-size:12px;color:var(--od)">${a}</div>`).join('')}
-  </div></div>`
+  const dec=(m.decisions||[]).join('\n')
+  const pend=(m.pending||[]).join('\n')
+  const acts=(m.actions||[]).join('\n')
+  const att=(m.attendees||[]).join(',')
+
+  if(editMode){
+    w.innerHTML=`<div class="modal">
+    <div class="mh">
+      <span style="font-weight:500"><i class="ti ti-pencil" style="color:var(--o)"></i> 회의록 수정</span>
+      <button class="btn btn-g" onclick="document.getElementById('mtg-ov').remove()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="mb">
+      <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">날짜</label>
+      <input class="inp" type="date" id="em-date" value="${m.date}">
+      <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">제목</label>
+      <input class="inp" id="em-title" value="${m.title}">
+      <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">참석자 (쉼표 구분)</label>
+      <input class="inp" id="em-att" value="${att}">
+      <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">결정사항 (줄 구분)</label>
+      <textarea class="inp" id="em-dec" style="min-height:90px">${dec}</textarea>
+      <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">미확인 사항 (줄 구분)</label>
+      <textarea class="inp" id="em-pend" style="min-height:70px">${pend}</textarea>
+      <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">다음 액션 (줄 구분)</label>
+      <textarea class="inp" id="em-act" style="min-height:70px">${acts}</textarea>
+      <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">전체 회의록 원문 (선택)</label>
+      <textarea class="inp" id="em-fulltext" style="min-height:100px">${m.full_text||''}</textarea>
+    </div>
+    <div class="mf" style="justify-content:space-between">
+      <button class="btn btn-red" onclick="deleteMtg('${m.id}')"><i class="ti ti-trash"></i> 삭제</button>
+      <div style="display:flex;gap:6px">
+        <button class="btn" onclick="openMtg('${m.id}',false)">취소</button>
+        <button class="btn btn-o" onclick="saveMtgEdit('${m.id}')"><i class="ti ti-check"></i> 저장</button>
+      </div>
+    </div>
+    </div>`
+  } else {
+    w.innerHTML=`<div class="modal">
+    <div class="mh">
+      <div><div style="font-weight:500">${m.title}</div><div style="font-size:11px;color:var(--muted)">${m.date}</div></div>
+      <div style="display:flex;gap:6px">
+        <button class="btn" onclick="openMtg('${m.id}',true)"><i class="ti ti-pencil"></i> 수정</button>
+        <button class="btn btn-g" onclick="document.getElementById('mtg-ov').remove()"><i class="ti ti-x"></i></button>
+      </div>
+    </div>
+    <div class="mb">
+      <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px">${(m.attendees||[]).map(a=>`<div style="display:flex;align-items:center;gap:4px">${avEl(a,20)}<span style="font-size:12px">${a}</span></div>`).join('')}</div>
+      <div style="font-size:12px;font-weight:500;color:#3B6D11;margin-bottom:5px"><i class="ti ti-check"></i> 결정사항 (${(m.decisions||[]).length}건)</div>
+      ${(m.decisions||[]).map(d=>`<div style="padding:5px 8px;margin-bottom:2px;background:#EAF3DE;border-radius:7px;font-size:12px;color:#27500A">${d}</div>`).join('')}
+      <div style="font-size:12px;font-weight:500;color:#A32D2D;margin:10px 0 5px"><i class="ti ti-question-mark"></i> 미확인 사항 (${(m.pending||[]).length}건)</div>
+      ${(m.pending||[]).map(p=>`<div style="padding:5px 8px;margin-bottom:2px;background:#FCEBEB;border-radius:7px;font-size:12px;color:#791F1F">${p}</div>`).join('')}
+      <div style="font-size:12px;font-weight:500;color:var(--o);margin:10px 0 5px"><i class="ti ti-arrow-right"></i> 다음 액션 (${(m.actions||[]).length}건)</div>
+      ${(m.actions||[]).map(a=>`<div style="padding:5px 8px;margin-bottom:2px;background:var(--ol);border-radius:7px;font-size:12px;color:var(--od)">${a}</div>`).join('')}
+      ${m.full_text?`<div style="margin-top:14px;border-top:0.5px solid var(--bd);padding-top:12px">
+        <div style="font-size:12px;font-weight:500;color:var(--muted);margin-bottom:6px"><i class="ti ti-file-text"></i> 전체 회의록 원문</div>
+        <div style="background:var(--sf);border-radius:9px;padding:12px;font-size:13px;line-height:1.7;white-space:pre-wrap;max-height:300px;overflow-y:auto">${m.full_text}</div>
+      </div>`:''}
+    </div></div>`
+  }
   document.body.appendChild(w)
+}
+
+window.saveMtgEdit=async(id)=>{
+  const sp=elId=>document.getElementById(elId)?.value.split('\n').map(s=>s.trim()).filter(Boolean)
+  const emFullText=document.getElementById('em-fulltext')?.value.trim()
+  await sb.from('meetings').update({
+    date:document.getElementById('em-date')?.value,
+    title:document.getElementById('em-title')?.value.trim(),
+    attendees:document.getElementById('em-att')?.value.split(',').map(s=>s.trim()).filter(Boolean),
+    decisions:sp('em-dec'),
+    pending:sp('em-pend'),
+    actions:sp('em-act'),
+    full_text:emFullText||null,
+  }).eq('id',id)
+  await logH('회의록 수정',document.getElementById('em-title')?.value.trim())
+  document.getElementById('mtg-ov').remove()
+  toast('회의록 수정됨');await loadAll()
+}
+
+window.deleteMtg=async(id)=>{
+  const m=D.meetings.find(m=>m.id===id)
+  if(!m||!confirm(`"${m.title}" 회의록을 삭제할까요?`))return
+  await sb.from('meetings').delete().eq('id',id)
+  await logH('회의록 삭제',m.title)
+  document.getElementById('mtg-ov').remove()
+  toast('삭제됨');await loadAll()
 }
 window.openAddMtg=()=>{
   const w=mkOv('add-mtg-ov')
