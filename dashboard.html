@@ -999,14 +999,14 @@ window.runAIMtg=async()=>{
   document.getElementById('aim-result').style.display='none'
   const btn=document.getElementById('aim-btn');btn.disabled=true
   try{
-    const resp=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,messages:[{role:'user',content:'다음 회의록을 분석해서 JSON만 반환해. 다른 텍스트 없이 JSON만.\n\n형식:\n{"summary":"2~3줄 핵심 요약","decisions":["결정사항1"],"pending":["미확인1"],"actions":["액션아이템1 (담당자)"]}\n\n회의록:\n'+raw}]})
+    const resp=await fetch('/api/summarize',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({text:raw})
     })
-    const data=await resp.json()
-    const text=data.content?.[0]?.text||''
-    const clean=text.replace(/```json|```/g,'').trim()
-    const parsed=JSON.parse(clean)
+    if(!resp.ok)throw new Error('서버 오류 '+resp.status)
+    const parsed=await resp.json()
+    if(parsed.error)throw new Error(parsed.error)
     window._parsedMtg={...parsed,
       title:document.getElementById('aim-title')?.value.trim()||'AI 회의록',
       date:document.getElementById('aim-date')?.value,
