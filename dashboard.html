@@ -395,11 +395,11 @@ function renderDash(){
 <!-- 담당자별 현황 -->
 <div class="card">
   <div class="sh"><span class="st"><i class="ti ti-users oi"></i> 담당자별 미완료</span></div>
-  ${byMember.length?byMember.map(m=>`<div class="dash-row" style="align-items:flex-start;gap:10px">
-  <div style="display:flex;align-items:center;gap:6px;min-width:70px;flex-shrink:0">${avEl(m.name,24)}<span style="font-size:12px;font-weight:500">${m.name}</span></div>
+  ${byMember.length?byMember.map(m=>`<div class="dash-row" style="align-items:flex-start;gap:10px;cursor:pointer;border-radius:8px;padding:8px;margin:-8px;transition:background .15s" onclick="openMemberTasks('${m.name}')" onmouseover="this.style.background='var(--sf)'" onmouseout="this.style.background=''">
+  <div style="display:flex;align-items:center;gap:6px;min-width:70px;flex-shrink:0">${avEl(m.name,28)}<span style="font-size:13px;font-weight:500">${m.name}</span></div>
   <div style="flex:1;min-width:0">
     ${m.items.map(i=>`<div style="font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:2px">${i.text}</div>`).join('')}
-    ${m.count>3?`<div style="font-size:11px;color:var(--muted)">+${m.count-3}건 더</div>`:''}
+    ${m.count>3?`<div style="font-size:11px;color:var(--o)">+${m.count-3}건 더 보기 →</div>`:''}
   </div>
   <span class="badge br">${m.count}건</span>
   </div>`).join(''):`<div style="font-size:13px;color:var(--muted);text-align:center;padding:16px">모든 항목 완료!</div>`}
@@ -1204,6 +1204,75 @@ window.addParsedActions=async()=>{
 }
 
 // D-day 편집
+window.openMemberTasks=(name)=>{
+  const allItems=[...D.items,...D.actionItems]
+  const myItems=allItems.filter(a=>{
+    const owners=Array.isArray(a.owners)&&a.owners.length?a.owners:a.owner?[a.owner]:[]
+    return owners.includes(name)
+  })
+  const done=myItems.filter(i=>i.done||i.status==='완료')
+  const todo=myItems.filter(i=>!i.done&&i.status!=='완료').sort((a,b)=>new Date(a.deadline||'9999')-new Date(b.deadline||'9999'))
+  const m=MEMBERS.find(m=>m.name===name)||{name,color:'#888'}
+  const w=mkOv('member-tasks-ov')
+  w.innerHTML=`<div class="modal" style="width:560px">
+  <div class="mh" style="border-top-color:${m.color}">
+    <div style="display:flex;align-items:center;gap:10px">
+      ${avEl(name,36)}
+      <div>
+        <div style="font-weight:500;font-size:15px">${name}</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px">전체 ${myItems.length}건 · 완료 ${done.length}건 · 미완료 ${todo.length}건</div>
+      </div>
+    </div>
+    <button class="btn btn-g" onclick="document.getElementById('member-tasks-ov').remove()"><i class="ti ti-x"></i></button>
+  </div>
+  <div class="mb" style="padding:0">
+    <!-- 진행률 바 -->
+    <div style="padding:12px 18px;border-bottom:0.5px solid var(--bd);background:var(--sf)">
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px">
+        <span style="color:var(--muted)">전체 진행률</span>
+        <span style="font-weight:500">${myItems.length?Math.round(done.length/myItems.length*100):0}%</span>
+      </div>
+      <div class="pgb" style="height:6px"><div class="pgf" style="width:${myItems.length?Math.round(done.length/myItems.length*100):0}%;background:${m.color}"></div></div>
+    </div>
+
+    <!-- 미완료 -->
+    ${todo.length?`<div style="padding:10px 18px 6px;font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.3px">미완료 (${todo.length}건)</div>
+    ${todo.map(i=>{
+      const isDone=i.done||i.status==='완료'
+      const color=i.category_id?getCatColor(i.category_id):'var(--o)'
+      const cat=i.category_id?D.cats.find(c=>c.id===i.category_id)?.label||'':'회의록 액션'
+      return`<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 18px;border-bottom:0.5px solid var(--bd);cursor:pointer;transition:background .12s" onclick="document.getElementById('member-tasks-ov').remove();${i.category_id?`location.href='detail.html?type=item&id=${i.id}'`:`openAIDetail('${i.id}')`}" onmouseover="this.style.background='var(--sf)'" onmouseout="this.style.background=''">
+        <div style="width:3px;border-radius:2px;background:${color};align-self:stretch;flex-shrink:0;min-height:36px"></div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:4px">${i.text}</div>
+          <div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center">
+            <span style="font-size:10px;color:${color};background:${color}18;padding:1px 6px;border-radius:4px">${cat}</span>
+            <span class="badge ${i.status==='진행중'?'bb':i.status==='검증대기'?'bo':'bgr'}">${i.status||'할 일'}</span>
+            ${i.deadline?dlc(i.deadline,false):''}
+          </div>
+        </div>
+        <i class="ti ti-chevron-right" style="color:var(--muted);font-size:13px;flex-shrink:0;margin-top:3px"></i>
+      </div>`
+    }).join('')}`:''}
+
+    <!-- 완료 -->
+    ${done.length?`<div style="padding:10px 18px 6px;font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.3px;margin-top:4px">완료 (${done.length}건)</div>
+    ${done.map(i=>{
+      const color=i.category_id?getCatColor(i.category_id):'var(--o)'
+      const cat=i.category_id?D.cats.find(c=>c.id===i.category_id)?.label||'':'회의록 액션'
+      return`<div style="display:flex;align-items:center;gap:10px;padding:8px 18px;border-bottom:0.5px solid var(--bd);opacity:.6">
+        <div style="width:3px;border-radius:2px;background:${color};align-self:stretch;flex-shrink:0;min-height:28px"></div>
+        <div style="flex:1;min-width:0;font-size:12px;text-decoration:line-through;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${i.text}</div>
+        <span class="badge bg">완료</span>
+      </div>`
+    }).join('')}`:''}
+
+    ${!myItems.length?`<div style="text-align:center;padding:30px;font-size:14px;color:var(--muted)">${name}님 담당 항목 없음</div>`:''}
+  </div>
+  </div>`
+  document.body.appendChild(w)
+}
+
 window.openDdayEdit=()=>{
   const w=mkOv('dday-ov')
   w.innerHTML=`<div class="modal" style="width:320px"><div class="mh"><span style="font-weight:500">D-Day 날짜 설정</span><button class="btn btn-g" onclick="document.getElementById('dday-ov').remove()"><i class="ti ti-x"></i></button></div>
