@@ -206,7 +206,9 @@ function getMembers(){
 
 // ── 상태 ──
 let MEMBERS=[], curUser=null, activeTab='dash'
-let expandCks={}, activeCat='전체'
+let expandCks={}
+window.activeCat='전체'
+window.setCat=(id)=>{window.activeCat=id;render()}
 let calYear=2026, calMonth=6
 let notifOpen=false
 let D={cats:[],items:[],subs:[],comments:[],kpiRows:[],kpiAnalysis:{},actionItems:[],meetings:[],history:[]}
@@ -570,9 +572,9 @@ window.calClick=(ds)=>{
 function renderCK(){
   const allCats=[{id:'전체',label:'전체',color:'#888'},...D.cats,{id:'회의록액션',label:'회의록 액션',color:'#E8680A'}]
   const getItems=()=>{
-    if(activeCat==='전체')return D.items
-    if(activeCat==='회의록액션')return D.actionItems
-    return D.items.filter(i=>i.category_id===activeCat)
+    if(window.activeCat==='전체')return D.items
+    if(window.activeCat==='회의록액션')return D.actionItems
+    return D.items.filter(i=>i.category_id===window.activeCat)
   }
   const items=getItems()
   const total=items.length
@@ -581,7 +583,7 @@ function renderCK(){
   return`
   <!-- 카테고리 탭 -->
   <div class="cat-tabs">
-    ${allCats.map(cat=>`<button class="cat-tab ${activeCat===cat.id?'active':''}" onclick="activeCat='${cat.id}';render()">
+    ${allCats.map(cat=>`<button class="cat-tab ${window.activeCat===cat.id?'active':''}" onclick="setCat('${cat.id}')">
     <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${cat.color};margin-right:5px"></span>${cat.label}
     <span style="background:var(--sf);border-radius:8px;padding:0 5px;font-size:10px;margin-left:3px;color:var(--muted)">
       ${cat.id==='전체'?D.items.length:cat.id==='회의록액션'?D.actionItems.length:D.items.filter(i=>i.category_id===cat.id).length}
@@ -592,13 +594,13 @@ function renderCK(){
   <!-- 헤더 -->
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
     <div>
-      <span style="font-size:14px;font-weight:500">${allCats.find(c=>c.id===activeCat)?.label||'전체'}</span>
+      <span style="font-size:14px;font-weight:500">${allCats.find(c=>c.id===window.activeCat)?.label||'전체'}</span>
       <span style="font-size:12px;color:var(--muted);margin-left:8px">${done}/${total} 완료</span>
       ${total?`<div class="pgb" style="width:200px;margin-top:6px;display:inline-block;vertical-align:middle;margin-left:10px"><div class="pgf" style="width:${Math.round(done/total*100)}%;background:${done===total?'#639922':'var(--o)'}"></div></div>`:''}
     </div>
     <div style="display:flex;gap:7px">
       <button class="btn" onclick="openAddCat()"><i class="ti ti-folder-plus"></i> 카테고리</button>
-      <button class="btn btn-o" onclick="openAddItem('${activeCat==='전체'||activeCat==='회의록액션'?'':activeCat}','')"><i class="ti ti-plus"></i> 항목 추가</button>
+      <button class="btn btn-o" onclick="openAddItem('${window.activeCat==='전체'||window.activeCat==='회의록액션'?'':activeCat}','')"><i class="ti ti-plus"></i> 항목 추가</button>
     </div>
   </div>
 
@@ -606,7 +608,7 @@ function renderCK(){
   ${activeCat==='kpicat'?renderKPIInline():''}
 
   <!-- 항목 목록 -->
-  ${activeCat==='회의록액션'?renderActionItems():renderCheckItems(items)}`
+  ${window.activeCat==='회의록액션'?renderActionItems():renderCheckItems(items)}`
 }
 
 function renderCheckItems(items){
@@ -1198,7 +1200,7 @@ window.addParsedActions=async()=>{
   await logH('회의록에서 액션 '+p.actions.length+'건 추가',p.title)
   toast('액션아이템 '+p.actions.length+'건 추가됨')
   document.getElementById('ai-mtg-ov').remove();await loadAll()
-  activeCat='회의록액션';showTab('ck')
+  window.activeCat='회의록액션';showTab('ck')
 }
 
 // D-day 편집
