@@ -9,39 +9,36 @@
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--o:#E8680A;--ol:#FEF0E6;--od:#B84E06;--ob:#F5C49A;--bg:#f8f7f5;--card:#fff;--bd:#e5e3dc;--text:#1a1a1a;--muted:#888;--sf:#f3f2ef}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text)}
+/* 헤더 */
 .hdr{background:var(--card);border-bottom:0.5px solid var(--bd);padding:10px 20px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;position:sticky;top:0;z-index:50}
 .logo{background:var(--o);color:#fff;font-size:13px;font-weight:600;padding:4px 10px;border-radius:6px}
 .dday-b{background:var(--ol);color:var(--od);font-size:12px;font-weight:500;padding:3px 10px;border-radius:20px;border:0.5px solid var(--ob);cursor:pointer}
 .uinfo{display:flex;align-items:center;gap:8px;position:relative}
-.av-wrap{position:relative;cursor:pointer}
 .av{border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;color:#fff;flex-shrink:0}
 .notif-btn{position:relative;background:none;border:none;cursor:pointer;padding:0}
 .notif-badge{position:absolute;top:-3px;right:-3px;min-width:16px;height:16px;border-radius:8px;background:#E24B4A;color:#fff;font-size:10px;font-weight:600;display:none;align-items:center;justify-content:center;padding:0 3px;border:1.5px solid var(--card)}
 .notif-badge.show{display:flex}
-.notif-panel{position:absolute;top:36px;right:0;width:300px;background:var(--card);border:0.5px solid var(--bd);border-radius:12px;z-index:100;display:none;overflow:hidden}
+.notif-panel{position:absolute;top:38px;right:0;width:300px;background:var(--card);border:0.5px solid var(--bd);border-radius:12px;z-index:100;display:none;box-shadow:0 8px 24px rgba(0,0,0,.1)}
 .notif-panel.open{display:block}
 .notif-item{padding:10px 14px;border-bottom:0.5px solid var(--bd);cursor:pointer;font-size:13px}
 .notif-item:last-child{border-bottom:none}
 .notif-item:hover{background:var(--ol)}
-.notif-item-title{font-weight:500;margin-bottom:2px}
-.notif-item-meta{font-size:11px;color:var(--muted)}
 .logout-btn{font-size:12px;padding:4px 10px;border-radius:6px;border:0.5px solid var(--bd);background:none;color:var(--muted);cursor:pointer}
+/* 네비 */
 .nav{display:flex;padding:0 16px;background:var(--card);border-bottom:0.5px solid var(--bd);overflow-x:auto}
-.nb{padding:9px 12px;font-size:12px;border:none;background:none;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;white-space:nowrap;display:flex;align-items:center;gap:4px}
+.nb{padding:10px 14px;font-size:13px;border:none;background:none;cursor:pointer;color:var(--muted);border-bottom:2.5px solid transparent;white-space:nowrap;display:flex;align-items:center;gap:5px;font-weight:400}
 .nb.active{color:var(--o);border-bottom-color:var(--o);font-weight:500}
 .nb:hover:not(.active){color:var(--text)}
-.nbadge{background:#E24B4A;color:#fff;border-radius:8px;padding:0 5px;font-size:10px;margin-left:2px}
-.cnt{padding:16px 20px;max-width:1100px;margin:0 auto}
-.krow{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;margin-bottom:14px}
-.kpi{background:var(--card);border-radius:10px;border:0.5px solid var(--bd);padding:12px;text-align:center}
-.kn{font-size:22px;font-weight:500;margin-bottom:2px}
-.kl{font-size:10px;color:var(--muted)}
-.sec{background:var(--card);border:0.5px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:12px}
-.sec-o{border-color:var(--ob)}
-.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px;flex-wrap:wrap}
+/* 레이아웃 */
+.cnt{padding:20px;max-width:1200px;margin:0 auto}
+/* 카드/섹션 */
+.card{background:var(--card);border:0.5px solid var(--bd);border-radius:12px;padding:16px;margin-bottom:14px}
+.card-o{border-color:var(--ob)}
+.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:8px;flex-wrap:wrap}
 .st{font-size:13px;font-weight:500;display:flex;align-items:center;gap:6px}
 .oi{color:var(--o)}
-.btn{font-size:12px;padding:5px 10px;border-radius:8px;border:0.5px solid var(--bd);background:none;color:var(--text);cursor:pointer;display:inline-flex;align-items:center;gap:4px;transition:all .15s}
+/* 버튼 */
+.btn{font-size:12px;padding:6px 12px;border-radius:8px;border:0.5px solid var(--bd);background:none;color:var(--text);cursor:pointer;display:inline-flex;align-items:center;gap:4px;transition:all .15s}
 .btn:hover{background:var(--sf)}
 .btn-o{background:var(--o);color:#fff;border-color:var(--o)}
 .btn-o:hover{background:var(--od);color:#fff}
@@ -49,89 +46,118 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .btn-g:hover{color:var(--text);background:var(--sf)}
 .btn-red{color:#A32D2D;border-color:#F09595}
 .btn-red:hover{background:#FCEBEB}
-.badge{font-size:10px;padding:2px 6px;border-radius:9px;font-weight:500;white-space:nowrap}
+/* 뱃지 */
+.badge{font-size:10px;padding:2px 7px;border-radius:9px;font-weight:500;white-space:nowrap}
 .bo{background:var(--ol);color:var(--od)}
 .bb{background:#E6F1FB;color:#185FA5}
 .br{background:#FCEBEB;color:#A32D2D}
 .bg{background:#EAF3DE;color:#3B6D11}
 .bgr{background:#F1EFE8;color:#5F5E5A}
-.inp{width:100%;padding:8px 10px;border:0.5px solid var(--bd);border-radius:8px;font-size:13px;background:var(--sf);color:var(--text);margin-bottom:8px;outline:none;transition:border-color .15s}
+.bp{background:#EEEDFE;color:#534AB7}
+/* 입력 */
+.inp{width:100%;padding:8px 11px;border:0.5px solid var(--bd);border-radius:8px;font-size:13px;background:var(--sf);color:var(--text);margin-bottom:8px;outline:none;transition:border-color .15s}
 .inp:focus{border-color:var(--o)}
-textarea.inp{resize:vertical;min-height:64px}
+textarea.inp{resize:vertical;min-height:64px;line-height:1.5}
 select.inp{cursor:pointer}
-.pgb{height:4px;border-radius:2px;background:var(--sf);overflow:hidden;margin-top:3px}
-.pgf{height:100%;border-radius:2px;transition:width .4s}
-.dlc{font-size:10px;font-weight:500;padding:2px 6px;border-radius:9px;white-space:nowrap}
+/* 그리드 */
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.krow{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-bottom:16px}
+.kpi{background:var(--card);border-radius:12px;border:0.5px solid var(--bd);padding:14px;text-align:center}
+.kn{font-size:24px;font-weight:500;margin-bottom:3px}
+.kl{font-size:11px;color:var(--muted)}
+/* 진행률 바 */
+.pgb{height:5px;border-radius:3px;background:var(--sf);overflow:hidden;margin-top:4px}
+.pgf{height:100%;border-radius:3px;transition:width .4s}
+/* D-day 칩 */
+.dlc{font-size:10px;font-weight:500;padding:2px 7px;border-radius:9px;white-space:nowrap}
 .dl-ok{background:#EAF3DE;color:#3B6D11}
 .dl-w{background:var(--ol);color:var(--od)}
 .dl-c{background:#FCEBEB;color:#A32D2D}
 .dl-d{background:#F1EFE8;color:#5F5E5A}
-.ck-row{display:flex;align-items:flex-start;gap:8px;padding:7px 8px;border-radius:8px;margin-bottom:2px}
-.ck-row:hover{background:var(--sf)}
-.ck-row input[type=checkbox]{accent-color:var(--o);margin-top:3px;flex-shrink:0;width:15px;height:15px}
-.sub-wrap{padding:3px 0 3px 26px;display:none}
+/* Go/No-Go */
+.gng-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px}
+.gng-c{border-radius:9px;padding:10px 12px;border:0.5px solid var(--bd);display:flex;align-items:flex-start;gap:8px;background:var(--card)}
+.gng-l{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:3px}
+.lg-r{background:#E24B4A}.lg-o{background:var(--o)}.lg-g{background:#639922}
+/* 체크리스트 */
+.cat-tabs{display:flex;gap:0;border-bottom:0.5px solid var(--bd);margin-bottom:16px;overflow-x:auto;padding-bottom:0}
+.cat-tab{padding:8px 14px;font-size:12px;border:none;background:none;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;white-space:nowrap;flex-shrink:0}
+.cat-tab.active{color:var(--o);border-bottom-color:var(--o);font-weight:500}
+.cat-tab:hover:not(.active){color:var(--text)}
+.ck-item{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:10px;border:0.5px solid var(--bd);margin-bottom:8px;background:var(--card);cursor:pointer;transition:border-color .15s}
+.ck-item:hover{border-color:var(--ob)}
+.ck-item.done-item{opacity:.6}
+.ck-cb{accent-color:var(--o);width:16px;height:16px;margin-top:2px;flex-shrink:0;cursor:pointer}
+.ck-body{flex:1;min-width:0}
+.ck-title{font-size:13px;font-weight:500;margin-bottom:4px;line-height:1.4}
+.ck-title.done{text-decoration:line-through;color:var(--muted)}
+.ck-meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:11px;color:var(--muted)}
+.ck-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.sub-wrap{display:none;padding:6px 0 2px 26px}
 .sub-wrap.open{display:block}
-.sub-row{display:flex;align-items:flex-start;gap:7px;padding:5px 8px;border-radius:8px;margin-bottom:1px;cursor:pointer}
+.sub-row{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:8px;font-size:12px;cursor:pointer}
 .sub-row:hover{background:var(--sf)}
-.sub-row input[type=checkbox]{accent-color:var(--o);margin-top:2px;flex-shrink:0;width:13px;height:13px}
+.sub-row input{accent-color:var(--o);width:13px;height:13px;flex-shrink:0}
 .vbadge{font-size:9px;padding:1px 5px;border-radius:6px;background:#EEEDFE;color:#534AB7}
 .vbadge.ok{background:#EAF3DE;color:#3B6D11}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
-.mtg-card{padding:11px;border:0.5px solid var(--bd);border-radius:10px;margin-bottom:8px;cursor:pointer;background:var(--card)}
-.mtg-card:hover{border-color:var(--ob)}
-.ai-row{display:flex;align-items:flex-start;gap:8px;padding:9px;border-radius:9px;border:0.5px solid var(--bd);margin-bottom:6px;background:var(--card)}
-.ai-row:hover{border-color:var(--ob)}
-.kpi-tbl{width:100%;border-collapse:collapse;font-size:12px}
-.kpi-tbl th{background:var(--sf);padding:8px;text-align:left;font-weight:500;font-size:11px;color:var(--muted);border-bottom:0.5px solid var(--bd);white-space:nowrap}
-.kpi-tbl td{padding:7px 8px;border-bottom:0.5px solid var(--bd)}
-.kpi-tbl tr:last-child td{border-bottom:none}
-.kpi-cell{width:100%;min-width:70px;padding:4px 6px;border:0.5px solid var(--bd);border-radius:5px;font-size:12px;background:var(--sf);color:var(--text);outline:none}
-.kpi-cell:focus{border-color:var(--o)}
-.hist-r{display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--bd);font-size:12px}
-.toast{position:fixed;bottom:20px;right:20px;background:#2d6a27;color:#fff;padding:9px 16px;border-radius:9px;font-size:13px;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none}
-.toast.show{opacity:1}
-.rdot{width:7px;height:7px;border-radius:50%;background:#639922;display:inline-block;margin-right:4px;animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-@keyframes spin{to{transform:rotate(360deg)}}
-.overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:flex-start;justify-content:center;padding-top:28px;overflow-y:auto}
-.modal{background:#fff;border-radius:14px;border:0.5px solid var(--bd);border-top:3px solid var(--o);width:560px;max-width:95%;max-height:90vh;overflow-y:auto}
-.mh{padding:13px 16px;border-bottom:0.5px solid var(--bd);display:flex;justify-content:space-between;align-items:center;gap:8px}
-.mb{padding:16px}
-.mf{padding:12px 16px;border-top:0.5px solid var(--bd);display:flex;justify-content:flex-end;gap:8px}
+/* 상태 셀렉트 */
+.st-sel{font-size:11px;padding:2px 6px;border:0.5px solid var(--bd);border-radius:6px;background:var(--sf);cursor:pointer;color:var(--text);outline:none}
+.st-sel:focus{border-color:var(--o)}
+/* 담당자 칩 */
+.owner-chips{display:flex;flex-wrap:wrap;gap:4px;min-height:30px;padding:4px 6px;border:0.5px solid var(--bd);border-radius:8px;background:var(--sf);margin-bottom:8px;align-items:center}
+.ochip{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500;color:#fff}
+.ochip-x{cursor:pointer;opacity:.7;font-size:10px}
+.ochip-x:hover{opacity:1}
+/* 캘린더 */
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
-.cal-dh{text-align:center;font-size:11px;color:var(--muted);padding:4px;font-weight:500}
-.cal-cell{min-height:68px;border-radius:8px;padding:4px 5px;border:0.5px solid transparent;background:var(--sf);position:relative;cursor:pointer;transition:border-color .1s}
+.cal-dh{text-align:center;font-size:11px;color:var(--muted);padding:5px;font-weight:500}
+.cal-cell{min-height:72px;border-radius:8px;padding:5px;border:0.5px solid transparent;background:var(--sf);position:relative;cursor:pointer;transition:border-color .12s}
 .cal-cell:hover{border-color:var(--o)}
 .cal-cell.today{border-color:var(--o);border-width:1.5px}
 .cal-cell.empty{background:transparent;border:none;cursor:default}
-.cal-cell.wknd{opacity:.65}
+.cal-cell.wknd{opacity:.6}
+.cal-cell.drag-over{border-color:var(--o);background:var(--ol);border-style:dashed}
 .cal-num{font-size:11px;font-weight:500;margin-bottom:2px}
 .cal-cell.today .cal-num{color:var(--o)}
-.cal-ev{font-size:9px;padding:2px 4px;border-radius:3px;margin-bottom:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.cal-cell.drag-over{border-color:var(--o);background:var(--ol);border-style:dashed}
-.cal-ev[draggable]{user-select:none}
+.cal-ev{font-size:9px;padding:2px 5px;border-radius:3px;margin-bottom:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:grab}
 .cal-ev.dragging{opacity:.4}
-.cal-add{position:absolute;bottom:3px;right:3px;width:16px;height:16px;border-radius:50%;background:var(--o);color:#fff;font-size:12px;line-height:16px;text-align:center;display:none;border:none;cursor:pointer}
+.cal-add{position:absolute;bottom:3px;right:3px;width:17px;height:17px;border-radius:50%;background:var(--o);color:#fff;font-size:13px;line-height:17px;text-align:center;display:none;border:none;cursor:pointer}
 .cal-cell:hover .cal-add{display:block}
-.owner-chips{display:flex;flex-wrap:wrap;gap:4px;min-height:28px;padding:4px;border:0.5px solid var(--bd);border-radius:8px;background:var(--sf);margin-bottom:8px}
-.ochip{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500;color:#fff}
-.ochip-x{cursor:pointer;opacity:.7;font-size:10px;margin-left:1px}
-.ochip-x:hover{opacity:1}
-.status-sel{font-size:11px;padding:2px 6px;border:0.5px solid var(--bd);border-radius:6px;background:var(--sf);cursor:pointer;color:var(--text);outline:none}
-.ux-item{padding:10px;border:0.5px solid var(--bd);border-radius:9px;margin-bottom:8px;background:var(--card);cursor:pointer;display:flex;align-items:flex-start;gap:8px}
-.ux-item:hover{border-color:var(--ob)}
-/* 대시보드 위젯 */
-.dash-widget{background:var(--card);border:0.5px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:12px;cursor:pointer;transition:border-color .15s}
-.dash-widget:hover{border-color:var(--ob)}
-.dash-widget-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.dash-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--bd);font-size:13px}
+/* 회의록 */
+.mtg-card{padding:14px;border:0.5px solid var(--bd);border-radius:10px;margin-bottom:10px;cursor:pointer;background:var(--card);transition:border-color .15s}
+.mtg-card:hover{border-color:var(--ob)}
+/* 댓글 */
+.comment{background:var(--sf);border-radius:10px;padding:12px;margin-bottom:8px;border-left:3px solid var(--o)}
+.cauth{font-size:12px;font-weight:500;display:flex;align-items:center;gap:6px;margin-bottom:5px}
+.ctime{font-size:10px;color:var(--muted);font-weight:400}
+.ctext{font-size:13px;color:#333;line-height:1.6;white-space:pre-wrap}
+/* 모달/오버레이 */
+.overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:flex-start;justify-content:center;padding-top:28px;overflow-y:auto}
+.modal{background:#fff;border-radius:14px;border:0.5px solid var(--bd);border-top:3px solid var(--o);width:580px;max-width:95%;max-height:90vh;overflow-y:auto}
+.mh{padding:14px 18px;border-bottom:0.5px solid var(--bd);display:flex;justify-content:space-between;align-items:center;gap:8px}
+.mb{padding:18px}
+.mf{padding:12px 18px;border-top:0.5px solid var(--bd);display:flex;justify-content:flex-end;gap:8px}
+/* 토스트 */
+.toast{position:fixed;bottom:20px;right:20px;background:#2d6a27;color:#fff;padding:10px 18px;border-radius:10px;font-size:13px;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.show{opacity:1}
+/* 기타 */
+.rdot{width:7px;height:7px;border-radius:50%;background:#639922;display:inline-block;margin-right:4px;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hist-r{display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--bd);font-size:12px}
+.kpi-tbl{width:100%;border-collapse:collapse;font-size:12px}
+.kpi-tbl th{background:var(--sf);padding:8px;text-align:left;font-weight:500;font-size:11px;color:var(--muted);border-bottom:0.5px solid var(--bd);white-space:nowrap}
+.kpi-tbl td{padding:7px 8px;border-bottom:0.5px solid var(--bd)}
+.kpi-cell{width:100%;min-width:70px;padding:4px 7px;border:0.5px solid var(--bd);border-radius:5px;font-size:12px;background:var(--sf);color:var(--text);outline:none}
+.kpi-cell:focus{border-color:var(--o)}
+.dash-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:0.5px solid var(--bd);font-size:13px}
 .dash-row:last-child{border-bottom:none}
-.analysis-area{background:var(--sf);border-radius:9px;padding:12px;font-size:13px;color:#444;line-height:1.6;min-height:60px;white-space:pre-wrap}
-@media(max-width:600px){.two{grid-template-columns:1fr}.three{grid-template-columns:1fr}.cnt{padding:12px}}
+@media(max-width:640px){.two{grid-template-columns:1fr}.three{grid-template-columns:1fr}.cnt{padding:12px}}
 </style>
 </head>
 <body>
+
 <div class="hdr">
   <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
     <span class="logo">OPLE</span>
@@ -140,11 +166,11 @@ select.inp{cursor:pointer}
     <span style="font-size:11px;color:var(--muted)"><span class="rdot"></span>실시간</span>
   </div>
   <div class="uinfo">
-    <div class="notif-btn" onclick="toggleNotif()">
+    <button class="notif-btn" onclick="toggleNotif()">
       <div class="av" id="user-av" style="width:30px;height:30px;font-size:12px;background:var(--o)">?</div>
       <div class="notif-badge" id="notif-badge"></div>
-    </div>
-    <span id="user-name" style="font-size:13px;color:var(--muted)">로딩중</span>
+    </button>
+    <span id="user-name" style="font-size:13px;color:var(--muted)"></span>
     <div class="notif-panel" id="notif-panel">
       <div style="padding:10px 14px;font-size:12px;font-weight:500;color:var(--muted);border-bottom:0.5px solid var(--bd)">내 담당 항목</div>
       <div id="notif-list"></div>
@@ -152,16 +178,14 @@ select.inp{cursor:pointer}
     <button class="logout-btn" onclick="logout()">로그아웃</button>
   </div>
 </div>
+
 <div class="nav">
   <button class="nb active" onclick="showTab('dash')" id="tab-dash"><i class="ti ti-layout-dashboard"></i>대시보드</button>
   <button class="nb" onclick="showTab('cal')" id="tab-cal"><i class="ti ti-calendar"></i>캘린더</button>
   <button class="nb" onclick="showTab('ck')" id="tab-ck"><i class="ti ti-checklist"></i>체크리스트</button>
-  <button class="nb" onclick="showTab('kpi')" id="tab-kpi"><i class="ti ti-chart-line"></i>KPI</button>
-  <button class="nb" onclick="showTab('ux')" id="tab-ux"><i class="ti ti-device-mobile"></i>UX 베타</button>
-  <button class="nb" onclick="showTab('ai')" id="tab-ai"><i class="ti ti-list-check"></i>액션아이템<span class="nbadge" id="ai-badge" style="display:none"></span></button>
   <button class="nb" onclick="showTab('mtg')" id="tab-mtg"><i class="ti ti-notes"></i>회의록</button>
-  <button class="nb" onclick="showTab('hist')" id="tab-hist"><i class="ti ti-history"></i>변경이력</button>
 </div>
+
 <div class="cnt" id="mc"><div style="text-align:center;padding:60px;color:var(--muted)">로딩중...</div></div>
 <div class="toast" id="toast"></div>
 
@@ -169,17 +193,27 @@ select.inp{cursor:pointer}
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 const sb=createClient('https://btutlgcidpjgedpypzri.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ0dXRsZ2NpZHBqZ2VkcHlwenJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0NTE0MjQsImV4cCI6MjA5ODAyNzQyNH0.qZp04DhOmm4oSho3Qsfz8UWEeY-eNhGcIydyVNejqBc')
 
+// ── 상수 ──
 const MC=['#E8680A','#534AB7','#0F6E56','#A32D2D','#185FA5','#854F0B','#993556','#5F5E5A']
-function getMembers(){try{const s=localStorage.getItem('ople-members');return(s?JSON.parse(s):[{name:'한덕희',email:'handeokhee@ople.co'},{name:'박영환',email:'younghwan@ople.co'},{name:'천세나',email:'sena@ople.co'},{name:'권현정',email:'hyunjeong@ople.co'},{name:'김현수',email:'hyunsu@ople.co'}]).map((m,i)=>({...m,color:MC[i%MC.length]}))}catch{return[]}}
+const STATUS_LIST=['할 일','진행중','검증대기','완료']
+const STATUS_NEXT={'할 일':'진행중','진행중':'검증대기','검증대기':'완료','완료':'완료'}
+const TODAY=new Date()
 
-let MEMBERS=[], curUser=null, curEmail=null, activeTab='dash'
-let expandCats={}, expandCks={}, calYear=2026, calMonth=6
-let D={cats:[],items:[],subs:[],comments:[],kpiRows:[],kpiAnalysis:{},uxItems:[],uxSettings:{},actionItems:[],meetings:[],history:[]}
+function getMembers(){
+  try{const s=localStorage.getItem('ople-members');return(s?JSON.parse(s):[{name:'한덕희',email:'handeokhee@ople.co'},{name:'박영환',email:'younghwan@ople.co'},{name:'천세나',email:'sena@ople.co'},{name:'권현정',email:'hyunjeong@ople.co'},{name:'김현수',email:'hyunsu@ople.co'}]).map((m,i)=>({...m,color:MC[i%MC.length]}))}catch{return[]}
+}
+
+// ── 상태 ──
+let MEMBERS=[], curUser=null, activeTab='dash'
+let expandCks={}, activeCat='전체'
+let calYear=2026, calMonth=6
 let notifOpen=false
+let D={cats:[],items:[],subs:[],comments:[],kpiRows:[],kpiAnalysis:{},actionItems:[],meetings:[],history:[]}
 
+// ── 인증 ──
 const {data:{session}}=await sb.auth.getSession()
 if(!session){location.href='index.html';throw new Error()}
-curEmail=session.user.email
+const curEmail=session.user.email
 MEMBERS=getMembers()
 curUser=MEMBERS.find(m=>m.email===curEmail)||{name:curEmail.split('@')[0],color:'#888'}
 document.getElementById('user-av').textContent=curUser.name[0]
@@ -187,7 +221,7 @@ document.getElementById('user-av').style.background=curUser.color
 document.getElementById('user-name').textContent=curUser.name
 window.logout=async()=>{await sb.auth.signOut();location.href='index.html'}
 
-const TODAY=new Date()
+// ── 유틸 ──
 function ddu(ds){if(!ds)return 999;return Math.ceil((new Date(ds)-TODAY)/864e5)}
 function calcDD(){return Math.max(0,Math.ceil((new Date(getDday())-TODAY)/864e5))}
 function getDday(){return localStorage.getItem('ople-dday')||'2026-07-14'}
@@ -204,8 +238,11 @@ function dlc(dl,done){
   if(d<=7)return`<span class="dlc dl-w">D-${d}</span>`
   return`<span class="dlc dl-ok">D-${d}</span>`
 }
-function pb(p){return{critical:'<span class="badge br">긴급</span>',high:'<span class="badge bo">중요</span>',medium:'<span class="badge bg">보통</span>'}[p]||''}
-function sb2(s){const m={'완료':'bg','진행중':'bb','진행전':'bgr','보류':'br','이슈':'br'};return`<span class="badge ${m[s]||'bgr'}">${s||'진행전'}</span>`}
+function stBadge(s){
+  const m={'할 일':'bgr','진행중':'bb','검증대기':'bo','완료':'bg'}
+  return`<span class="badge ${m[s]||'bgr'}">${s||'할 일'}</span>`
+}
+function prBadge(p){return{critical:'<span class="badge br">긴급</span>',high:'<span class="badge bo">중요</span>',medium:'<span class="badge bg">보통</span>'}[p]||''}
 function avEl(name,sz=22){const m=MEMBERS.find(m=>m.name===name);const c=m?m.color:'#888';return`<div class="av" style="width:${sz}px;height:${sz}px;font-size:${Math.round(sz*.42)}px;background:${c}" title="${name}">${name?name[0]:'?'}</div>`}
 function ownersEl(owners,sz=20){return(Array.isArray(owners)?owners:[owners||'']).filter(Boolean).map(o=>avEl(o,sz)).join('')}
 function getCatColor(id){const c=D.cats.find(c=>c.id===id);return c?c.color:'#888'}
@@ -214,236 +251,207 @@ function toast(msg,ok=true){const t=document.getElementById('toast');t.textConte
 function mkOv(id){const old=document.getElementById(id);if(old)old.remove();const w=document.createElement('div');w.id=id;w.className='overlay';w.onclick=e=>{if(e.target===w)w.remove()};return w}
 async function logH(action,target){await sb.from('history').insert({user_name:curUser.name,action,target})}
 
-// 알림 패널
+// ── 알림 ──
 window.toggleNotif=()=>{
   notifOpen=!notifOpen
   document.getElementById('notif-panel').classList.toggle('open',notifOpen)
-  if(notifOpen)document.addEventListener('click',closeNotifOutside,{once:true})
-}
-function closeNotifOutside(e){
-  if(!document.getElementById('notif-panel').contains(e.target)){notifOpen=false;document.getElementById('notif-panel').classList.remove('open')}
+  if(notifOpen)setTimeout(()=>document.addEventListener('click',()=>{notifOpen=false;document.getElementById('notif-panel').classList.remove('open')},{once:true}),100)
 }
 function updateNotif(){
-  const myItems=D.actionItems.filter(a=>{if(a.status==='완료')return false;const o=getOwners(a);return o.includes(curUser.name)})
+  const myItems=[...D.items,...D.actionItems].filter(a=>{
+    if(a.done||a.status==='완료')return false
+    const o=getOwners(a)||[]
+    return o.includes(curUser.name)||a.owner===curUser.name
+  })
   const badge=document.getElementById('notif-badge')
-  badge.textContent=myItems.length
-  badge.classList.toggle('show',myItems.length>0)
+  badge.textContent=myItems.length;badge.classList.toggle('show',myItems.length>0)
   const list=document.getElementById('notif-list')
-  if(!myItems.length){list.innerHTML=`<div style="padding:14px;font-size:13px;color:var(--muted);text-align:center">담당 항목 없음</div>`;return}
-  list.innerHTML=myItems.slice(0,8).map(a=>`<div class="notif-item" onclick="showTab('ai');document.getElementById('notif-panel').classList.remove('open');notifOpen=false">
-    <div class="notif-item-title">${a.text}</div>
-    <div class="notif-item-meta">${a.cat||''} · ${sb2(a.status)} ${dlc(a.deadline,false)}</div>
-  </div>`).join('')+(myItems.length>8?`<div style="padding:10px;text-align:center;font-size:12px;color:var(--muted)">+${myItems.length-8}개 더</div>`:'')
+  list.innerHTML=myItems.length
+    ?myItems.slice(0,6).map(a=>`<div class="notif-item" onclick="showTab('ck');document.getElementById('notif-panel').classList.remove('open')"><div style="font-weight:500;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.text}</div><div style="font-size:11px;color:var(--muted);margin-top:2px">${dlc(a.deadline,false)}</div></div>`).join('')+(myItems.length>6?`<div style="padding:8px 14px;font-size:11px;color:var(--muted)">+${myItems.length-6}건 더</div>`:'')
+    :`<div style="padding:14px;font-size:13px;color:var(--muted);text-align:center">담당 항목 없음</div>`
 }
 
-// 담당자 선택 컴포넌트
-function ownerSelectHTML(selectedOwners,inputId){
-  const chips=selectedOwners.map(o=>`<div class="ochip" style="background:${MEMBERS.find(m=>m.name===o)?.color||'#888'}">${o}<span class="ochip-x" onclick="removeOwnerChip('${inputId}','${o}')">✕</span></div>`).join('')
-  return`<div class="owner-chips" id="chips-${inputId}">${chips}<span style="font-size:11px;color:var(--muted);align-self:center;padding:2px 4px">담당자 선택 →</span></div>
-  <select class="inp" style="margin-bottom:8px" onchange="addOwnerChip('${inputId}',this.value);this.value=''">
-    <option value="">+ 담당자 추가</option>
-    ${MEMBERS.map(m=>`<option value="${m.name}">${m.name}</option>`).join('')}
-  </select>
-  <input type="hidden" id="${inputId}" value="${selectedOwners.join(',')}">`
-}
-window._ownerData={}
-window.addOwnerChip=(inputId,name)=>{
-  if(!name)return
-  const inp=document.getElementById(inputId);if(!inp)return
-  const cur=inp.value?inp.value.split(',').filter(Boolean):[]
-  if(cur.includes(name))return
-  cur.push(name)
-  inp.value=cur.join(',')
-  const chips=document.getElementById('chips-'+inputId)
-  if(chips){const c=document.createElement('div');c.className='ochip';c.style.background=MEMBERS.find(m=>m.name===name)?.color||'#888';c.innerHTML=`${name}<span class="ochip-x" onclick="removeOwnerChip('${inputId}','${name}')">✕</span>`;chips.insertBefore(c,chips.lastElementChild)}
-}
-window.removeOwnerChip=(inputId,name)=>{
-  const inp=document.getElementById(inputId);if(!inp)return
-  const cur=inp.value?inp.value.split(',').filter(Boolean):[]
-  inp.value=cur.filter(o=>o!==name).join(',')
-  const chips=document.getElementById('chips-'+inputId)
-  if(chips){chips.querySelectorAll('.ochip').forEach(c=>{if(c.textContent.trim().startsWith(name))c.remove()})}
-}
-
+// ── 데이터 로드 ──
 async function loadAll(){
-  const [cR,iR,sR,cmR,kR,kaR,uxR,usR,aR,mR,hR]=await Promise.all([
+  const [cR,iR,sR,cmR,kR,kaR,aR,mR,hR]=await Promise.all([
     sb.from('checklist_categories').select('*').order('sort_order'),
     sb.from('checklist_items').select('*').order('sort_order'),
     sb.from('checklist_subs').select('*').order('sort_order'),
     sb.from('checklist_comments').select('*').order('created_at'),
     sb.from('kpi_data').select('*'),
     sb.from('kpi_analysis').select('*').eq('id','main').single(),
-    sb.from('ux_testers').select('*').order('sort_order'),
-    sb.from('ux_settings').select('*').eq('id','main').single(),
     sb.from('action_items').select('*').order('created_at'),
     sb.from('meetings').select('*').order('date',{ascending:false}),
-    sb.from('history').select('*').order('created_at',{ascending:false}).limit(150),
+    sb.from('history').select('*').order('created_at',{ascending:false}).limit(100),
   ])
-  D={cats:cR.data||[],items:iR.data||[],subs:sR.data||[],comments:cmR.data||[],kpiRows:kR.data||[],kpiAnalysis:kaR.data||{},uxItems:uxR.data||[],uxSettings:usR.data||{},actionItems:aR.data||[],meetings:mR.data||[],history:hR.data||[]}
-  updateNotif()
+  D={cats:cR.data||[],items:iR.data||[],subs:sR.data||[],comments:cmR.data||[],kpiRows:kR.data||[],kpiAnalysis:kaR.data||{},actionItems:aR.data||[],meetings:mR.data||[],history:hR.data||[]}
+  updateNotif();render()
+}
+
+// 실시간
+sb.channel('rt')
+  .on('postgres_changes',{event:'*',schema:'public',table:'checklist_items'},()=>loadAll())
+  .on('postgres_changes',{event:'*',schema:'public',table:'checklist_subs'},()=>loadAll())
+  .on('postgres_changes',{event:'*',schema:'public',table:'action_items'},()=>loadAll())
+  .on('postgres_changes',{event:'*',schema:'public',table:'meetings'},()=>loadAll())
+  .on('postgres_changes',{event:'*',schema:'public',table:'history'},()=>loadAll())
+  .subscribe()
+
+// ── 탭 ──
+window.showTab=t=>{
+  activeTab=t
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'))
+  document.getElementById('tab-'+t).classList.add('active')
   render()
 }
 
-sb.channel('rt').on('postgres_changes',{event:'*',schema:'public',table:'checklist_items'},()=>loadAll()).on('postgres_changes',{event:'*',schema:'public',table:'checklist_subs'},()=>loadAll()).on('postgres_changes',{event:'*',schema:'public',table:'action_items'},()=>loadAll()).on('postgres_changes',{event:'*',schema:'public',table:'history'},()=>loadAll()).subscribe()
-
-window.showTab=t=>{activeTab=t;document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));document.getElementById('tab-'+t).classList.add('active');render()}
-
 function render(){
   document.getElementById('dday-c').textContent=`D-${calcDD()} · ${getDday().slice(5).replace('-','/')}`
-  const pd=D.actionItems.filter(a=>a.status!=='완료').length
-  const ab=document.getElementById('ai-badge');ab.textContent=pd;ab.style.display=pd>0?'':'none'
   const mc=document.getElementById('mc')
-  const tabs={dash:renderDash,cal:renderCal,ck:renderCK,kpi:renderKPI,ux:renderUX,ai:renderAI,mtg:renderMTG,hist:renderHist}
-  mc.innerHTML=(tabs[activeTab]||renderDash)()
+  if(activeTab==='dash')mc.innerHTML=renderDash()
+  else if(activeTab==='cal')mc.innerHTML=renderCal()
+  else if(activeTab==='ck')mc.innerHTML=renderCK()
+  else mc.innerHTML=renderMTG()
 }
 
-// ══════════════════════════════
+// ══════════════════════
 // 대시보드
-// ══════════════════════════════
-let dashOwnerFilter=''
+// ══════════════════════
 function renderDash(){
-  let tot=0,dn=0
-  D.items.forEach(i=>{tot++;if(i.done)dn++;D.subs.filter(s=>s.item_id===i.id).forEach(s=>{tot++;if(s.done)dn++;})})
-  const prog=tot?Math.round(dn/tot*100):0
-  const aiDone=D.actionItems.filter(a=>a.status==='완료').length
-  const aiTot=D.actionItems.length
-  const myItems=D.actionItems.filter(a=>{if(a.status==='완료')return false;return getOwners(a).includes(curUser.name)})
-  const filteredItems=dashOwnerFilter?D.actionItems.filter(a=>a.status!=='완료'&&getOwners(a).includes(dashOwnerFilter)):[]
-  const urgent=D.items.filter(i=>!i.done&&i.deadline&&ddu(i.deadline)<=3).sort((a,b)=>new Date(a.deadline)-new Date(b.deadline)).slice(0,5)
+  // 전체 항목 (체크리스트 + 액션아이템 통합)
+  const allItems=[...D.items,...D.actionItems]
+  const total=allItems.length
+  const done=allItems.filter(i=>i.done||i.status==='완료').length
+  const prog=total?Math.round(done/total*100):0
+
+  // 카테고리별 진행률
   const catProg=D.cats.map(cat=>{
     const its=D.items.filter(i=>i.category_id===cat.id)
     const t=its.reduce((s,i)=>s+1+D.subs.filter(s=>s.item_id===i.id).length,0)
     const d=its.reduce((s,i)=>s+(i.done?1:0)+D.subs.filter(s=>s.item_id===i.id&&s.done).length,0)
     return{...cat,t,d,pct:t?Math.round(d/t*100):0}
   })
-  const metrics=[...new Set(D.kpiRows.map(r=>r.metric))].slice(0,3)
-  const getKPIVal=(col,m)=>{const r=D.kpiRows.find(r=>r.col===col&&r.metric===m);return r?.value||'—'}
-  const uxDone=D.uxItems.length
-  const recentHistory=D.history.slice(0,5)
+
+  // Go/No-Go 기준 (카테고리 완료율 기반)
+  const gngItems=[
+    {label:'SUPLA 주문연동 테스트',done:D.items.filter(i=>i.category_id==='order'&&i.done).length===D.items.filter(i=>i.category_id==='order').length&&D.items.filter(i=>i.category_id==='order').length>0},
+    {label:'결제 한도 테스트',done:D.items.filter(i=>i.category_id==='payment'&&i.done).length===D.items.filter(i=>i.category_id==='payment').length&&D.items.filter(i=>i.category_id==='payment').length>0},
+    {label:'고객 DB 이관 확인',done:D.items.filter(i=>i.category_id==='db'&&i.done).length===D.items.filter(i=>i.category_id==='db').length&&D.items.filter(i=>i.category_id==='db').length>0},
+    {label:'URL 리다이렉트 완료',done:D.items.filter(i=>i.category_id==='url'&&i.done).length===D.items.filter(i=>i.category_id==='url').length&&D.items.filter(i=>i.category_id==='url').length>0},
+    {label:'CS 스크립트 준비',done:D.items.filter(i=>i.category_id==='cs'&&i.done).length===D.items.filter(i=>i.category_id==='cs').length&&D.items.filter(i=>i.category_id==='cs').length>0},
+    {label:'비상대응 계획',done:D.items.filter(i=>i.category_id==='emergency'&&i.done).length===D.items.filter(i=>i.category_id==='emergency').length&&D.items.filter(i=>i.category_id==='emergency').length>0},
+  ]
+  const gngPass=gngItems.filter(g=>g.done).length
+
+  // 마감 임박
+  const urgent=D.items.filter(i=>!i.done&&i.deadline&&ddu(i.deadline)<=3).sort((a,b)=>new Date(a.deadline)-new Date(b.deadline)).slice(0,5)
+
+  // 담당자별 미완료
+  const byMember=MEMBERS.map(m=>{
+    const mine=allItems.filter(a=>!a.done&&a.status!=='완료'&&(getOwners(a).includes(m.name)||a.owner===m.name))
+    return{...m,count:mine.length,items:mine.slice(0,3)}
+  }).filter(m=>m.count>0)
+
+  // KPI 미리보기
+  const kpiMetrics=[...new Set(D.kpiRows.map(r=>r.metric))].slice(0,4)
+  const gv=(col,m)=>{const r=D.kpiRows.find(r=>r.col===col&&r.metric===m);return r?.value||'—'}
 
   return`
 <div class="krow">
   <div class="kpi"><div class="kn" style="color:var(--o)">${calcDD()}</div><div class="kl">D-day까지</div></div>
   <div class="kpi"><div class="kn" style="color:${prog>=70?'#3B6D11':'var(--text)'}">${prog}%</div><div class="kl">전체 진행률</div></div>
-  <div class="kpi"><div class="kn">${aiDone}/${aiTot}</div><div class="kl">액션 완료</div></div>
-  <div class="kpi"><div class="kn" style="color:var(--o)">${D.actionItems.filter(a=>a.status==='진행중').length}</div><div class="kl">진행중</div></div>
-  <div class="kpi"><div class="kn" style="color:#A32D2D">${D.actionItems.filter(a=>a.status!=='완료').length}</div><div class="kl">미완료</div></div>
-  <div class="kpi"><div class="kn" style="color:#A32D2D">${myItems.length}</div><div class="kl">내 담당</div></div>
+  <div class="kpi"><div class="kn">${done}<span style="font-size:14px;color:var(--muted)">/${total}</span></div><div class="kl">완료 항목</div></div>
+  <div class="kpi"><div class="kn" style="color:${gngPass===6?'#3B6D11':'#A32D2D'}">${gngPass}/6</div><div class="kl">Go/No-Go</div></div>
+  <div class="kpi"><div class="kn" style="color:#A32D2D">${urgent.length}</div><div class="kl">마감 임박</div></div>
+  <div class="kpi"><div class="kn" style="color:#185FA5">${D.meetings.length}</div><div class="kl">회의록</div></div>
 </div>
 
-${myItems.length?`
-<div class="sec sec-o">
-  <div class="sh"><span class="st"><i class="ti ti-bell oi"></i> ${curUser.name}님 담당 미완료 (${myItems.length}건)</span><button class="btn" onclick="showTab('ai')">전체 보기</button></div>
-  ${myItems.slice(0,5).map(a=>`<div class="dash-row" onclick="openAIDetail('${a.id}')" style="cursor:pointer">
-    <div style="flex:1;min-width:0">
-      <div style="font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.text}</div>
-      <div style="font-size:11px;color:var(--muted);margin-top:2px">${a.cat||''}</div>
-    </div>
-    <div style="display:flex;align-items:center;gap:5px;flex-shrink:0">${sb2(a.status)}${dlc(a.deadline,false)}</div>
-  </div>`).join('')}
-  ${myItems.length>5?`<div style="font-size:12px;color:var(--muted);padding-top:6px;text-align:center">+${myItems.length-5}건 더</div>`:''}
-</div>`:''}
+<!-- Go/No-Go -->
+<div class="card card-o">
+  <div class="sh"><span class="st"><i class="ti ti-traffic-lights oi"></i> Go/No-Go 판정 <span style="font-size:11px;color:var(--muted);font-weight:400;margin-left:4px">${gngPass===6?'✅ 전환 가능':'⛔ 미충족 항목 있음'}</span></span><button class="btn" onclick="openDdayEdit()"><i class="ti ti-calendar"></i> D-Day 설정</button></div>
+  <div class="gng-grid" style="margin-bottom:10px">
+    ${gngItems.map(g=>`<div class="gng-c"><div class="gng-l ${g.done?'lg-g':'lg-o'}"></div><div style="font-size:12px;font-weight:500">${g.label}</div></div>`).join('')}
+  </div>
+  ${gngPass<6?`<div style="background:var(--ol);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--od)"><i class="ti ti-alert-triangle"></i> ${6-gngPass}개 기준 미충족 — 체크리스트에서 완료 처리 필요</div>`:'<div style="background:#EAF3DE;border-radius:8px;padding:8px 12px;font-size:12px;color:#3B6D11">✅ 모든 기준 충족 — D-Day 전환 가능합니다.</div>'}
+</div>
 
 <div class="two">
-<div>
-  <div class="sec sec-o">
-    <div class="sh"><span class="st"><i class="ti ti-list-check oi"></i> 체크리스트 진행률</span><button class="btn" onclick="showTab('ck')">전체 보기</button></div>
-    ${catProg.map(cat=>`<div style="margin-bottom:8px">
-    <div style="display:flex;justify-content:space-between;margin-bottom:2px">
-      <div style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;background:${cat.color};display:inline-block"></span><span style="font-size:12px">${cat.label}</span></div>
-      <span style="font-size:11px;color:var(--muted)">${cat.d}/${cat.t}</span>
-    </div>
-    <div class="pgb"><div class="pgf" style="width:${cat.pct}%;background:${cat.pct===100?'#3B6D11':cat.color}"></div></div>
-    </div>`).join('')}
+<!-- 카테고리별 진행률 -->
+<div class="card">
+  <div class="sh"><span class="st"><i class="ti ti-list-check oi"></i> 카테고리별 진행률</span><button class="btn" onclick="showTab('ck')">전체 보기</button></div>
+  ${catProg.map(cat=>`<div style="margin-bottom:10px">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
+    <div style="display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:50%;background:${cat.color};display:inline-block"></span><span style="font-size:12px">${cat.label}</span></div>
+    <span style="font-size:11px;color:var(--muted)">${cat.d}/${cat.t} (${cat.pct}%)</span>
   </div>
-
-  <div class="sec">
-    <div class="sh"><span class="st"><i class="ti ti-alarm oi"></i> 마감 임박 (3일 이내)</span><button class="btn" onclick="showTab('ck')">체크리스트</button></div>
-    ${urgent.length?urgent.map(i=>`<div class="dash-row" style="cursor:pointer" onclick="location.href='detail.html?type=item&id=${i.id}'">
-    <span style="width:8px;height:8px;border-radius:50%;background:${getCatColor(i.category_id)};flex-shrink:0"></span>
-    <div style="flex:1;min-width:0"><div style="font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${i.text}</div><div style="font-size:11px;color:var(--muted)">${i.owner||''}</div></div>
-    ${dlc(i.deadline,i.done)}
-    </div>`).join(''):`<div style="font-size:13px;color:var(--muted)">없음</div>`}
-  </div>
+  <div class="pgb"><div class="pgf" style="width:${cat.pct}%;background:${cat.pct===100?'#639922':cat.color}"></div></div>
+  </div>`).join('')}
 </div>
 
-<div>
-  <div class="sec">
-    <div class="sh"><span class="st"><i class="ti ti-users oi"></i> 담당자별 항목 조회</span></div>
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap">
-      <select class="inp" style="margin:0;width:auto;min-width:140px" onchange="dashOwnerFilter=this.value;renderDashFilter(this.value)">
-        <option value="">-- 담당자 선택 --</option>
-        ${MEMBERS.map(m=>`<option value="${m.name}" ${dashOwnerFilter===m.name?'selected':''}>${m.name}</option>`).join('')}
-      </select>
-      ${dashOwnerFilter?`<span class="badge bo">${filteredItems.length}건 미완료</span><button class="btn btn-g" onclick="dashOwnerFilter='';render()"><i class="ti ti-x"></i> 초기화</button>`:''}
-    </div>
-    ${dashOwnerFilter?filteredItems.map(a=>`<div class="dash-row" onclick="openAIDetail('${a.id}')" style="cursor:pointer">
-    <div style="flex:1;min-width:0">
-      <div style="font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.text}</div>
-      <div style="font-size:11px;color:var(--muted);margin-top:2px">${a.cat||''}</div>
-    </div>
-    <div style="display:flex;align-items:center;gap:5px;flex-shrink:0">${sb2(a.status)}${dlc(a.deadline,false)}</div>
-    </div>`).join('')||`<div style="font-size:13px;color:var(--muted);text-align:center;padding:12px">${dashOwnerFilter}님 담당 미완료 항목 없음</div>`:'<div style="font-size:13px;color:var(--muted)">담당자를 선택하면 해당 미완료 항목이 표시됩니다.</div>'}
+<!-- 담당자별 현황 -->
+<div class="card">
+  <div class="sh"><span class="st"><i class="ti ti-users oi"></i> 담당자별 미완료</span></div>
+  ${byMember.length?byMember.map(m=>`<div class="dash-row" style="align-items:flex-start;gap:10px">
+  <div style="display:flex;align-items:center;gap:6px;min-width:70px;flex-shrink:0">${avEl(m.name,24)}<span style="font-size:12px;font-weight:500">${m.name}</span></div>
+  <div style="flex:1;min-width:0">
+    ${m.items.map(i=>`<div style="font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:2px">${i.text}</div>`).join('')}
+    ${m.count>3?`<div style="font-size:11px;color:var(--muted)">+${m.count-3}건 더</div>`:''}
   </div>
-
-  <div class="sec">
-    <div class="sh"><span class="st"><i class="ti ti-chart-line oi"></i> KPI 현황</span><button class="btn" onclick="showTab('kpi')">KPI 탭</button></div>
-    ${metrics.length?`<table style="width:100%;border-collapse:collapse;font-size:12px">
-    <thead><tr><th style="text-align:left;padding:4px 6px;color:var(--muted);font-weight:500;border-bottom:0.5px solid var(--bd)">지표</th><th style="text-align:right;padding:4px 6px;color:var(--muted);font-weight:500;border-bottom:0.5px solid var(--bd)">기준값</th><th style="text-align:right;padding:4px 6px;color:var(--muted);font-weight:500;border-bottom:0.5px solid var(--bd)">D+1</th><th style="text-align:right;padding:4px 6px;color:var(--muted);font-weight:500;border-bottom:0.5px solid var(--bd)">D+7</th></tr></thead>
-    <tbody>${metrics.map(m=>`<tr>
-    <td style="padding:5px 6px;border-bottom:0.5px solid var(--bd)">${m}</td>
-    <td style="padding:5px 6px;border-bottom:0.5px solid var(--bd);text-align:right">${getKPIVal('baseline',m)}</td>
-    <td style="padding:5px 6px;border-bottom:0.5px solid var(--bd);text-align:right">${getKPIVal('d1',m)}</td>
-    <td style="padding:5px 6px;border-bottom:0.5px solid var(--bd);text-align:right">${getKPIVal('d7',m)}</td>
-    </tr>`).join('')}</tbody></table>`:`<div style="font-size:13px;color:var(--muted)">KPI 데이터 없음 — <span style="color:var(--o);cursor:pointer" onclick="showTab('kpi')">입력하기</span></div>`}
-    ${D.kpiAnalysis?.sales_analysis?`<div style="margin-top:10px;font-size:11px;color:var(--muted);border-top:0.5px solid var(--bd);padding-top:8px"><strong>매출 하락 분석</strong><div style="margin-top:4px;color:var(--text)">${D.kpiAnalysis.sales_analysis.slice(0,120)}${D.kpiAnalysis.sales_analysis.length>120?'...':''}</div></div>`:''}
-  </div>
-
-  <div class="sec">
-    <div class="sh"><span class="st"><i class="ti ti-device-mobile oi"></i> UX 베타 현황</span><button class="btn" onclick="showTab('ux')">UX 탭</button></div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
-    ${D.uxItems.map(t=>`<div style="background:var(--sf);border-radius:8px;border:0.5px solid var(--bd);padding:8px 12px;text-align:center">
-      <div style="font-size:18px;font-weight:500;color:var(--o)">${t.n}</div>
-      <div style="font-size:11px;color:var(--muted)">${t.grp}</div>
-    </div>`).join('')||'<div style="font-size:13px;color:var(--muted)">테스터 미설정</div>'}
-    </div>
-    ${D.uxSettings?.success_criteria?`<div style="font-size:12px;color:var(--muted);background:var(--sf);border-radius:7px;padding:8px">${D.uxSettings.success_criteria.slice(0,100)}...</div>`:''}
-  </div>
-
-  <div class="sec">
-    <div class="sh"><span class="st"><i class="ti ti-history oi"></i> 최근 변경</span><button class="btn" onclick="showTab('hist')">전체</button></div>
-    ${recentHistory.map(h=>`<div class="dash-row" style="gap:6px">
-    ${avEl(h.user_name,18)}
-    <div style="flex:1;min-width:0;font-size:12px"><span style="font-weight:500">${h.user_name}</span> ${h.action}</div>
-    <div style="font-size:10px;color:var(--muted);white-space:nowrap">${new Date(h.created_at).toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}</div>
-    </div>`).join('')||'<div style="font-size:13px;color:var(--muted)">없음</div>'}
-  </div>
+  <span class="badge br">${m.count}건</span>
+  </div>`).join(''):`<div style="font-size:13px;color:var(--muted);text-align:center;padding:16px">모든 항목 완료!</div>`}
 </div>
 </div>
 
-<div class="sec">
+<div class="two">
+<!-- 마감 임박 -->
+<div class="card">
+  <div class="sh"><span class="st"><i class="ti ti-alarm oi"></i> 마감 임박 (3일 이내)</span><button class="btn" onclick="showTab('ck')">체크리스트</button></div>
+  ${urgent.length?urgent.map(i=>`<div class="dash-row" style="cursor:pointer" onclick="location.href='detail.html?type=item&id=${i.id}'">
+  <span style="width:8px;height:8px;border-radius:50%;background:${getCatColor(i.category_id)};flex-shrink:0"></span>
+  <div style="flex:1;min-width:0"><div style="font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${i.text}</div></div>
+  ${dlc(i.deadline,false)}</div>`).join(''):`<div style="font-size:13px;color:var(--muted);text-align:center;padding:12px">없음</div>`}
+</div>
+
+<!-- KPI 현황 -->
+<div class="card">
+  <div class="sh"><span class="st"><i class="ti ti-chart-line oi"></i> KPI 현황</span><button class="btn" onclick="showTab('ck');activeCat='KPI 모니터링';render()">입력</button></div>
+  ${kpiMetrics.length?`<table style="width:100%;border-collapse:collapse;font-size:12px">
+  <thead><tr><th style="text-align:left;padding:5px 6px;color:var(--muted);font-weight:500;border-bottom:0.5px solid var(--bd)">지표</th><th style="text-align:right;padding:5px 6px;color:var(--muted);font-weight:500;border-bottom:0.5px solid var(--bd)">기준값</th><th style="text-align:right;padding:5px 6px;color:var(--muted);font-weight:500;border-bottom:0.5px solid var(--bd)">D+1</th><th style="text-align:right;padding:5px 6px;color:var(--muted);font-weight:500;border-bottom:0.5px solid var(--bd)">D+7</th></tr></thead>
+  <tbody>${kpiMetrics.map(m=>`<tr><td style="padding:5px 6px;border-bottom:0.5px solid var(--bd)">${m}</td><td style="padding:5px 6px;border-bottom:0.5px solid var(--bd);text-align:right">${gv('baseline',m)}</td><td style="padding:5px 6px;border-bottom:0.5px solid var(--bd);text-align:right">${gv('d1',m)}</td><td style="padding:5px 6px;border-bottom:0.5px solid var(--bd);text-align:right">${gv('d7',m)}</td></tr>`).join('')}</tbody>
+  </table>`:`<div style="font-size:13px;color:var(--muted)">KPI 데이터 없음 — <span style="color:var(--o);cursor:pointer" onclick="showTab('ck')">체크리스트에서 입력</span></div>`}
+</div>
+</div>
+
+<!-- 최근 회의 + 변경이력 -->
+<div class="two">
+<div class="card">
   <div class="sh"><span class="st"><i class="ti ti-notes oi"></i> 최근 회의록</span><button class="btn" onclick="showTab('mtg')">전체</button></div>
-  <div class="two">
   ${D.meetings.slice(0,2).map(m=>`<div class="mtg-card" onclick="openMtg('${m.id}')">
-    <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:13px;font-weight:500">${m.title}</span><span style="font-size:10px;color:var(--muted)">${m.date}</span></div>
-    <div style="display:flex;gap:5px;margin-bottom:5px"><span class="badge bg">결정 ${(m.decisions||[]).length}</span><span class="badge br">미확인 ${(m.pending||[]).length}</span></div>
-    <div style="display:flex;gap:3px">${(m.attendees||[]).map(a=>avEl(a,18)).join('')}</div>
+  <div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:13px;font-weight:500">${m.title}</span><span style="font-size:11px;color:var(--muted)">${m.date}</span></div>
+  <div style="display:flex;gap:5px;margin-bottom:5px"><span class="badge bg">결정 ${(m.decisions||[]).length}</span><span class="badge br">미확인 ${(m.pending||[]).length}</span></div>
+  <div style="font-size:12px;color:var(--muted)">${(m.decisions||[])[0]||''}</div>
   </div>`).join('')||'<div style="font-size:13px;color:var(--muted)">회의록 없음</div>'}
-  </div>
+</div>
+<div class="card">
+  <div class="sh"><span class="st"><i class="ti ti-history oi"></i> 최근 변경</span></div>
+  ${D.history.slice(0,6).map(h=>`<div class="hist-r">${avEl(h.user_name,18)}<div style="flex:1;min-width:0;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><span style="font-weight:500">${h.user_name}</span> ${h.action}</div><div style="font-size:10px;color:var(--muted);white-space:nowrap">${new Date(h.created_at).toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}</div></div>`).join('')}
+</div>
 </div>`
 }
 
-// ══════════════════════════════
+// ══════════════════════
 // 캘린더
-// ══════════════════════════════
+// ══════════════════════
 function renderCal(){
-  const yr=calYear,mo=calMonth
   const ML=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월']
+  const yr=calYear,mo=calMonth
   const first=new Date(yr,mo,1).getDay(),last=new Date(yr,mo+1,0).getDate()
   const days=['일','월','화','수','목','금','토']
+  // 모든 항목 (체크리스트 + 액션)
+  const allItems=[...D.items,...D.actionItems]
   function evsOn(d){
     const k=`${yr}-${String(mo+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`
-    return D.items.filter(i=>i.deadline===k||i.start_date===k)
+    return allItems.filter(i=>i.deadline===k)
   }
   let cells=''
   for(let i=0;i<first;i++)cells+=`<div class="cal-cell empty"></div>`
@@ -451,223 +459,230 @@ function renderCal(){
     const ds=`${yr}-${String(mo+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`
     const evs=evsOn(d),wk=(d+first-1)%7
     const isToday=ds===TODAY.toISOString().slice(0,10)
-    cells+=`<div class="cal-cell${wk===0||wk===6?' wknd':''}${isToday?' today':''}"
-      onclick="calClick('${ds}')"
-      ondragover="event.preventDefault();this.classList.add('drag-over')"
-      ondragleave="this.classList.remove('drag-over')"
-      ondrop="event.preventDefault();this.classList.remove('drag-over');calDrop('${ds}',event)">
+    cells+=`<div class="cal-cell${wk===0||wk===6?' wknd':''}${isToday?' today':''}" onclick="calClick('${ds}')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');calDrop('${ds}',event)">
     <div class="cal-num">${d}</div>
-    ${evs.slice(0,3).map(e=>`<div class="cal-ev"
-      draggable="true"
-      style="background:${getCatColor(e.category_id)}22;color:${getCatColor(e.category_id)};border-left:2px solid ${getCatColor(e.category_id)};cursor:grab"
-      onclick="event.stopPropagation();location.href='detail.html?type=item&id=${e.id}'"
-      ondragstart="event.stopPropagation();calDragStart('${e.id}',event)"
-      ondragend="calDragEnd(event)"
-      >${e.text}</div>`).join('')}
+    ${evs.slice(0,3).map(e=>{
+      const color=e.category_id?getCatColor(e.category_id):'var(--o)'
+      const isDone=e.done||e.status==='완료'
+      return`<div class="cal-ev" draggable="true" style="background:${color}22;color:${color};border-left:2px solid ${color};${isDone?'text-decoration:line-through;opacity:.5':''}" onclick="event.stopPropagation();${e.category_id?`location.href='detail.html?type=item&id=${e.id}'`:`openAIDetail('${e.id}')`}" ondragstart="event.stopPropagation();calDragStart('${e.id}','${e.category_id?'item':'action'}',event)" ondragend="event.target.classList.remove('dragging')">${e.text}</div>`
+    }).join('')}
     ${evs.length>3?`<div style="font-size:9px;color:var(--muted)">+${evs.length-3}</div>`:''}
-    <button class="cal-add" onclick="event.stopPropagation();openAddItemModal('${ds}')">+</button>
+    <button class="cal-add" onclick="event.stopPropagation();openAddItem('','${ds}')">+</button>
     </div>`
   }
-  return`<div class="sec">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-    <div style="display:flex;align-items:center;gap:8px">
+  // 이번 달 전체 목록
+  const monthItems=allItems.filter(i=>{if(!i.deadline)return false;const d=new Date(i.deadline);return d.getFullYear()===yr&&d.getMonth()===mo}).sort((a,b)=>new Date(a.deadline)-new Date(b.deadline))
+
+  return`<div class="card">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+    <div style="display:flex;align-items:center;gap:10px">
       <button class="btn btn-g" onclick="calNav(-1)"><i class="ti ti-chevron-left"></i></button>
       <span style="font-size:15px;font-weight:500">${yr}년 ${ML[mo]}</span>
       <button class="btn btn-g" onclick="calNav(1)"><i class="ti ti-chevron-right"></i></button>
     </div>
-    <button class="btn btn-o" onclick="openAddItemModal('')"><i class="ti ti-plus"></i> 일정 추가</button>
+    <button class="btn btn-o" onclick="openAddItem('','')"><i class="ti ti-plus"></i> 항목 추가</button>
   </div>
-  <div class="cal-grid">
-    ${days.map(d=>`<div class="cal-dh">${d}</div>`).join('')}${cells}
-  </div>
+  <div class="cal-grid">${days.map(d=>`<div class="cal-dh">${d}</div>`).join('')}${cells}</div>
   <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;font-size:11px;color:var(--muted)">
     ${D.cats.map(c=>`<span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${c.color};margin-right:3px"></span>${c.label}</span>`).join('')}
   </div>
   </div>
-  <div class="sec">
-  <div class="sh"><span class="st"><i class="ti ti-list oi"></i> 이번 달 항목</span></div>
-  ${D.items.filter(i=>{if(!i.deadline)return false;const d=new Date(i.deadline);return d.getFullYear()===yr&&d.getMonth()===mo}).sort((a,b)=>new Date(a.deadline)-new Date(b.deadline)).map(i=>`
-  <div class="dash-row" style="cursor:pointer" onclick="location.href='detail.html?type=item&id=${i.id}'">
-    <span style="width:8px;height:8px;border-radius:50%;background:${getCatColor(i.category_id)};flex-shrink:0"></span>
-    <div style="flex:1;min-width:0"><div style="font-size:13px;${i.done?'text-decoration:line-through;color:var(--muted)':''};overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${i.text}</div>
-    <div style="font-size:11px;color:var(--muted);display:flex;gap:6px;margin-top:2px">${i.owner||''}${ownersEl(i.owners||[],16)}</div></div>
+  <div class="card">
+  <div class="sh"><span class="st"><i class="ti ti-list oi"></i> ${ML[mo]} 마감 항목 (${monthItems.length}건)</span></div>
+  ${monthItems.map(i=>{
+    const color=i.category_id?getCatColor(i.category_id):'var(--o)'
+    const isDone=i.done||i.status==='완료'
+    return`<div class="dash-row" style="cursor:pointer" onclick="${i.category_id?`location.href='detail.html?type=item&id=${i.id}'`:`openAIDetail('${i.id}')`}">
+    <span style="width:8px;height:8px;border-radius:50%;background:${color};flex-shrink:0"></span>
+    <div style="flex:1;min-width:0"><div style="font-size:13px;${isDone?'text-decoration:line-through;color:var(--muted)':''};overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${i.text}</div>
+    <div style="font-size:11px;color:var(--muted)">${i.owner||ownersEl(i.owners||[],14)}</div></div>
     <span style="font-size:11px;color:var(--muted);white-space:nowrap">${fmtDate(i.deadline)}</span>
-    ${dlc(i.deadline,i.done)}
-  </div>`).join('')||'<div style="font-size:13px;color:var(--muted)">이번 달 항목 없음</div>'}
+    ${dlc(i.deadline,isDone)}
+    </div>`
+  }).join('')||'<div style="font-size:13px;color:var(--muted)">이번 달 마감 항목 없음</div>'}
   </div>`
 }
-let _dragItemId=null
-
-window.calDragStart=(itemId,event)=>{
-  _dragItemId=itemId
-  event.target.classList.add('dragging')
-  event.dataTransfer.effectAllowed='move'
-  event.dataTransfer.setData('text/plain',itemId)
-}
-
-window.calDragEnd=(event)=>{
-  event.target.classList.remove('dragging')
-  document.querySelectorAll('.drag-over').forEach(el=>el.classList.remove('drag-over'))
-}
-
+let _dragId=null,_dragType=null
+window.calDragStart=(id,type,event)=>{_dragId=id;_dragType=type;event.target.classList.add('dragging');event.dataTransfer.setData('text/plain',id)}
 window.calDrop=async(newDate,event)=>{
-  const itemId=event.dataTransfer.getData('text/plain')||_dragItemId
-  if(!itemId||!newDate)return
-  const item=D.items.find(i=>i.id===itemId)
-  if(!item)return
-  const oldDate=item.deadline
-  if(oldDate===newDate)return
-  await sb.from('checklist_items').update({deadline:newDate,updated_at:new Date().toISOString()}).eq('id',itemId)
-  await logH(`마감일 변경 (드래그)`,`${item.text}: ${oldDate||'없음'} → ${newDate}`)
-  toast(`${item.text.slice(0,20)}... → ${newDate}`)
-  _dragItemId=null
-  await loadAll()
+  const id=_dragId||event.dataTransfer.getData('text/plain');if(!id||!newDate)return
+  if(_dragType==='item'||D.items.find(i=>i.id===id)){
+    const item=D.items.find(i=>i.id===id);if(!item||item.deadline===newDate)return
+    await sb.from('checklist_items').update({deadline:newDate,updated_at:new Date().toISOString()}).eq('id',id)
+    await logH('마감일 변경 (드래그)',`${item.text}: →${newDate}`)
+  } else {
+    const a=D.actionItems.find(a=>a.id===id);if(!a||a.deadline===newDate)return
+    await sb.from('action_items').update({deadline:newDate,updated_at:new Date().toISOString()}).eq('id',id)
+    await logH('마감일 변경 (드래그)',`${a.text}: →${newDate}`)
+  }
+  toast('마감일 변경됨');_dragId=null;await loadAll()
 }
-
 window.calNav=(dir)=>{calMonth+=dir;if(calMonth>11){calMonth=0;calYear++}if(calMonth<0){calMonth=11;calYear--};render()}
-window.calClick=(ds)=>{const evs=D.items.filter(i=>i.deadline===ds);if(evs.length===1)location.href=`detail.html?type=item&id=${evs[0].id}`;else if(evs.length===0)openAddItemModal(ds)}
-
-// ══════════════════════════════
-// 항목 추가 모달 (캘린더 + 체크리스트 공통)
-// ══════════════════════════════
-window.openAddItemModal=(dateStr)=>{
-  const w=mkOv('add-item-ov')
-  w.innerHTML=`<div class="modal">
-  <div class="mh"><span style="font-weight:500">일정 / 체크리스트 항목 추가</span><button class="btn btn-g" onclick="document.getElementById('add-item-ov').remove()"><i class="ti ti-x"></i></button></div>
-  <div class="mb">
-    <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">제목</label>
-    <input class="inp" id="ni-text" placeholder="항목 이름 또는 일정 제목">
-    <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">카테고리</label>
-    <select class="inp" id="ni-cat">${D.cats.map(c=>`<option value="${c.id}">${c.label}</option>`).join('')}</select>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-      <div><label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">시작일</label><input class="inp" type="date" id="ni-start" value="${dateStr||''}" style="margin:0"></div>
-      <div><label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">마감일</label><input class="inp" type="date" id="ni-dl" value="${dateStr||''}" style="margin:0"></div>
-    </div>
-    <div style="margin-top:8px">
-      <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">담당자 (복수 선택)</label>
-      ${ownerSelectHTML([],'ni-owners')}
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px">
-      <div><label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">우선순위</label><select class="inp" id="ni-pri" style="margin:0"><option value="high" selected>중요</option><option value="critical">긴급</option><option value="medium">보통</option></select></div>
-      <div><label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">상태</label><select class="inp" id="ni-st" style="margin:0"><option>진행전</option><option>진행중</option><option>완료</option><option>보류</option></select></div>
-    </div>
-    <div style="margin-top:8px">
-      <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">세부 항목 (Enter로 추가)</label>
-      <div id="ni-subs-list" style="margin-bottom:6px"></div>
-      <div style="display:flex;gap:6px">
-        <input id="ni-sub-inp" style="flex:1;padding:7px 10px;border:0.5px solid var(--bd);border-radius:8px;font-size:13px;background:var(--sf);color:var(--text);outline:none" placeholder="세부 항목..." onkeydown="if(event.key==='Enter'){addNiSub();event.preventDefault()}">
-        <button class="btn btn-o" style="flex-shrink:0" onclick="addNiSub()"><i class="ti ti-plus"></i></button>
-      </div>
-    </div>
-  </div>
-  <div class="mf"><button class="btn" onclick="document.getElementById('add-item-ov').remove()">취소</button><button class="btn btn-o" onclick="saveNewItem()">추가</button></div>
-  </div>`
-  document.body.appendChild(w)
-  window._niSubs=[]
-}
-window.addNiSub=()=>{
-  const inp=document.getElementById('ni-sub-inp');if(!inp?.value.trim())return
-  window._niSubs=window._niSubs||[];window._niSubs.push(inp.value.trim());inp.value=''
-  document.getElementById('ni-subs-list').innerHTML=window._niSubs.map((t,i)=>`<div style="display:flex;align-items:center;gap:5px;padding:3px 6px;margin-bottom:2px;background:var(--ol);border-radius:7px;font-size:12px"><span style="flex:1">${t}</span><button class="btn btn-g" style="padding:0 4px" onclick="window._niSubs.splice(${i},1);addNiSub()"><i class="ti ti-x"></i></button></div>`).join('')
-}
-window.saveNewItem=async()=>{
-  const text=document.getElementById('ni-text')?.value.trim();if(!text)return
-  const ownersRaw=document.getElementById('ni-owners')?.value||''
-  const owners=ownersRaw.split(',').filter(Boolean)
-  const {data:ni}=await sb.from('checklist_items').insert({
-    category_id:document.getElementById('ni-cat').value,text,
-    owner:owners[0]||null,owners,
-    start_date:document.getElementById('ni-start').value||null,
-    deadline:document.getElementById('ni-dl').value||null,
-    priority:document.getElementById('ni-pri').value,
-    status:document.getElementById('ni-st').value,
-    created_by:curUser.name
-  }).select().single()
-  if(ni&&window._niSubs?.length)await sb.from('checklist_subs').insert(window._niSubs.map((t,i)=>({item_id:ni.id,text:t,verifier:curUser.name,sort_order:i})))
-  await logH('항목 추가',text)
-  document.getElementById('add-item-ov').remove()
-  toast('추가됨');await loadAll()
+window.calClick=(ds)=>{
+  const evs=[...D.items,...D.actionItems].filter(i=>i.deadline===ds)
+  if(evs.length===0)openAddItem('',ds)
 }
 
-// ══════════════════════════════
-// 체크리스트
-// ══════════════════════════════
+// ══════════════════════
+// 체크리스트 (통합)
+// ══════════════════════
 function renderCK(){
-  return`<div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:10px">
-  <button class="btn" onclick="openAddCat()"><i class="ti ti-folder-plus"></i> 카테고리 추가</button>
+  const allCats=[{id:'전체',label:'전체',color:'#888'},...D.cats,{id:'회의록액션',label:'회의록 액션',color:'#E8680A'}]
+  const getItems=()=>{
+    if(activeCat==='전체')return D.items
+    if(activeCat==='회의록액션')return D.actionItems
+    return D.items.filter(i=>i.category_id===activeCat)
+  }
+  const items=getItems()
+  const total=items.length
+  const done=items.filter(i=>i.done||i.status==='완료').length
+
+  return`
+  <!-- 카테고리 탭 -->
+  <div class="cat-tabs">
+    ${allCats.map(cat=>`<button class="cat-tab ${activeCat===cat.id?'active':''}" onclick="activeCat='${cat.id}';render()">
+    <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${cat.color};margin-right:5px"></span>${cat.label}
+    <span style="background:var(--sf);border-radius:8px;padding:0 5px;font-size:10px;margin-left:3px;color:var(--muted)">
+      ${cat.id==='전체'?D.items.length:cat.id==='회의록액션'?D.actionItems.length:D.items.filter(i=>i.category_id===cat.id).length}
+    </span>
+    </button>`).join('')}
   </div>
-  ${D.cats.map(cat=>{
-    const its=D.items.filter(i=>i.category_id===cat.id)
-    const tot=its.reduce((s,i)=>s+1+D.subs.filter(s=>s.item_id===i.id).length,0)
-    const dn=its.reduce((s,i)=>s+(i.done?1:0)+D.subs.filter(s=>s.item_id===i.id&&s.done).length,0)
-    const isOpen=expandCats[cat.id]!==false
-    return`<div class="sec" style="border-left:3px solid ${cat.color}">
-    <div style="display:flex;align-items:center;gap:7px;cursor:pointer;padding:4px 0" onclick="toggleCat('${cat.id}')">
-      <i class="ti ${cat.icon||'ti-folder'}" style="color:${cat.color};font-size:16px"></i>
-      <span style="flex:1;font-size:13px;font-weight:500">${cat.label}</span>
-      <span style="font-size:11px;color:var(--muted)">${dn}/${tot}</span>
-      <button class="btn btn-o" style="padding:2px 8px;font-size:11px" onclick="event.stopPropagation();openAddItemModal('')"><i class="ti ti-plus"></i> 추가</button>
-      <i class="ti ti-chevron-${isOpen?'up':'down'}" style="color:var(--muted)"></i>
+
+  <!-- 헤더 -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+    <div>
+      <span style="font-size:14px;font-weight:500">${allCats.find(c=>c.id===activeCat)?.label||'전체'}</span>
+      <span style="font-size:12px;color:var(--muted);margin-left:8px">${done}/${total} 완료</span>
+      ${total?`<div class="pgb" style="width:200px;margin-top:6px;display:inline-block;vertical-align:middle;margin-left:10px"><div class="pgf" style="width:${Math.round(done/total*100)}%;background:${done===total?'#639922':'var(--o)'}"></div></div>`:''}
     </div>
-    ${isOpen?its.map(item=>{
-      const subs=D.subs.filter(s=>s.item_id===item.id)
-      const cmts=D.comments.filter(c=>c.item_id===item.id)
-      const sdone=subs.filter(s=>s.done).length
-      const isExp=expandCks[item.id]!==false
-      const owners=item.owners?.length?item.owners:item.owner?[item.owner]:[]
-      return`<div style="margin:8px 0">
-      <div class="ck-row" onclick="toggleCkExp('${item.id}')">
-        <input type="checkbox" ${item.done?'checked':''} onclick="event.stopPropagation()" onchange="toggleItem('${item.id}',this.checked)">
-        <div style="flex:1;min-width:0">
-          <div style="font-size:13px;${item.done?'text-decoration:line-through;color:var(--muted)':''}">${item.text}</div>
-          <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:3px;align-items:center">
-            ${pb(item.priority)}${sb2(item.status)}
-            ${ownersEl(owners,18)}
-            ${item.start_date?`<span style="font-size:11px;color:var(--muted)">${fmtDate(item.start_date)}~</span>`:''}
-            ${item.deadline?`<span style="font-size:11px;color:var(--muted)">${fmtDate(item.deadline)}</span>`:''}
-            ${dlc(item.deadline,item.done)}
-            ${subs.length?`<span style="font-size:10px;color:var(--muted)">${sdone}/${subs.length}</span>`:''}
-          </div>
-        </div>
-        <div style="display:flex;align-items:center;gap:5px;flex-shrink:0">
-          <button class="btn btn-g" style="padding:2px 7px;font-size:11px" onclick="event.stopPropagation();location.href='detail.html?type=item&id=${item.id}'">
-            <i class="ti ti-pencil"></i>${cmts.length?' '+cmts.length:''}
-          </button>
-          <button class="btn btn-g btn-red" style="padding:2px 6px;font-size:11px" onclick="event.stopPropagation();deleteItem('${item.id}')"><i class="ti ti-trash"></i></button>
-          <i class="ti ti-chevron-${isExp?'up':'down'}" style="font-size:13px;color:var(--muted)"></i>
-        </div>
+    <div style="display:flex;gap:7px">
+      <button class="btn" onclick="openAddCat()"><i class="ti ti-folder-plus"></i> 카테고리</button>
+      <button class="btn btn-o" onclick="openAddItem('${activeCat==='전체'||activeCat==='회의록액션'?'':activeCat}','')"><i class="ti ti-plus"></i> 항목 추가</button>
+    </div>
+  </div>
+
+  <!-- KPI 테이블 (KPI 카테고리 선택 시) -->
+  ${activeCat==='kpicat'?renderKPIInline():''}
+
+  <!-- 항목 목록 -->
+  ${activeCat==='회의록액션'?renderActionItems():renderCheckItems(items)}`
+}
+
+function renderCheckItems(items){
+  if(!items.length)return`<div style="text-align:center;padding:40px;color:var(--muted);font-size:14px">항목이 없어요.<br><span style="color:var(--o);cursor:pointer" onclick="openAddItem('${activeCat}','')">+ 추가하기</span></div>`
+  return items.map(item=>{
+    const subs=D.subs.filter(s=>s.item_id===item.id)
+    const cmts=D.comments.filter(c=>c.item_id===item.id)
+    const sdone=subs.filter(s=>s.done).length
+    const isExp=expandCks[item.id]!==false
+    const owners=item.owners?.length?item.owners:item.owner?[item.owner]:[]
+    return`<div class="ck-item ${item.done?'done-item':''}">
+    <input class="ck-cb" type="checkbox" ${item.done?'checked':''} onclick="event.stopPropagation()" onchange="toggleItem('${item.id}',this.checked)">
+    <div class="ck-body" onclick="toggleCkExp('${item.id}')">
+      <div class="ck-title ${item.done?'done':''}">${item.text}</div>
+      <div class="ck-meta">
+        ${prBadge(item.priority)}
+        <select class="st-sel" onclick="event.stopPropagation()" onchange="updateItemField('${item.id}','status',this.value)">
+          ${STATUS_LIST.map(s=>`<option ${(item.status||'할 일')===s?'selected':''}>${s}</option>`).join('')}
+        </select>
+        ${ownersEl(owners,18)}
+        ${item.deadline?`<span>${fmtDate(item.deadline)}</span>`:''}
+        ${dlc(item.deadline,item.done)}
+        ${subs.length?`<span>${sdone}/${subs.length} 세부</span>`:''}
       </div>
-      <div class="sub-wrap ${isExp?'open':''}" id="sub-${item.id}">
-        ${subs.map(s=>`<div class="sub-row" onclick="location.href='detail.html?type=item&id=${item.id}'">
-        <input type="checkbox" ${s.done?'checked':''} onclick="event.stopPropagation()" onchange="toggleSub('${s.id}','${item.id}',this.checked)">
-        <span style="${s.done?'text-decoration:line-through;color:var(--muted);':''}flex:1;font-size:12px">${s.text}</span>
-        <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
-          ${s.deadline?dlc(s.deadline,s.done):''}
-          <span class="vbadge ${s.verified?'ok':''}">${s.verified?'✓검증':'미검증'}</span>
-          ${s.done&&!s.verified?`<button class="btn btn-o" style="font-size:10px;padding:1px 5px" onclick="event.stopPropagation();verifySub('${s.id}','${item.id}')">검증</button>`:''}
+    </div>
+    <div class="ck-right" onclick="event.stopPropagation()">
+      <button class="btn btn-g" style="padding:3px 8px;font-size:11px" onclick="location.href='detail.html?type=item&id=${item.id}'">
+        <i class="ti ti-pencil"></i>${cmts.length?' '+cmts.length:''}
+      </button>
+      <button class="btn btn-g" style="padding:3px 6px;font-size:11px;color:#A32D2D" onclick="deleteItem('${item.id}')"><i class="ti ti-trash"></i></button>
+    </div>
+    </div>
+    <div class="sub-wrap ${isExp?'open':''}" id="sub-${item.id}">
+      ${subs.map(s=>`<div class="sub-row" onclick="location.href='detail.html?type=item&id=${item.id}'">
+      <input type="checkbox" ${s.done?'checked':''} onclick="event.stopPropagation()" onchange="toggleSub('${s.id}','${item.id}',this.checked)" style="accent-color:var(--o);width:13px;height:13px;flex-shrink:0">
+      <span style="${s.done?'text-decoration:line-through;color:var(--muted);':''}flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.text}</span>
+      <span class="vbadge ${s.verified?'ok':''}">${s.verified?'✓검증':'미검증'}</span>
+      ${s.done&&!s.verified?`<button class="btn btn-o" style="font-size:10px;padding:1px 6px" onclick="event.stopPropagation();verifySub('${s.id}','${item.id}')">검증</button>`:''}
+      </div>`).join('')}
+      <div style="display:flex;gap:5px;padding:4px 8px;margin-top:3px">
+        <input id="ns-${item.id}" style="flex:1;font-size:12px;padding:5px 8px;border:0.5px solid var(--bd);border-radius:7px;background:var(--sf);color:var(--text);outline:none" placeholder="세부 항목 추가..." onkeydown="if(event.key==='Enter'){addSub('${item.id}');event.preventDefault()}">
+        <button class="btn btn-o" style="padding:4px 9px;font-size:11px;flex-shrink:0" onclick="addSub('${item.id}')"><i class="ti ti-plus"></i></button>
+      </div>
+    </div>`
+  }).join('')
+}
+
+function renderActionItems(){
+  const items=D.actionItems
+  if(!items.length)return`<div style="text-align:center;padding:40px;color:var(--muted);font-size:14px">회의록에서 추가된 액션아이템이 없어요.</div>`
+  const cats=[...new Set(items.map(a=>a.cat))]
+  return cats.map(cat=>{
+    const its=items.filter(a=>a.cat===cat).sort((a,b)=>{const o={'완료':3,'검증대기':2,'진행중':1,'할 일':0};return(o[a.status]||0)-(o[b.status]||0)})
+    return`<div style="margin-bottom:16px">
+    <div style="font-size:11px;font-weight:500;color:var(--muted);padding:4px 8px;background:var(--sf);border-radius:7px;margin-bottom:6px">${cat}</div>
+    ${its.map(a=>{
+      const owners=getOwners(a)
+      return`<div class="ck-item">
+      <input class="ck-cb" type="checkbox" ${a.status==='완료'?'checked':''} onclick="event.stopPropagation()" onchange="updAI('${a.id}','status',this.checked?'완료':'할 일')">
+      <div class="ck-body">
+        <div class="ck-title ${a.status==='완료'?'done':''}">${a.text}</div>
+        <div class="ck-meta">
+          <select class="st-sel" onclick="event.stopPropagation()" onchange="updAI('${a.id}','status',this.value)">
+            ${STATUS_LIST.map(s=>`<option ${a.status===s?'selected':''}>${s}</option>`).join('')}
+          </select>
+          ${ownersEl(owners,18)}
+          ${a.deadline?`<span>${fmtDate(a.deadline)}</span>`:''}
+          ${dlc(a.deadline,a.status==='완료')}
+          ${a.note?`<span style="color:var(--muted)">${a.note}</span>`:''}
         </div>
-        </div>`).join('')}
-        <div style="display:flex;gap:5px;padding:4px 8px;margin-top:3px">
-          <input id="ns-${item.id}" style="flex:1;font-size:12px;padding:5px 8px;border:0.5px solid var(--bd);border-radius:7px;background:var(--sf);color:var(--text);outline:none" placeholder="세부 항목 추가..." onkeydown="if(event.key==='Enter'){addSub('${item.id}');event.preventDefault()}">
-          <button class="btn btn-o" style="padding:4px 9px;font-size:11px;flex-shrink:0" onclick="addSub('${item.id}')"><i class="ti ti-plus"></i></button>
-        </div>
+        ${(a.comments||[]).length?`<div style="font-size:11px;color:var(--muted);margin-top:3px;padding:3px 6px;background:var(--sf);border-radius:5px;border-left:2px solid var(--ob)"><span style="font-weight:500">${a.last_comment_by}</span>: ${a.last_comment}</div>`:''}
+      </div>
+      <div class="ck-right" onclick="event.stopPropagation()">
+        <button class="btn btn-g" style="padding:3px 8px;font-size:11px" onclick="openAIDetail('${a.id}')"><i class="ti ti-pencil"></i>${(a.comments||[]).length?' '+(a.comments||[]).length:''}</button>
+        <button class="btn btn-g" style="padding:3px 6px;font-size:11px;color:#A32D2D" onclick="delAI('${a.id}')"><i class="ti ti-trash"></i></button>
       </div>
       </div>`
-    }).join(''):''}
+    }).join('')}
     </div>`
-  }).join('')}`
+  }).join('')
 }
 
-window.toggleCat=id=>{expandCats[id]=expandCats[id]===false;render()}
+function renderKPIInline(){
+  const metrics=D.kpiRows.length?[...new Set(D.kpiRows.map(r=>r.metric))]:['일매출','주문수','전환율','결제실패율','404오류','SUPLA누락']
+  const cols=[{k:'baseline',l:'전환 전'},{k:'d1',l:'D+1'},{k:'d3',l:'D+3'},{k:'d7',l:'D+7'},{k:'d14',l:'D+14'}]
+  const gv=(col,m)=>{const r=D.kpiRows.find(r=>r.col===col&&r.metric===m);return r?.value||''}
+  return`<div class="card" style="margin-bottom:14px">
+  <div class="sh"><span class="st"><i class="ti ti-chart-line oi"></i> KPI 추적표</span><button class="btn btn-o" onclick="openAddKPI()"><i class="ti ti-plus"></i> 지표 추가</button></div>
+  <div style="overflow-x:auto"><table class="kpi-tbl">
+  <thead><tr><th>지표</th>${cols.map(c=>`<th>${c.l}</th>`).join('')}<th>허용</th><th>임계</th><th></th></tr></thead>
+  <tbody>${metrics.map(m=>`<tr>
+  <td style="font-weight:500;white-space:nowrap">${m}</td>
+  ${cols.map(c=>`<td><input class="kpi-cell" value="${gv(c.k,m)}" placeholder="—" onchange="saveKPI('${c.k}','${m}',this.value)"></td>`).join('')}
+  <td style="color:var(--o);white-space:nowrap">-15%</td><td style="color:#A32D2D;white-space:nowrap">-20%</td>
+  <td><button class="btn btn-g btn-red" style="padding:1px 5px;font-size:10px" onclick="delKPI('${m}')"><i class="ti ti-x"></i></button></td>
+  </tr>`).join('')}</tbody></table></div>
+  <div class="two" style="margin-top:12px">
+    <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px">매출 하락 분석</div><textarea class="inp" style="min-height:80px;margin:0" placeholder="원인·기간·영역..." onchange="saveKA('sales_analysis',this.value)">${D.kpiAnalysis?.sales_analysis||''}</textarea></div>
+    <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px">손실 산정 & 회복 계획</div><textarea class="inp" style="min-height:80px;margin:0" placeholder="일매출 ___원 × ___% × ___일..." onchange="saveKA('recovery_plan',this.value)">${D.kpiAnalysis?.recovery_plan||''}</textarea></div>
+  </div>
+  </div>`
+}
+
 window.toggleCkExp=id=>{expandCks[id]=expandCks[id]===false;render()}
 window.toggleItem=async(id,checked)=>{
-  await sb.from('checklist_items').update({done:checked,done_by:checked?curUser.name:null,updated_at:new Date().toISOString()}).eq('id',id)
-  const item=D.items.find(i=>i.id===id)
-  await logH(`항목 ${checked?'완료':'취소'}`,item?.text||'');await loadAll()
+  const item=D.items.find(i=>i.id===id);if(!item)return
+  const newStatus=checked?'완료':'할 일'
+  await sb.from('checklist_items').update({done:checked,status:newStatus,done_by:checked?curUser.name:null,updated_at:new Date().toISOString()}).eq('id',id)
+  await logH(`항목 ${checked?'완료':'취소'}`,item.text);await loadAll()
+}
+window.updateItemField=async(id,field,val)=>{
+  await sb.from('checklist_items').update({[field]:val,updated_at:new Date().toISOString()}).eq('id',id)
+  const item=D.items.find(i=>i.id===id);await logH(`${field} 변경`,item?.text||'');await loadAll()
 }
 window.toggleSub=async(sid,itemId,checked)=>{
   await sb.from('checklist_subs').update({done:checked,done_by:checked?curUser.name:null,verified:false}).eq('id',sid)
-  const s=D.subs.find(s=>s.id===sid),item=D.items.find(i=>i.id===itemId)
+  const s=D.subs.find(s=>s.id===sid);const item=D.items.find(i=>i.id===itemId)
   await logH(`세부 ${checked?'완료':'취소'}`,`${item?.text||''} > ${s?.text||''}`);await loadAll()
 }
 window.verifySub=async(sid,itemId)=>{
@@ -676,28 +691,101 @@ window.verifySub=async(sid,itemId)=>{
 }
 window.addSub=async(itemId)=>{
   const inp=document.getElementById('ns-'+itemId);if(!inp?.value.trim())return
-  const text=inp.value.trim()
-  await sb.from('checklist_subs').insert({item_id:itemId,text,verifier:curUser.name})
+  await sb.from('checklist_subs').insert({item_id:itemId,text:inp.value.trim(),verifier:curUser.name})
   inp.value='';toast('추가됨');await loadAll()
 }
 window.deleteItem=async(id)=>{
   const item=D.items.find(i=>i.id===id);if(!item||!confirm(`"${item.text}" 삭제?`))return
-  await sb.from('checklist_items').delete().eq('id',id)
-  await logH('항목 삭제',item.text);await loadAll()
+  await sb.from('checklist_items').delete().eq('id',id);await logH('항목 삭제',item.text);await loadAll()
 }
+window.updAI=async(id,field,value)=>{
+  const a=D.actionItems.find(a=>a.id===id);if(!a)return
+  await sb.from('action_items').update({[field]:value,updated_at:new Date().toISOString()}).eq('id',id)
+  await logH(`${field} →${value}`,a.text);await loadAll()
+}
+window.delAI=async(id)=>{
+  const a=D.actionItems.find(a=>a.id===id);if(!a||!confirm(`"${a.text}" 삭제?`))return
+  await sb.from('action_items').delete().eq('id',id);await logH('액션 삭제',a.text);await loadAll()
+}
+window.saveKPI=async(col,metric,value)=>{await sb.from('kpi_data').upsert({col,metric,value,updated_by:curUser.name},{onConflict:'col,metric'});toast('저장됨')}
+window.delKPI=async(m)=>{if(!confirm(`"${m}" 삭제?`))return;await sb.from('kpi_data').delete().eq('metric',m);toast('삭제됨');await loadAll()}
+window.saveKA=async(field,value)=>{await sb.from('kpi_analysis').update({[field]:value,updated_by:curUser.name}).eq('id','main');toast('저장됨')}
+window.openAddKPI=()=>{const w=mkOv('add-kpi-ov');w.innerHTML=`<div class="modal" style="width:340px"><div class="mh"><span style="font-weight:500">KPI 지표 추가</span><button class="btn btn-g" onclick="document.getElementById('add-kpi-ov').remove()"><i class="ti ti-x"></i></button></div><div class="mb"><input class="inp" id="kpi-m" placeholder="예: 신규 회원수"></div><div class="mf"><button class="btn btn-o" onclick="saveKPI('baseline',document.getElementById('kpi-m').value,'');document.getElementById('add-kpi-ov').remove();toast('추가됨');loadAll()">추가</button></div></div>`;document.body.appendChild(w)}
+
+// 항목 추가 모달
+window.openAddItem=(catId,dateStr)=>{
+  const w=mkOv('add-item-ov')
+  w.innerHTML=`<div class="modal">
+  <div class="mh"><span style="font-weight:500">항목 추가</span><button class="btn btn-g" onclick="document.getElementById('add-item-ov').remove()"><i class="ti ti-x"></i></button></div>
+  <div class="mb">
+    <input class="inp" id="ni-text" placeholder="항목 이름">
+    <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">카테고리</label>
+    <select class="inp" id="ni-cat">${D.cats.map(c=>`<option value="${c.id}" ${c.id===catId?'selected':''}>${c.label}</option>`).join('')}</select>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div><label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">시작일</label><input class="inp" type="date" id="ni-start" value="${dateStr||''}" style="margin:0"></div>
+      <div><label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">마감일</label><input class="inp" type="date" id="ni-dl" value="${dateStr||''}" style="margin:0"></div>
+    </div>
+    <div style="margin-top:8px"><label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">담당자 (복수 선택)</label>
+    <div class="owner-chips" id="ni-owner-chips"><span style="font-size:11px;color:var(--muted)">담당자 선택 →</span></div>
+    <select class="inp" onchange="addOwnerToForm('ni',this.value);this.value=''"><option value="">+ 담당자 추가</option>${MEMBERS.map(m=>`<option>${m.name}</option>`).join('')}</select>
+    <input type="hidden" id="ni-owners" value=""></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px">
+      <div><label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">우선순위</label><select class="inp" id="ni-pri" style="margin:0"><option value="high" selected>중요</option><option value="critical">긴급</option><option value="medium">보통</option></select></div>
+      <div><label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">상태</label><select class="inp" id="ni-st" style="margin:0">${STATUS_LIST.map(s=>`<option>${s}</option>`).join('')}</select></div>
+    </div>
+    <div style="margin-top:10px"><label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">세부 항목 (Enter로 추가)</label>
+    <div id="ni-subs-list" style="margin-bottom:6px"></div>
+    <div style="display:flex;gap:6px"><input id="ni-sub-inp" style="flex:1;font-size:12px;padding:6px 9px;border:0.5px solid var(--bd);border-radius:7px;background:var(--sf);color:var(--text);outline:none" placeholder="세부 항목..." onkeydown="if(event.key==='Enter'){addNiSub();event.preventDefault()}"><button class="btn btn-o" style="flex-shrink:0" onclick="addNiSub()"><i class="ti ti-plus"></i></button></div>
+    </div>
+  </div>
+  <div class="mf"><button class="btn" onclick="document.getElementById('add-item-ov').remove()">취소</button><button class="btn btn-o" onclick="saveNewItem()">추가</button></div>
+  </div>`
+  document.body.appendChild(w);window._niSubs=[]
+}
+window.addOwnerToForm=(prefix,name)=>{
+  if(!name)return
+  const inp=document.getElementById(prefix+'-owners');if(!inp)return
+  const cur=inp.value?inp.value.split(',').filter(Boolean):[]
+  if(cur.includes(name))return
+  cur.push(name);inp.value=cur.join(',')
+  const chips=document.getElementById(prefix+'-owner-chips');if(!chips)return
+  const c=document.createElement('div');c.className='ochip';c.style.background=MEMBERS.find(m=>m.name===name)?.color||'#888'
+  c.innerHTML=`${name}<span class="ochip-x" onclick="removeOwnerFromForm('${prefix}','${name}',this.parentElement)">✕</span>`
+  chips.appendChild(c)
+}
+window.removeOwnerFromForm=(prefix,name,el)=>{
+  const inp=document.getElementById(prefix+'-owners');if(!inp)return
+  inp.value=inp.value.split(',').filter(o=>o!==name).join(',');el.remove()
+}
+window.addNiSub=()=>{
+  const inp=document.getElementById('ni-sub-inp');if(!inp?.value.trim())return
+  window._niSubs=window._niSubs||[];window._niSubs.push(inp.value.trim());inp.value=''
+  document.getElementById('ni-subs-list').innerHTML=window._niSubs.map((t,i)=>`<div style="display:flex;align-items:center;gap:5px;padding:3px 7px;margin-bottom:2px;background:var(--ol);border-radius:7px;font-size:12px"><span style="flex:1">${t}</span><button class="btn btn-g" style="padding:0 4px" onclick="window._niSubs.splice(${i},1);addNiSub()"><i class="ti ti-x"></i></button></div>`).join('')
+}
+window.saveNewItem=async()=>{
+  const text=document.getElementById('ni-text')?.value.trim();if(!text)return
+  const owners=(document.getElementById('ni-owners')?.value||'').split(',').filter(Boolean)
+  const {data:ni}=await sb.from('checklist_items').insert({
+    category_id:document.getElementById('ni-cat').value,text,
+    owner:owners[0]||null,owners,
+    start_date:document.getElementById('ni-start').value||null,
+    deadline:document.getElementById('ni-dl').value||null,
+    priority:document.getElementById('ni-pri').value,
+    status:document.getElementById('ni-st').value||'할 일',
+    created_by:curUser.name
+  }).select().single()
+  if(ni&&window._niSubs?.length)await sb.from('checklist_subs').insert(window._niSubs.map((t,i)=>({item_id:ni.id,text:t,verifier:curUser.name,sort_order:i})))
+  await logH('항목 추가',text);document.getElementById('add-item-ov').remove();toast('추가됨');await loadAll()
+}
+
+// 카테고리 추가
 window.openAddCat=()=>{
   const w=mkOv('add-cat-ov')
-  w.innerHTML=`<div class="modal" style="width:380px">
-  <div class="mh"><span style="font-weight:500">카테고리 추가</span><button class="btn btn-g" onclick="document.getElementById('add-cat-ov').remove()"><i class="ti ti-x"></i></button></div>
-  <div class="mb">
-    <input class="inp" id="cat-name" placeholder="카테고리 이름">
-    <div style="display:flex;gap:8px;flex-wrap:wrap" id="cat-colors">
-      ${['#E8680A','#185FA5','#3B6D11','#A32D2D','#534AB7','#0F6E56','#854F0B','#993556'].map((c,i)=>`<div onclick="selCatColor(this,'${c}')" style="width:28px;height:28px;border-radius:50%;background:${c};cursor:pointer;border:${i===0?'2.5px solid #1a1a1a':'2.5px solid transparent'}" data-c="${c}"></div>`).join('')}
-    </div>
-    <input type="hidden" id="cat-color" value="#E8680A">
-  </div>
-  <div class="mf"><button class="btn" onclick="document.getElementById('add-cat-ov').remove()">취소</button><button class="btn btn-o" onclick="saveNewCat()">추가</button></div>
-  </div>`
+  w.innerHTML=`<div class="modal" style="width:360px"><div class="mh"><span style="font-weight:500">카테고리 추가</span><button class="btn btn-g" onclick="document.getElementById('add-cat-ov').remove()"><i class="ti ti-x"></i></button></div>
+  <div class="mb"><input class="inp" id="cat-name" placeholder="카테고리 이름">
+  <div style="display:flex;gap:8px;flex-wrap:wrap" id="cat-colors">${['#E8680A','#185FA5','#3B6D11','#A32D2D','#534AB7','#0F6E56','#854F0B','#993556'].map((c,i)=>`<div onclick="selCatColor(this,'${c}')" style="width:28px;height:28px;border-radius:50%;background:${c};cursor:pointer;border:${i===0?'2.5px solid #1a1a1a':'2.5px solid transparent'}"></div>`).join('')}</div>
+  <input type="hidden" id="cat-color" value="#E8680A"></div>
+  <div class="mf"><button class="btn" onclick="document.getElementById('add-cat-ov').remove()">취소</button><button class="btn btn-o" onclick="saveNewCat()">추가</button></div></div>`
   document.body.appendChild(w)
 }
 window.selCatColor=(el,c)=>{document.querySelectorAll('#cat-colors div').forEach(d=>d.style.border='2.5px solid transparent');el.style.border='2.5px solid #1a1a1a';document.getElementById('cat-color').value=c}
@@ -707,186 +795,7 @@ window.saveNewCat=async()=>{
   await logH('카테고리 추가',name);document.getElementById('add-cat-ov').remove();toast('추가됨');await loadAll()
 }
 
-// ══════════════════════════════
-// KPI
-// ══════════════════════════════
-function renderKPI(){
-  const metrics=D.kpiRows.length?[...new Set(D.kpiRows.map(r=>r.metric))]:['일매출','주문수','전환율','결제실패율','404오류','SUPLA누락']
-  const cols=[{k:'baseline',l:'전환 전 기준값'},{k:'d1',l:'D+1'},{k:'d3',l:'D+3'},{k:'d7',l:'D+7'},{k:'d14',l:'D+14'}]
-  const gv=(col,m)=>{const r=D.kpiRows.find(r=>r.col===col&&r.metric===m);return r?.value||''}
-  return`
-  <div style="display:flex;justify-content:flex-end;margin-bottom:10px"><button class="btn" onclick="openAddKPI()"><i class="ti ti-plus"></i> 지표 추가</button></div>
-  <div class="sec"><div class="sh"><span class="st"><i class="ti ti-chart-line oi"></i> KPI 추적표</span></div>
-  <div style="overflow-x:auto"><table class="kpi-tbl">
-  <thead><tr><th>지표</th>${cols.map(c=>`<th>${c.l}</th>`).join('')}<th>허용 하락</th><th>임계치</th><th></th></tr></thead>
-  <tbody>${metrics.map(m=>`<tr>
-  <td style="font-weight:500;white-space:nowrap">${m}</td>
-  ${cols.map(c=>`<td><input class="kpi-cell" value="${gv(c.k,m)}" placeholder="—" onchange="saveKPI('${c.k}','${m}',this.value)"></td>`).join('')}
-  <td style="color:var(--o);white-space:nowrap">-15%</td>
-  <td style="color:#A32D2D;white-space:nowrap">-20%</td>
-  <td><button class="btn btn-g btn-red" style="padding:1px 5px;font-size:11px" onclick="delKPI('${m}')"><i class="ti ti-x"></i></button></td>
-  </tr>`).join('')}</tbody>
-  </table></div></div>
-  <div class="three">
-  <div class="sec"><div class="sh"><span class="st"><i class="ti ti-trending-down oi"></i> 매출 하락 분석</span></div>
-  <textarea class="inp" style="min-height:120px" placeholder="원인·기간·영역..." onchange="saveKA('sales_analysis',this.value)">${D.kpiAnalysis?.sales_analysis||''}</textarea></div>
-  <div class="sec"><div class="sh"><span class="st"><i class="ti ti-calculator oi"></i> 손실 산정</span></div>
-  <textarea class="inp" style="min-height:120px" placeholder="3개월 평균 일매출: ___원&#10;하락율: ___%&#10;기간: ___일&#10;손실: ___원" onchange="saveKA('loss_estimate',this.value)">${D.kpiAnalysis?.loss_estimate||''}</textarea></div>
-  <div class="sec"><div class="sh"><span class="st"><i class="ti ti-trending-up oi"></i> 회복 계획</span></div>
-  <textarea class="inp" style="min-height:120px" placeholder="회복 기간·근거·단계별 목표..." onchange="saveKA('recovery_plan',this.value)">${D.kpiAnalysis?.recovery_plan||''}</textarea></div>
-  </div>`
-}
-window.openAddKPI=()=>{const w=mkOv('add-kpi-ov');w.innerHTML=`<div class="modal" style="width:340px"><div class="mh"><span style="font-weight:500">KPI 지표 추가</span><button class="btn btn-g" onclick="document.getElementById('add-kpi-ov').remove()"><i class="ti ti-x"></i></button></div><div class="mb"><input class="inp" id="kpi-m" placeholder="예: 신규 회원수"></div><div class="mf"><button class="btn" onclick="document.getElementById('add-kpi-ov').remove()">취소</button><button class="btn btn-o" onclick="saveKPI('baseline',document.getElementById('kpi-m').value,'');document.getElementById('add-kpi-ov').remove();toast('추가됨');loadAll()">추가</button></div></div>`;document.body.appendChild(w)}
-window.saveKPI=async(col,metric,value)=>{await sb.from('kpi_data').upsert({col,metric,value,updated_by:curUser.name},{onConflict:'col,metric'});toast('저장됨')}
-window.delKPI=async(m)=>{if(!confirm(`"${m}" 삭제?`))return;await sb.from('kpi_data').delete().eq('metric',m);toast('삭제됨');await loadAll()}
-window.saveKA=async(field,value)=>{await sb.from('kpi_analysis').update({[field]:value,updated_by:curUser.name}).eq('id','main');toast('저장됨')}
-
-// ══════════════════════════════
-// UX 베타
-// ══════════════════════════════
-function renderUX(){
-  const u=D.uxSettings
-  const UX_QS=[{q:'원하는 상품을 바로 찾을 수 있는가',sub:'검색 UX, 카테고리 구조'},{q:'기존처럼 빠르게 주문 가능한가',sub:'주문 단계, 장바구니·바로구매'},{q:'통관번호/배송/결제가 헷갈리지 않는가',sub:'직구 고객 핵심'},{q:'즐겨찾기 상품으로 정상 연결되는가',sub:'301 리다이렉트 연계'},{q:'적립금/주문내역/회원정보가 유지되는가',sub:'DB 이관 연계'},{q:'PC vs 모바일 전환율 차이',sub:'임성엽 담당'},{q:'기존 고객 주요 구매 플로우 분석',sub:'임성엽 담당'},{q:'리셀러 빠른 주문 & 별도 접속 방안',sub:'한덕희 회신'},{q:'장바구니/즐겨찾기/재주문 고객 처리',sub:'한덕희 회신'},{q:'고객 리뉴얼 안내 방식',sub:'박영환 담당'}]
-  return`
-  <div class="two" style="margin-bottom:12px">
-  <div class="sec sec-o"><div class="sh"><span class="st"><i class="ti ti-users oi"></i> 베타 테스터 구성</span><button class="btn btn-o" onclick="addTester()"><i class="ti ti-plus"></i></button></div>
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px">
-  ${D.uxItems.map(t=>`<div style="background:var(--sf);border-radius:9px;border:0.5px solid var(--bd);padding:10px;position:relative">
-    <div style="position:absolute;top:4px;right:4px;display:flex;gap:3px">
-      <button class="btn btn-g" style="padding:1px 4px;font-size:10px" onclick="editTester('${t.id}')"><i class="ti ti-pencil"></i></button>
-      <button class="btn btn-g btn-red" style="padding:1px 4px;font-size:10px" onclick="delTester('${t.id}')"><i class="ti ti-x"></i></button>
-    </div>
-    <div style="font-size:12px;font-weight:500;color:var(--o);margin-bottom:2px;padding-right:48px">${t.grp}</div>
-    <div style="font-size:22px;font-weight:500;margin-bottom:2px">${t.n}명</div>
-    <div style="font-size:11px;color:var(--muted)">${t.note||''}</div>
-  </div>`).join('')}
-  </div></div>
-  <div class="sec"><div class="sh"><span class="st"><i class="ti ti-target oi"></i> 성공 기준 & 결과</span></div>
-  <textarea class="inp" style="min-height:70px" onchange="saveUS('success_criteria',this.value)">${u.success_criteria||''}</textarea>
-  <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">결과 보고 링크</label>
-  <input class="inp" style="margin:0" placeholder="원드라이브 링크..." value="${u.result_link||''}" onchange="saveUS('result_link',this.value)">
-  </div></div>
-  <div class="sec"><div class="sh"><span class="st"><i class="ti ti-checklist oi"></i> UX 핵심 점검 항목</span></div>
-  ${UX_QS.map((item,i)=>`<div class="ux-item" onclick="location.href='detail.html?type=ux&q=${encodeURIComponent(item.q)}&idx=${i}'">
-  <span style="background:var(--ol);color:var(--od);font-size:10px;font-weight:500;padding:2px 6px;border-radius:5px;flex-shrink:0;margin-top:1px">${i+1}</span>
-  <div style="flex:1"><div style="font-size:13px;font-weight:500">${item.q}</div><div style="font-size:11px;color:var(--muted);margin-top:1px">${item.sub}</div></div>
-  <i class="ti ti-chevron-right" style="color:var(--muted);font-size:14px;flex-shrink:0"></i>
-  </div>`).join('')}
-  <div style="margin-top:8px"><label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">추가 메모</label><textarea class="inp" style="min-height:60px;margin:0" onchange="saveUS('notes',this.value)">${u.notes||''}</textarea></div>
-  </div>`
-}
-window.addTester=async()=>{await sb.from('ux_testers').insert({grp:'새 그룹',n:'0',note:'',sort_order:D.uxItems.length+1});await loadAll()}
-window.editTester=(id)=>{
-  const t=D.uxItems.find(t=>t.id===id);if(!t)return
-  const w=mkOv('edit-tester-ov')
-  w.innerHTML=`<div class="modal" style="width:380px">
-  <div class="mh"><span style="font-weight:500">테스터 그룹 수정</span><button class="btn btn-g" onclick="document.getElementById('edit-tester-ov').remove()"><i class="ti ti-x"></i></button></div>
-  <div class="mb">
-    <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">그룹명</label>
-    <input class="inp" id="et-grp" value="${t.grp}">
-    <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">인원 수</label>
-    <input class="inp" id="et-n" value="${t.n}">
-    <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">메모</label>
-    <input class="inp" id="et-note" value="${t.note||''}">
-  </div>
-  <div class="mf">
-    <button class="btn" onclick="document.getElementById('edit-tester-ov').remove()">취소</button>
-    <button class="btn btn-o" onclick="saveTesterEdit('${t.id}')">저장</button>
-  </div></div>`
-  document.body.appendChild(w)
-}
-window.saveTesterEdit=async(id)=>{
-  await sb.from('ux_testers').update({
-    grp:document.getElementById('et-grp')?.value.trim(),
-    n:document.getElementById('et-n')?.value.trim(),
-    note:document.getElementById('et-note')?.value.trim(),
-  }).eq('id',id)
-  document.getElementById('edit-tester-ov').remove()
-  toast('저장됨');await loadAll()
-}
-window.delTester=async(id)=>{if(!confirm('삭제?'))return;await sb.from('ux_testers').delete().eq('id',id);await loadAll()}
-window.saveUS=async(field,value)=>{await sb.from('ux_settings').update({[field]:value,updated_by:curUser.name}).eq('id','main');toast('저장됨')}
-
-// ══════════════════════════════
-// 액션아이템
-// ══════════════════════════════
-window.aiStatusFilter=''
-window.aiCatFilter=''
-window.setAIStatus=(val)=>{window.aiStatusFilter=val;window.aiCatFilter='';render()}
-window.setAICat=(cat)=>{window.aiCatFilter=cat;render()}
-function renderAI(){
-  const cats=[...new Set(D.actionItems.map(a=>a.cat))]
-  const done=D.actionItems.filter(a=>a.status==='완료').length
-  const inprog=D.actionItems.filter(a=>a.status==='진행중').length
-  const wait=D.actionItems.filter(a=>['진행전','대기'].includes(a.status)).length
-  const issue=D.actionItems.filter(a=>a.status==='이슈').length
-
-  const statusBtns=[
-    {label:'전체',val:'',count:D.actionItems.length,color:'var(--text)'},
-    {label:'완료',val:'완료',count:done,color:'#3B6D11'},
-    {label:'진행중',val:'진행중',count:inprog,color:'#185FA5'},
-    {label:'진행전',val:'진행전',count:wait,color:'var(--muted)'},
-    {label:'이슈',val:'이슈',count:issue,color:'#A32D2D'},
-  ]
-
-  return`
-  <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px">
-    ${[
-      {label:'전체',val:'',count:D.actionItems.length,color:'#1a1a1a'},
-      {label:'완료',val:'완료',count:done,color:'#3B6D11'},
-      {label:'진행중',val:'진행중',count:inprog,color:'#185FA5'},
-      {label:'진행전',val:'진행전',count:wait,color:'#888'},
-      {label:'이슈',val:'이슈',count:issue,color:'#A32D2D'},
-    ].map(s=>{
-      const active=window.aiStatusFilter===s.val
-      return`<button data-val="${s.val}" onclick="setAIStatus(this.dataset.val)" style="padding:7px 14px;border-radius:20px;border:1.5px solid ${active?s.color:'var(--bd)'};background:${active?s.color+'18':'var(--card)'};color:${s.color};font-size:12px;font-weight:${active?600:400};cursor:pointer;display:inline-flex;align-items:center;gap:5px">${s.label}<span style="background:${active?s.color:'var(--sf)'};color:${active?'#fff':s.color};border-radius:10px;padding:0 6px;font-size:11px">${s.count}</span></button>`
-    }).join('')}
-    <button class="btn btn-o" style="margin-left:auto" onclick="openAddAI()"><i class="ti ti-plus"></i> 액션 추가</button>
-  </div>
-  <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px;padding:8px 10px;background:var(--sf);border-radius:9px">
-    <span style="font-size:11px;color:var(--muted);align-self:center;margin-right:4px">카테고리:</span>
-    ${['전체',...cats].map(cat=>{
-      const v=cat==='전체'?'':cat
-      const active=window.aiCatFilter===v
-      return`<button data-cat="${v}" onclick="setAICat(this.dataset.cat)" style="padding:3px 10px;border-radius:20px;border:1px solid ${active?'var(--o)':'var(--bd)'};background:${active?'var(--ol)':'var(--card)'};color:${active?'var(--o)':'var(--muted)'};font-size:11px;cursor:pointer">${cat}</button>`
-    }).join('')}
-  </div>
-  <div class="sec">
-  ${(window.aiCatFilter?[window.aiCatFilter]:cats).map(cat=>{
-    let its=D.actionItems.filter(a=>a.cat===cat)
-    if(window.aiStatusFilter)its=its.filter(a=>a.status===window.aiStatusFilter)
-    if(!its.length)return''
-    its=its.sort((a,b)=>{const o={'완료':3,'진행중':1,'진행전':0,'대기':0,'보류':2,'이슈':1};return(o[a.status]||0)-(o[b.status]||0)})
-    return`<div style="margin-bottom:14px">
-    <div style="font-size:11px;font-weight:500;color:var(--muted);margin-bottom:5px;padding:4px 8px;background:var(--sf);border-radius:7px">${cat} <span style="float:right">${its.length}건</span></div>
-    ${its.map(a=>{
-      const owners=getOwners(a)
-      const isMyTask=owners.includes(curUser.name)&&a.status!=='완료'
-      return`<div class="ai-row" style="${isMyTask?'border-color:var(--ob);background:var(--ol)':''}">
-      <div style="flex:1;min-width:0">
-        <div style="font-size:13px;font-weight:500;${a.status==='완료'?'text-decoration:line-through;color:var(--muted)':''}">${a.text}</div>
-        <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:4px;align-items:center">
-          <select class="status-sel" onchange="updAI('${a.id}','status',this.value)">
-            ${['진행전','진행중','완료','보류','이슈'].map(s=>`<option ${a.status===s?'selected':''}>${s}</option>`).join('')}
-          </select>
-          <div style="display:flex;gap:2px">${ownersEl(owners,20)}</div>
-          ${a.deadline?`<span style="font-size:10px;color:var(--muted)">${fmtDate(a.deadline)}</span>`:''}
-          ${dlc(a.deadline,a.status==='완료')}
-          ${a.note?`<span style="font-size:11px;color:var(--muted)">${a.note}</span>`:''}
-        </div>
-        ${a.last_comment?`<div style="font-size:11px;color:var(--muted);margin-top:4px;padding:3px 7px;background:var(--sf);border-radius:5px;border-left:2px solid var(--ob)"><span style="font-weight:500">${a.last_comment_by}</span>: ${a.last_comment}</div>`:''}
-      </div>
-      <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">
-        <button class="btn btn-g" style="padding:2px 7px;font-size:11px" onclick="openAIDetail('${a.id}')"><i class="ti ti-pencil"></i>${(a.comments||[]).length?' '+(a.comments||[]).length:''}</button>
-        <button class="btn btn-g btn-red" style="padding:2px 6px;font-size:11px" onclick="delAI('${a.id}')"><i class="ti ti-trash"></i></button>
-      </div>
-      </div>`
-    }).join('')}
-    </div>`
-  }).join('')}
-  </div>`
-}
-
+// 액션아이템 상세
 window.openAIDetail=(id)=>{
   const a=D.actionItems.find(a=>a.id===id);if(!a)return
   const owners=getOwners(a)
@@ -896,8 +805,8 @@ window.openAIDetail=(id)=>{
   <div class="mb">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
       <div><label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">상태</label>
-        <select class="inp" style="margin:0" onchange="updAI('${id}','status',this.value)">
-          ${['진행전','진행중','완료','보류','이슈'].map(s=>`<option ${a.status===s?'selected':''}>${s}</option>`).join('')}
+        <select class="inp" style="margin:0" onchange="updAI('${id}','status',this.value);setTimeout(()=>openAIDetail('${id}'),300)">
+          ${STATUS_LIST.map(s=>`<option ${a.status===s?'selected':''}>${s}</option>`).join('')}
         </select></div>
       <div><label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">마감일</label>
         <input class="inp" type="date" style="margin:0" value="${a.deadline||''}" onchange="updAI('${id}','deadline',this.value)"></div>
@@ -906,239 +815,83 @@ window.openAIDetail=(id)=>{
       <div><label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">비고</label>
         <input class="inp" style="margin:0" value="${a.note||''}" placeholder="비고..." onchange="updAI('${id}','note',this.value)"></div>
     </div>
-    <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">담당자 (복수 선택)</label>
-    ${ownerSelectHTML(owners,'ai-owners-'+id)}
-    <button class="btn btn-o" style="margin-top:4px;margin-bottom:14px" onclick="saveAIOwners('${id}')">담당자 저장</button>
-
-    <div style="font-size:12px;font-weight:500;margin-bottom:8px;border-top:0.5px solid var(--bd);padding-top:12px">댓글 & 수정이력 <span style="font-size:11px;font-weight:400;color:var(--muted)">(${(a.comments||[]).length}개)</span></div>
-    ${(a.comments||[]).length?(a.comments||[]).map(c=>`<div style="background:var(--sf);border-radius:9px;padding:10px;margin-bottom:7px;border-left:3px solid var(--o)">
-    <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px">${avEl(c.user,24)}<span style="font-size:12px;font-weight:500">${c.user}</span><span style="font-size:10px;color:var(--muted)">${c.time}</span></div>
-    <div style="font-size:13px;color:#333;line-height:1.5">${c.text}</div>
-    </div>`).join(''):`<div style="font-size:13px;color:var(--muted);padding:8px 0">댓글 없음</div>`}
-    <div style="border-top:0.5px solid var(--bd);padding-top:12px;margin-top:8px">
-      <textarea class="inp" id="ai-cmt-${id}" placeholder="댓글, 진행 상황, 이슈..."></textarea>
-      <div style="display:flex;justify-content:flex-end"><button class="btn btn-o" onclick="saveAICmt('${id}')"><i class="ti ti-send"></i> 등록</button></div>
-    </div>
+    <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">담당자</label>
+    <div class="owner-chips" id="ai-owner-chips-${id}">${owners.map(o=>`<div class="ochip" style="background:${MEMBERS.find(m=>m.name===o)?.color||'#888'}">${o}<span class="ochip-x" onclick="removeAIOwner('${id}','${o}')">✕</span></div>`).join('')}<span style="font-size:11px;color:var(--muted)">추가 →</span></div>
+    <select class="inp" onchange="addAIOwner('${id}',this.value);this.value=''"><option value="">+ 담당자 추가</option>${MEMBERS.filter(m=>!owners.includes(m.name)).map(m=>`<option>${m.name}</option>`).join('')}</select>
+    <div style="font-size:12px;font-weight:500;margin:14px 0 8px;border-top:0.5px solid var(--bd);padding-top:12px">댓글 (${(a.comments||[]).length})</div>
+    ${(a.comments||[]).map(c=>`<div class="comment"><div class="cauth">${avEl(c.user,18)} ${c.user} <span class="ctime">${c.time}</span></div><div class="ctext">${c.text}</div></div>`).join('')}
+    <textarea class="inp" id="ai-cmt-${id}" placeholder="댓글 입력..."></textarea>
+    <div style="display:flex;justify-content:flex-end"><button class="btn btn-o" onclick="saveAICmt('${id}')"><i class="ti ti-send"></i> 등록</button></div>
   </div></div>`
   document.body.appendChild(w)
 }
-window.saveAIOwners=async(id)=>{
-  const inp=document.getElementById('ai-owners-'+id);if(!inp)return
-  const owners=inp.value.split(',').filter(Boolean)
+window.addAIOwner=async(id,name)=>{
+  if(!name)return;const a=D.actionItems.find(a=>a.id===id);if(!a)return
+  const owners=getOwners(a);if(!owners.includes(name))owners.push(name)
+  await sb.from('action_items').update({owners,owner:owners[0],updated_at:new Date().toISOString()}).eq('id',id)
+  await logH('담당자 추가',a.text);await loadAll();openAIDetail(id)
+}
+window.removeAIOwner=async(id,name)=>{
+  const a=D.actionItems.find(a=>a.id===id);if(!a)return
+  const owners=getOwners(a).filter(o=>o!==name)
   await sb.from('action_items').update({owners,owner:owners[0]||null,updated_at:new Date().toISOString()}).eq('id',id)
-  const a=D.actionItems.find(a=>a.id===id)
-  await logH(`담당자 변경: ${owners.join(', ')}`,a?.text||'')
-  toast('담당자 저장됨');await loadAll();document.getElementById('ai-det-ov')?.remove()
+  await logH('담당자 제거',a.text);await loadAll();openAIDetail(id)
 }
 window.saveAICmt=async(id)=>{
   const txt=document.getElementById('ai-cmt-'+id)?.value.trim();if(!txt)return
   const a=D.actionItems.find(a=>a.id===id);if(!a)return
   const comments=[...(a.comments||[]),{user:curUser.name,text:txt,time:ts()}]
   await sb.from('action_items').update({comments,last_comment:txt,last_comment_by:curUser.name,updated_at:new Date().toISOString()}).eq('id',id)
-  await logH(`댓글: ${txt.slice(0,20)}`,a.text)
-  document.getElementById('ai-det-ov').remove();toast('등록됨');await loadAll()
-}
-window.updAI=async(id,field,value)=>{
-  const a=D.actionItems.find(a=>a.id===id);if(!a)return
-  await sb.from('action_items').update({[field]:value||null,updated_at:new Date().toISOString()}).eq('id',id)
-  await logH(`${field} →${value}`,a.text);await loadAll()
-}
-window.delAI=async(id)=>{
-  const a=D.actionItems.find(a=>a.id===id);if(!a||!confirm(`"${a.text}" 삭제?`))return
-  await sb.from('action_items').delete().eq('id',id);await logH('액션 삭제',a.text);await loadAll()
-}
-window.openAddAI=()=>{
-  const w=mkOv('add-ai-ov')
-  w.innerHTML=`<div class="modal" style="width:440px">
-  <div class="mh"><span style="font-weight:500">액션 추가</span><button class="btn btn-g" onclick="document.getElementById('add-ai-ov').remove()"><i class="ti ti-x"></i></button></div>
-  <div class="mb">
-    <input class="inp" id="nai-text" placeholder="액션 내용">
-    <input class="inp" id="nai-cat" placeholder="카테고리 (예: 로그인, CS)">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-      <input class="inp" type="date" id="nai-dl" style="margin:0">
-      <input class="inp" id="nai-note" placeholder="비고" style="margin:0">
-    </div>
-    <div style="margin-top:8px">
-      <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">담당자 (복수 선택)</label>
-      ${ownerSelectHTML([],'nai-owners')}
-    </div>
-  </div>
-  <div class="mf"><button class="btn" onclick="document.getElementById('add-ai-ov').remove()">취소</button><button class="btn btn-o" onclick="saveNewAI()">추가</button></div>
-  </div>`
-  document.body.appendChild(w)
-}
-window.saveNewAI=async()=>{
-  const text=document.getElementById('nai-text')?.value.trim();if(!text)return
-  const ownersRaw=document.getElementById('nai-owners')?.value||''
-  const owners=ownersRaw.split(',').filter(Boolean)
-  await sb.from('action_items').insert({cat:document.getElementById('nai-cat').value||'기타',text,owner:owners[0]||null,owners,deadline:document.getElementById('nai-dl').value||null,note:document.getElementById('nai-note').value||null,status:'진행전',comments:[],created_by:curUser.name})
-  await logH('액션 추가',text);document.getElementById('add-ai-ov').remove();toast('추가됨');await loadAll()
+  await logH('댓글 등록',a.text);document.getElementById('ai-det-ov').remove();toast('등록됨');await loadAll()
 }
 
-// ══════════════════════════════
+// ══════════════════════
 // 회의록
-// ══════════════════════════════
+// ══════════════════════
 function renderMTG(){
-  return`<div class="sec">
-  <div class="sh"><span class="st"><i class="ti ti-notes oi"></i> 회의록 (${D.meetings.length}건)</span><div style="display:flex;gap:6px">
-    <button class="btn" onclick="openAIMtg()"><i class="ti ti-robot"></i> AI 요약</button>
-    <button class="btn btn-o" onclick="openAddMtg()"><i class="ti ti-plus"></i> 직접 입력</button>
-  </div></div>
+  return`<div class="card">
+  <div class="sh"><span class="st"><i class="ti ti-notes oi"></i> 회의록 (${D.meetings.length}건)</span>
+  <div style="display:flex;gap:8px"><button class="btn" onclick="openAIMtg()"><i class="ti ti-robot"></i> AI 요약</button><button class="btn btn-o" onclick="openAddMtg()"><i class="ti ti-plus"></i> 추가</button></div></div>
   ${D.meetings.map(m=>`<div class="mtg-card" onclick="openMtg('${m.id}')">
-  <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:13px;font-weight:500">${m.title}</span><span style="font-size:10px;color:var(--muted)">${m.date}</span></div>
-  <div style="display:flex;gap:5px;margin-bottom:5px"><span class="badge bg">결정 ${(m.decisions||[]).length}</span><span class="badge br">미확인 ${(m.pending||[]).length}</span><span class="badge bb">액션 ${(m.actions||[]).length}</span></div>
+  <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:14px;font-weight:500">${m.title}</span><span style="font-size:11px;color:var(--muted)">${m.date}</span></div>
+  <div style="display:flex;gap:6px;margin-bottom:6px"><span class="badge bg">결정 ${(m.decisions||[]).length}</span><span class="badge br">미확인 ${(m.pending||[]).length}</span><span class="badge bb">액션 ${(m.actions||[]).length}</span></div>
+  <div style="font-size:12px;color:var(--muted);margin-bottom:6px">${(m.decisions||[])[0]||''}</div>
   <div style="display:flex;gap:3px">${(m.attendees||[]).map(a=>avEl(a,18)).join('')}</div>
-  </div>`).join('')||'<div style="font-size:13px;color:var(--muted)">회의록 없음</div>'}
+  </div>`).join('')||'<div style="font-size:13px;color:var(--muted);text-align:center;padding:20px">회의록 없음</div>'}
   </div>`
-}
-window.openAIMtg=()=>{
-  const w=mkOv('ai-mtg-ov')
-  const today=new Date().toISOString().slice(0,10)
-  w.innerHTML=`<div class="modal" style="width:640px">
-  <div class="mh"><span style="font-weight:500"><i class="ti ti-robot" style="color:var(--o)"></i> AI 회의록 요약</span><button class="btn btn-g" onclick="document.getElementById('ai-mtg-ov').remove()"><i class="ti ti-x"></i></button></div>
-  <div class="mb">
-    <div style="background:var(--ol);border-radius:8px;padding:9px 12px;font-size:12px;color:var(--od);margin-bottom:12px">회의록 전문을 붙여넣으면 AI가 결정사항, 미확인 사항, 액션아이템을 자동 추출합니다.</div>
-    <input class="inp" id="aim-title" placeholder="회의 제목 (예: 6/26 Shopify 전환 논의)">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-      <input class="inp" type="date" id="aim-date" value="${today}" style="margin:0">
-      <input class="inp" id="aim-att" placeholder="참석자 (쉼표 구분)" style="margin:0">
-    </div>
-    <textarea class="inp" id="aim-raw" style="min-height:180px;margin-top:8px" placeholder="회의록 전문을 여기에 붙여넣으세요..."></textarea>
-    <div id="aim-loading" style="display:none;text-align:center;padding:16px;color:var(--muted)">
-      <i class="ti ti-loader" style="font-size:20px;animation:spin 1s linear infinite;display:inline-block"></i>
-      <div style="margin-top:6px;font-size:13px">AI 분석 중...</div>
-    </div>
-    <div id="aim-result" style="display:none;margin-top:12px;border-top:0.5px solid var(--bd);padding-top:12px">
-      <div style="font-size:12px;font-weight:500;color:var(--o);margin-bottom:8px"><i class="ti ti-sparkles"></i> AI 요약 결과</div>
-      <div id="aim-summary-box" style="background:var(--sf);border-radius:9px;padding:12px;font-size:13px;line-height:1.8;white-space:pre-wrap"></div>
-      <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
-        <button class="btn btn-o" onclick="saveParsedMtg()"><i class="ti ti-device-floppy"></i> 회의록으로 저장</button>
-        <button class="btn" onclick="addParsedActions()"><i class="ti ti-list-check"></i> 액션아이템으로 추가</button>
-      </div>
-    </div>
-  </div>
-  <div class="mf">
-    <button class="btn" onclick="document.getElementById('ai-mtg-ov').remove()">닫기</button>
-    <button class="btn btn-o" id="aim-btn" onclick="runAIMtg()"><i class="ti ti-robot"></i> AI 요약 실행</button>
-  </div></div>`
-  document.body.appendChild(w)
-  window._parsedMtg=null
-}
-
-window.runAIMtg=async()=>{
-  const raw=document.getElementById('aim-raw')?.value.trim()
-  if(!raw){toast('회의록 내용을 입력해주세요.',false);return}
-  document.getElementById('aim-loading').style.display='block'
-  document.getElementById('aim-result').style.display='none'
-  const btn=document.getElementById('aim-btn');btn.disabled=true
-  try{
-    const resp=await fetch('/api/summarize',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({text:raw})
-    })
-    const respData=await resp.json().catch(()=>({error:'응답 파싱 실패'}))
-    if(!resp.ok||respData.error)throw new Error(respData.error||'서버 오류 '+resp.status)
-    const parsed=respData
-    window._parsedMtg={...parsed,
-      title:document.getElementById('aim-title')?.value.trim()||'AI 회의록',
-      date:document.getElementById('aim-date')?.value,
-      attendees:document.getElementById('aim-att')?.value.split(',').map(s=>s.trim()).filter(Boolean),
-      raw
-    }
-    document.getElementById('aim-loading').style.display='none'
-    document.getElementById('aim-result').style.display='block'
-    const p=window._parsedMtg
-    document.getElementById('aim-summary-box').innerHTML=
-      '<strong>핵심 요약</strong>\n'+( p.summary||'')+
-      '\n\n<strong style="color:#3B6D11">✅ 결정사항 ('+( p.decisions||[]).length+'건)</strong>\n'+((p.decisions||[]).map((d,i)=>(i+1)+'. '+d).join('\n')||'없음')+
-      '\n\n<strong style="color:#A32D2D">❓ 미확인 사항</strong>\n'+((p.pending||[]).map(p=>'• '+p).join('\n')||'없음')+
-      '\n\n<strong style="color:var(--o)">📌 액션아이템 ('+( p.actions||[]).length+'건)</strong>\n'+((p.actions||[]).map((a,i)=>(i+1)+'. '+a).join('\n')||'없음')
-  }catch(e){
-    document.getElementById('aim-loading').style.display='none'
-    toast('AI 분석 실패: '+e.message,false)
-  }
-  btn.disabled=false
-}
-
-window.saveParsedMtg=async()=>{
-  const p=window._parsedMtg;if(!p)return
-  await sb.from('meetings').insert({date:p.date,title:p.title,attendees:p.attendees,decisions:p.decisions||[],pending:p.pending||[],actions:p.actions||[],full_text:p.raw||null,created_by:curUser.name})
-  await logH('AI 회의록 저장',p.title)
-  document.getElementById('ai-mtg-ov').remove()
-  toast('회의록 저장됨');await loadAll();showTab('mtg')
-}
-
-window.addParsedActions=async(mtgId)=>{
-  const p=window._parsedMtg;if(!p||!p.actions?.length)return
-  for(const a of p.actions){
-    await sb.from('action_items').insert({cat:'회의록',text:a,owner:null,owners:[],status:'진행전',comments:[],meeting_id:mtgId||null,created_by:curUser.name})
-  }
-  await logH('회의록에서 액션 '+p.actions.length+'건 추가',p.title)
-  toast('액션아이템 '+p.actions.length+'건 추가됨')
-  document.getElementById('ai-mtg-ov').remove()
-  await loadAll();showTab('ai')
 }
 
 window.openMtg=(id,editMode=false)=>{
   const m=D.meetings.find(m=>m.id===id);if(!m)return
   const w=mkOv('mtg-ov')
-  const dec=(m.decisions||[]).join('\n')
-  const pend=(m.pending||[]).join('\n')
-  const acts=(m.actions||[]).join('\n')
-  const att=(m.attendees||[]).join(',')
-
   if(editMode){
-    w.innerHTML=`<div class="modal">
-    <div class="mh">
-      <span style="font-weight:500"><i class="ti ti-pencil" style="color:var(--o)"></i> 회의록 수정</span>
-      <button class="btn btn-g" onclick="document.getElementById('mtg-ov').remove()"><i class="ti ti-x"></i></button>
-    </div>
+    w.innerHTML=`<div class="modal"><div class="mh"><span style="font-weight:500">회의록 수정</span><button class="btn btn-g" onclick="document.getElementById('mtg-ov').remove()"><i class="ti ti-x"></i></button></div>
     <div class="mb">
-      <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">날짜</label>
       <input class="inp" type="date" id="em-date" value="${m.date}">
-      <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">제목</label>
       <input class="inp" id="em-title" value="${m.title}">
-      <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">참석자 (쉼표 구분)</label>
-      <input class="inp" id="em-att" value="${att}">
-      <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">결정사항 (줄 구분)</label>
-      <textarea class="inp" id="em-dec" style="min-height:90px">${dec}</textarea>
-      <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">미확인 사항 (줄 구분)</label>
-      <textarea class="inp" id="em-pend" style="min-height:70px">${pend}</textarea>
-      <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">다음 액션 (줄 구분)</label>
-      <textarea class="inp" id="em-act" style="min-height:70px">${acts}</textarea>
-      <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">전체 회의록 원문 (선택)</label>
-      <textarea class="inp" id="em-fulltext" style="min-height:100px">${m.full_text||''}</textarea>
+      <input class="inp" id="em-att" value="${(m.attendees||[]).join(',')}">
+      <textarea class="inp" id="em-dec" style="min-height:80px">${(m.decisions||[]).join('\n')}</textarea>
+      <textarea class="inp" id="em-pend" style="min-height:60px">${(m.pending||[]).join('\n')}</textarea>
+      <textarea class="inp" id="em-act" style="min-height:60px">${(m.actions||[]).join('\n')}</textarea>
+      <textarea class="inp" id="em-fulltext" style="min-height:80px" placeholder="전체 원문">${m.full_text||''}</textarea>
     </div>
     <div class="mf" style="justify-content:space-between">
       <button class="btn btn-red" onclick="deleteMtg('${m.id}')"><i class="ti ti-trash"></i> 삭제</button>
-      <div style="display:flex;gap:6px">
-        <button class="btn" onclick="openMtg('${m.id}',false)">취소</button>
-        <button class="btn btn-o" onclick="saveMtgEdit('${m.id}')"><i class="ti ti-check"></i> 저장</button>
-      </div>
-    </div>
-    </div>`
+      <div style="display:flex;gap:6px"><button class="btn" onclick="openMtg('${m.id}',false)">취소</button><button class="btn btn-o" onclick="saveMtgEdit('${m.id}')"><i class="ti ti-check"></i> 저장</button></div>
+    </div></div>`
   } else {
-    w.innerHTML=`<div class="modal">
-    <div class="mh">
-      <div><div style="font-weight:500">${m.title}</div><div style="font-size:11px;color:var(--muted)">${m.date}</div></div>
-      <div style="display:flex;gap:6px">
-        <button class="btn" onclick="openMtg('${m.id}',true)"><i class="ti ti-pencil"></i> 수정</button>
-        <button class="btn btn-g" onclick="document.getElementById('mtg-ov').remove()"><i class="ti ti-x"></i></button>
-      </div>
+    w.innerHTML=`<div class="modal"><div class="mh">
+    <div><div style="font-weight:500;font-size:15px">${m.title}</div><div style="font-size:12px;color:var(--muted);margin-top:2px">${m.date} · ${(m.attendees||[]).join(', ')}</div></div>
+    <div style="display:flex;gap:6px"><button class="btn" onclick="openMtg('${m.id}',true)"><i class="ti ti-pencil"></i> 수정</button><button class="btn btn-g" onclick="document.getElementById('mtg-ov').remove()"><i class="ti ti-x"></i></button></div>
     </div>
     <div class="mb">
-      <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px">${(m.attendees||[]).map(a=>`<div style="display:flex;align-items:center;gap:4px">${avEl(a,20)}<span style="font-size:12px">${a}</span></div>`).join('')}</div>
-      <div style="font-size:12px;font-weight:500;color:#3B6D11;margin-bottom:5px"><i class="ti ti-check"></i> 결정사항 (${(m.decisions||[]).length}건)</div>
-      ${(m.decisions||[]).map(d=>`<div style="padding:5px 8px;margin-bottom:2px;background:#EAF3DE;border-radius:7px;font-size:12px;color:#27500A">${d}</div>`).join('')}
-      <div style="font-size:12px;font-weight:500;color:#A32D2D;margin:10px 0 5px"><i class="ti ti-question-mark"></i> 미확인 사항 (${(m.pending||[]).length}건)</div>
-      ${(m.pending||[]).map(p=>`<div style="padding:5px 8px;margin-bottom:2px;background:#FCEBEB;border-radius:7px;font-size:12px;color:#791F1F">${p}</div>`).join('')}
-      <div style="font-size:12px;font-weight:500;color:var(--o);margin:10px 0 5px"><i class="ti ti-arrow-right"></i> 다음 액션 (${(m.actions||[]).length}건)</div>
-      ${(m.actions||[]).map(a=>`<div style="padding:5px 8px;margin-bottom:2px;background:var(--ol);border-radius:7px;font-size:12px;color:var(--od)">${a}</div>`).join('')}
-      ${m.full_text?`<div style="margin-top:14px;border-top:0.5px solid var(--bd);padding-top:12px">
-        <div style="font-size:12px;font-weight:500;color:var(--muted);margin-bottom:6px"><i class="ti ti-file-text"></i> 전체 회의록 원문</div>
-        <div style="background:var(--sf);border-radius:9px;padding:12px;font-size:13px;line-height:1.7;white-space:pre-wrap;max-height:300px;overflow-y:auto">${m.full_text}</div>
-      </div>`:''}
+      <div style="font-size:12px;font-weight:500;color:#3B6D11;margin-bottom:6px"><i class="ti ti-check"></i> 결정사항 (${(m.decisions||[]).length}건)</div>
+      ${(m.decisions||[]).map(d=>`<div style="padding:6px 10px;margin-bottom:3px;background:#EAF3DE;border-radius:8px;font-size:13px;color:#27500A">${d}</div>`).join('')}
+      <div style="font-size:12px;font-weight:500;color:#A32D2D;margin:12px 0 6px"><i class="ti ti-question-mark"></i> 미확인 (${(m.pending||[]).length}건)</div>
+      ${(m.pending||[]).map(p=>`<div style="padding:6px 10px;margin-bottom:3px;background:#FCEBEB;border-radius:8px;font-size:13px;color:#791F1F">${p}</div>`).join('')}
+      <div style="font-size:12px;font-weight:500;color:var(--o);margin:12px 0 6px"><i class="ti ti-arrow-right"></i> 다음 액션 (${(m.actions||[]).length}건)</div>
+      ${(m.actions||[]).map(a=>`<div style="padding:6px 10px;margin-bottom:3px;background:var(--ol);border-radius:8px;font-size:13px;color:var(--od)">${a}</div>`).join('')}
+      ${m.full_text?`<div style="margin-top:14px;border-top:0.5px solid var(--bd);padding-top:12px"><div style="font-size:12px;font-weight:500;color:var(--muted);margin-bottom:6px"><i class="ti ti-file-text"></i> 전체 원문</div><div style="background:var(--sf);border-radius:9px;padding:12px;font-size:13px;line-height:1.7;white-space:pre-wrap;max-height:250px;overflow-y:auto">${m.full_text}</div></div>`:''}
     </div></div>`
   }
   document.body.appendChild(w)
@@ -1146,39 +899,21 @@ window.openMtg=(id,editMode=false)=>{
 
 window.saveMtgEdit=async(id)=>{
   const sp=elId=>document.getElementById(elId)?.value.split('\n').map(s=>s.trim()).filter(Boolean)
-  const emFullText=document.getElementById('em-fulltext')?.value.trim()
-  await sb.from('meetings').update({
-    date:document.getElementById('em-date')?.value,
-    title:document.getElementById('em-title')?.value.trim(),
-    attendees:document.getElementById('em-att')?.value.split(',').map(s=>s.trim()).filter(Boolean),
-    decisions:sp('em-dec'),
-    pending:sp('em-pend'),
-    actions:sp('em-act'),
-    full_text:emFullText||null,
-  }).eq('id',id)
+  await sb.from('meetings').update({date:document.getElementById('em-date')?.value,title:document.getElementById('em-title')?.value.trim(),attendees:document.getElementById('em-att')?.value.split(',').map(s=>s.trim()).filter(Boolean),decisions:sp('em-dec'),pending:sp('em-pend'),actions:sp('em-act'),full_text:document.getElementById('em-fulltext')?.value.trim()||null}).eq('id',id)
   await logH('회의록 수정',document.getElementById('em-title')?.value.trim())
-  document.getElementById('mtg-ov').remove()
-  toast('회의록 수정됨');await loadAll()
+  document.getElementById('mtg-ov').remove();toast('수정됨');await loadAll()
 }
 
 window.deleteMtg=async(id)=>{
-  const m=D.meetings.find(m=>m.id===id)
-  if(!m)return
-  // 연결된 액션아이템 확인
-  const linked=D.actionItems.filter(a=>a.meeting_id===id||a.cat==='회의록')
-  const linkedFromThis=D.actionItems.filter(a=>a.meeting_id===id)
-  const msg=linkedFromThis.length
-    ? `"${m.title}" 회의록과 연결된 액션아이템 ${linkedFromThis.length}건도 함께 삭제할까요?`
-    : `"${m.title}" 회의록을 삭제할까요?`
+  const m=D.meetings.find(m=>m.id===id);if(!m)return
+  const linked=D.actionItems.filter(a=>a.meeting_id===id)
+  const msg=linked.length?`"${m.title}" 회의록과 연결된 액션아이템 ${linked.length}건도 함께 삭제할까요?`:`"${m.title}" 삭제할까요?`
   if(!confirm(msg))return
-  if(linkedFromThis.length){
-    await sb.from('action_items').delete().in('id',linkedFromThis.map(a=>a.id))
-  }
+  if(linked.length)await sb.from('action_items').delete().in('id',linked.map(a=>a.id))
   await sb.from('meetings').delete().eq('id',id)
-  await logH('회의록 삭제'+(linkedFromThis.length?` (액션 ${linkedFromThis.length}건 포함)`:''),m.title)
-  document.getElementById('mtg-ov').remove()
-  toast('삭제됨');await loadAll()
+  await logH('회의록 삭제',m.title);document.getElementById('mtg-ov').remove();toast('삭제됨');await loadAll()
 }
+
 window.openAddMtg=()=>{
   const w=mkOv('add-mtg-ov')
   w.innerHTML=`<div class="modal"><div class="mh"><span style="font-weight:500">회의록 추가</span><button class="btn btn-g" onclick="document.getElementById('add-mtg-ov').remove()"><i class="ti ti-x"></i></button></div>
@@ -1194,6 +929,7 @@ window.openAddMtg=()=>{
   </div>`
   document.body.appendChild(w)
 }
+
 window.saveMtg=async()=>{
   const title=document.getElementById('am-title')?.value.trim();if(!title)return
   const sp=id=>document.getElementById(id).value.split('\n').map(s=>s.trim()).filter(Boolean)
@@ -1201,21 +937,69 @@ window.saveMtg=async()=>{
   await logH('회의록 등록',title);document.getElementById('add-mtg-ov').remove();toast('저장됨');await loadAll()
 }
 
-// ══════════════════════════════
-// 변경이력
-// ══════════════════════════════
-function renderHist(){
-  return`<div class="sec"><div class="sh"><span class="st"><i class="ti ti-history oi"></i> 변경이력 (${D.history.length}건)</span></div>
-  ${D.history.map(h=>`<div class="hist-r">${avEl(h.user_name,20)}
-  <div style="flex:1"><span style="font-weight:500">${h.user_name}</span> · ${h.action}${h.target?` <span style="color:var(--muted)">(${h.target})</span>`:''}</div>
-  <div style="color:var(--muted);white-space:nowrap;font-size:10px">${new Date(h.created_at).toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}</div>
-  </div>`).join('')}
+// AI 회의록 요약
+window.openAIMtg=()=>{
+  const w=mkOv('ai-mtg-ov')
+  const today=new Date().toISOString().slice(0,10)
+  w.innerHTML=`<div class="modal"><div class="mh"><span style="font-weight:500"><i class="ti ti-robot" style="color:var(--o)"></i> AI 회의록 요약</span><button class="btn btn-g" onclick="document.getElementById('ai-mtg-ov').remove()"><i class="ti ti-x"></i></button></div>
+  <div class="mb">
+    <div style="background:var(--ol);border-radius:8px;padding:9px 12px;font-size:12px;color:var(--od);margin-bottom:12px">회의록 전문을 붙여넣으면 AI가 결정사항·액션아이템을 자동 추출합니다.</div>
+    <input class="inp" id="aim-title" placeholder="회의 제목">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><input class="inp" type="date" id="aim-date" value="${today}" style="margin:0"><input class="inp" id="aim-att" placeholder="참석자 (쉼표 구분)" style="margin:0"></div>
+    <textarea class="inp" id="aim-raw" style="min-height:160px;margin-top:8px" placeholder="회의록 전문을 붙여넣으세요..."></textarea>
+    <div id="aim-loading" style="display:none;text-align:center;padding:16px;color:var(--muted)"><i class="ti ti-loader" style="font-size:20px;animation:spin 1s linear infinite;display:inline-block"></i><div style="margin-top:6px;font-size:13px">AI 분석 중...</div></div>
+    <div id="aim-result" style="display:none;margin-top:12px;border-top:0.5px solid var(--bd);padding-top:12px">
+      <div style="font-size:12px;font-weight:500;color:var(--o);margin-bottom:8px"><i class="ti ti-sparkles"></i> AI 요약 결과</div>
+      <div id="aim-summary-box" style="background:var(--sf);border-radius:9px;padding:12px;font-size:13px;line-height:1.8;white-space:pre-wrap"></div>
+      <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
+        <button class="btn btn-o" onclick="saveParsedMtg()"><i class="ti ti-device-floppy"></i> 회의록 저장</button>
+        <button class="btn" onclick="addParsedActions()"><i class="ti ti-list-check"></i> 액션아이템으로 추가</button>
+      </div>
+    </div>
+  </div>
+  <div class="mf"><button class="btn" onclick="document.getElementById('ai-mtg-ov').remove()">닫기</button><button class="btn btn-o" id="aim-btn" onclick="runAIMtg()"><i class="ti ti-robot"></i> AI 요약 실행</button></div>
   </div>`
+  document.body.appendChild(w);window._parsedMtg=null
+}
+
+window.runAIMtg=async()=>{
+  const raw=document.getElementById('aim-raw')?.value.trim();if(!raw){toast('내용을 입력해주세요.',false);return}
+  document.getElementById('aim-loading').style.display='block'
+  document.getElementById('aim-result').style.display='none'
+  const btn=document.getElementById('aim-btn');btn.disabled=true
+  try{
+    const resp=await fetch('/api/summarize',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:raw})})
+    const respData=await resp.json().catch(()=>({error:'응답 파싱 실패'}))
+    if(!resp.ok||respData.error)throw new Error(respData.error||'서버 오류 '+resp.status)
+    const p=respData
+    window._parsedMtg={...p,title:document.getElementById('aim-title')?.value.trim()||'AI 회의록',date:document.getElementById('aim-date')?.value,attendees:document.getElementById('aim-att')?.value.split(',').map(s=>s.trim()).filter(Boolean),raw}
+    document.getElementById('aim-loading').style.display='none'
+    document.getElementById('aim-result').style.display='block'
+    document.getElementById('aim-summary-box').innerHTML=
+      `<strong>핵심 요약</strong>\n${p.summary||''}\n\n<strong style="color:#3B6D11">✅ 결정사항 (${(p.decisions||[]).length}건)</strong>\n${(p.decisions||[]).map((d,i)=>`${i+1}. ${d}`).join('\n')||'없음'}\n\n<strong style="color:#A32D2D">❓ 미확인 사항</strong>\n${(p.pending||[]).map(x=>`• ${x}`).join('\n')||'없음'}\n\n<strong style="color:var(--o)">📌 액션아이템 (${(p.actions||[]).length}건)</strong>\n${(p.actions||[]).map((a,i)=>`${i+1}. ${a}`).join('\n')||'없음'}`
+  }catch(e){
+    document.getElementById('aim-loading').style.display='none'
+    toast('AI 분석 실패: '+e.message,false)
+  }
+  btn.disabled=false
+}
+
+window.saveParsedMtg=async()=>{
+  const p=window._parsedMtg;if(!p)return
+  await sb.from('meetings').insert({date:p.date,title:p.title,attendees:p.attendees,decisions:p.decisions||[],pending:p.pending||[],actions:p.actions||[],full_text:p.raw||null,created_by:curUser.name})
+  await logH('AI 회의록 저장',p.title);document.getElementById('ai-mtg-ov').remove();toast('저장됨');await loadAll()
+}
+
+window.addParsedActions=async()=>{
+  const p=window._parsedMtg;if(!p||!p.actions?.length)return
+  for(const a of p.actions)await sb.from('action_items').insert({cat:'회의록',text:a,owner:null,owners:[],status:'할 일',comments:[],created_by:curUser.name})
+  await logH('회의록에서 액션 '+p.actions.length+'건 추가',p.title)
+  toast('액션아이템 '+p.actions.length+'건 추가됨')
+  document.getElementById('ai-mtg-ov').remove();await loadAll()
+  activeCat='회의록액션';showTab('ck')
 }
 
 // D-day 편집
-
-window.renderDashFilter=(owner)=>{dashOwnerFilter=owner;render()}
 window.openDdayEdit=()=>{
   const w=mkOv('dday-ov')
   w.innerHTML=`<div class="modal" style="width:320px"><div class="mh"><span style="font-weight:500">D-Day 날짜 설정</span><button class="btn btn-g" onclick="document.getElementById('dday-ov').remove()"><i class="ti ti-x"></i></button></div>
@@ -1224,9 +1008,6 @@ window.openDdayEdit=()=>{
   </div>`
   document.body.appendChild(w)
 }
-
-// start_date 컬럼 추가 마이그레이션 (없으면 무시)
-try{await sb.from('checklist_items').select('start_date').limit(1)}catch{}
 
 await loadAll()
 </script>
