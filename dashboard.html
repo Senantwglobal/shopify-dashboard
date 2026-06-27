@@ -112,7 +112,7 @@ select.inp{cursor:pointer}
 /* 캘린더 */
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
 .cal-dh{text-align:center;font-size:11px;color:var(--muted);padding:5px;font-weight:500}
-.cal-cell{min-height:72px;border-radius:8px;padding:5px;border:0.5px solid transparent;background:var(--sf);position:relative;cursor:pointer;transition:border-color .12s}
+.cal-cell{min-height:72px;border-radius:8px;padding:5px;border:0.5px solid transparent;background:var(--sf);position:relative;cursor:pointer;transition:border-color .12s;overflow:hidden}
 .cal-cell:hover{border-color:var(--o)}
 .cal-cell.today{border-color:var(--o);border-width:1.5px}
 .cal-cell.empty{background:transparent;border:none;cursor:default}
@@ -120,7 +120,7 @@ select.inp{cursor:pointer}
 .cal-cell.drag-over{border-color:var(--o);background:var(--ol);border-style:dashed}
 .cal-num{font-size:11px;font-weight:500;margin-bottom:2px}
 .cal-cell.today .cal-num{color:var(--o)}
-.cal-ev{font-size:9px;padding:2px 5px;border-radius:3px;margin-bottom:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:grab}
+.cal-ev{font-size:9px;padding:2px 5px;border-radius:3px;margin-bottom:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:grab;max-width:100%;display:block}
 .cal-ev.dragging{opacity:.4}
 .cal-add{position:absolute;bottom:3px;right:3px;width:17px;height:17px;border-radius:50%;background:var(--o);color:#fff;font-size:13px;line-height:17px;text-align:center;display:none;border:none;cursor:pointer}
 .cal-cell:hover .cal-add{display:block}
@@ -461,12 +461,12 @@ function renderCal(){
     const isToday=ds===TODAY.toISOString().slice(0,10)
     cells+=`<div class="cal-cell${wk===0||wk===6?' wknd':''}${isToday?' today':''}" onclick="calClick('${ds}')" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="event.preventDefault();this.classList.remove('drag-over');calDrop('${ds}',event)">
     <div class="cal-num">${d}</div>
-    ${evs.slice(0,3).map(e=>{
+    ${evs.slice(0,2).map(e=>{
       const color=e.category_id?getCatColor(e.category_id):'var(--o)'
       const isDone=e.done||e.status==='완료'
       return`<div class="cal-ev" draggable="true" style="background:${color}22;color:${color};border-left:2px solid ${color};${isDone?'text-decoration:line-through;opacity:.5':''}" onclick="event.stopPropagation();${e.category_id?`location.href='detail.html?type=item&id=${e.id}'`:`openAIDetail('${e.id}')`}" ondragstart="event.stopPropagation();calDragStart('${e.id}','${e.category_id?'item':'action'}',event)" ondragend="event.target.classList.remove('dragging')">${e.text}</div>`
     }).join('')}
-    ${evs.length>3?`<div style="font-size:9px;color:var(--muted)">+${evs.length-3}</div>`:''}
+    ${evs.length>2?`<div style="font-size:9px;color:var(--muted);padding:1px 2px">+${evs.length-2}개 더</div>`:''}
     <button class="cal-add" onclick="event.stopPropagation();openAddItem('','${ds}')">+</button>
     </div>`
   }
