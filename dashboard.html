@@ -63,7 +63,7 @@ select.inp{cursor:pointer}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
 .krow{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-bottom:16px}
-.kpi{background:var(--card);border-radius:12px;border:0.5px solid var(--bd);padding:14px;text-align:center}
+.kpi{background:var(--card);border-radius:12px;border:0.5px solid var(--bd);padding:14px;text-align:center;transition:border-color .15s,transform .1s}.kpi[onclick]:hover{border-color:var(--ob);transform:translateY(-1px)}
 .kn{font-size:24px;font-weight:500;margin-bottom:3px}
 .kl{font-size:11px;color:var(--muted)}
 /* 진행률 바 */
@@ -362,12 +362,12 @@ function renderDash(){
 
   return`
 <div class="krow">
-  <div class="kpi"><div class="kn" style="color:var(--o)">${calcDD()}</div><div class="kl">D-day까지</div></div>
-  <div class="kpi"><div class="kn" style="color:${prog>=70?'#3B6D11':'var(--text)'}">${prog}%</div><div class="kl">전체 진행률</div></div>
-  <div class="kpi"><div class="kn">${done}<span style="font-size:14px;color:var(--muted)">/${total}</span></div><div class="kl">완료 항목</div></div>
-  <div class="kpi"><div class="kn" style="color:${gngPass===6?'#3B6D11':'#A32D2D'}">${gngPass}/6</div><div class="kl">Go/No-Go</div></div>
-  <div class="kpi"><div class="kn" style="color:#A32D2D">${urgent.length}</div><div class="kl">마감 임박</div></div>
-  <div class="kpi"><div class="kn" style="color:#185FA5">${D.meetings.length}</div><div class="kl">회의록</div></div>
+  <div class="kpi" onclick="openDdayEdit()" style="cursor:pointer" title="클릭해서 D-Day 변경"><div class="kn" style="color:var(--o)">${calcDD()}</div><div class="kl">D-day까지</div></div>
+  <div class="kpi" onclick="showTab('ck')" style="cursor:pointer" title="체크리스트 보기"><div class="kn" style="color:${prog>=70?'#3B6D11':'var(--text)'}">${prog}%</div><div class="kl">전체 진행률</div></div>
+  <div class="kpi" onclick="showTab('ck')" style="cursor:pointer" title="체크리스트 보기"><div class="kn">${done}<span style="font-size:14px;color:var(--muted)">/${total}</span></div><div class="kl">완료 항목</div></div>
+  <div class="kpi" onclick="document.querySelector('.card-o').scrollIntoView({behavior:'smooth'})" style="cursor:pointer" title="Go/No-Go 현황 보기"><div class="kn" style="color:${gngPass===6?'#3B6D11':'#A32D2D'}">${gngPass}/6</div><div class="kl">Go/No-Go</div></div>
+  <div class="kpi" onclick="showTab('cal')" style="cursor:pointer" title="캘린더에서 마감 확인"><div class="kn" style="color:#A32D2D">${urgent.length}</div><div class="kl" style="color:#A32D2D;font-weight:500">마감 임박</div></div>
+  <div class="kpi" onclick="showTab('mtg')" style="cursor:pointer" title="회의록 보기"><div class="kn" style="color:#185FA5">${D.meetings.length}</div><div class="kl">회의록</div></div>
 </div>
 
 <!-- Go/No-Go -->
