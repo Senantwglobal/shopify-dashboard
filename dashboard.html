@@ -520,7 +520,46 @@ window.calDrop=async(newDate,event)=>{
 window.calNav=(dir)=>{calMonth+=dir;if(calMonth>11){calMonth=0;calYear++}if(calMonth<0){calMonth=11;calYear--};render()}
 window.calClick=(ds)=>{
   const evs=[...D.items,...D.actionItems].filter(i=>i.deadline===ds)
-  if(evs.length===0)openAddItem('',ds)
+  if(evs.length===0){openAddItem('',ds);return}
+  // 날짜 클릭 → 해당 날짜 항목 팝업
+  const w=mkOv('cal-day-ov')
+  const dateLabel=new Date(ds).toLocaleDateString('ko-KR',{month:'long',day:'numeric',weekday:'short'})
+  w.innerHTML=`<div class="modal" style="width:480px">
+  <div class="mh">
+    <div>
+      <div style="font-weight:500;font-size:15px">${dateLabel}</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:2px">${evs.length}개 항목</div>
+    </div>
+    <div style="display:flex;gap:6px">
+      <button class="btn btn-o" style="padding:5px 10px;font-size:12px" onclick="document.getElementById('cal-day-ov').remove();openAddItem('','${ds}')"><i class="ti ti-plus"></i> 추가</button>
+      <button class="btn btn-g" onclick="document.getElementById('cal-day-ov').remove()"><i class="ti ti-x"></i></button>
+    </div>
+  </div>
+  <div class="mb" style="padding:12px 16px">
+    ${evs.map(e=>{
+      const isDone=e.done||e.status==='완료'
+      const color=e.category_id?getCatColor(e.category_id):'var(--o)'
+      const catLabel=e.category_id?D.cats.find(c=>c.id===e.category_id)?.label||'':'회의록 액션'
+      const owners=e.category_id?
+        (e.owners?.length?e.owners:e.owner?[e.owner]:[]):
+        (Array.isArray(e.owners)&&e.owners.length?e.owners:e.owner?[e.owner]:[])
+      return`<div style="display:flex;align-items:flex-start;gap:10px;padding:10px;border:0.5px solid var(--bd);border-radius:10px;margin-bottom:8px;cursor:pointer;background:var(--card)" onclick="document.getElementById('cal-day-ov').remove();${e.category_id?`location.href='detail.html?type=item&id=${e.id}'`:`openAIDetail('${e.id}')`}">
+        <div style="width:4px;height:100%;min-height:40px;border-radius:2px;background:${color};flex-shrink:0;margin-top:2px"></div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:500;${isDone?'text-decoration:line-through;color:var(--muted)':''};margin-bottom:4px">${e.text}</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+            <span style="font-size:10px;color:${color};background:${color}18;padding:1px 6px;border-radius:4px">${catLabel}</span>
+            ${owners.map(o=>avEl(o,18)).join('')}
+            <span class="badge ${isDone?'bg':e.status==='진행중'?'bb':'bgr'}">${e.status||'할 일'}</span>
+            ${e.priority==='critical'?'<span class="badge br">긴급</span>':e.priority==='high'?'<span class="badge bo">중요</span>':''}
+          </div>
+        </div>
+        <i class="ti ti-chevron-right" style="color:var(--muted);font-size:14px;flex-shrink:0;margin-top:4px"></i>
+      </div>`
+    }).join('')}
+  </div>
+  </div>`
+  document.body.appendChild(w)
 }
 
 // ══════════════════════
