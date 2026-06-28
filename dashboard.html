@@ -418,11 +418,11 @@ function renderDash(){
 
 <!-- KPI 현황 -->
 <div class="card">
-  <div class="sh"><span class="st"><i class="ti ti-chart-line oi"></i> KPI 현황</span><button class="btn" onclick="showTab('ck');activeCat='KPI 모니터링';render()">입력</button></div>
+  <div class="sh"><span class="st"><i class="ti ti-chart-line oi"></i> KPI 현황</span><button class="btn" onclick="showTab('kpi')">KPI 탭 →</button></div>
   ${kpiMetrics.length?`<table style="width:100%;border-collapse:collapse;font-size:12px">
   <thead><tr><th style="text-align:left;padding:5px 6px;color:var(--muted);font-weight:500;border-bottom:0.5px solid var(--bd)">지표</th><th style="text-align:right;padding:5px 6px;color:var(--muted);font-weight:500;border-bottom:0.5px solid var(--bd)">기준값</th><th style="text-align:right;padding:5px 6px;color:var(--muted);font-weight:500;border-bottom:0.5px solid var(--bd)">D+1</th><th style="text-align:right;padding:5px 6px;color:var(--muted);font-weight:500;border-bottom:0.5px solid var(--bd)">D+7</th></tr></thead>
   <tbody>${kpiMetrics.map(m=>`<tr><td style="padding:5px 6px;border-bottom:0.5px solid var(--bd)">${m}</td><td style="padding:5px 6px;border-bottom:0.5px solid var(--bd);text-align:right">${gv('baseline',m)}</td><td style="padding:5px 6px;border-bottom:0.5px solid var(--bd);text-align:right">${gv('d1',m)}</td><td style="padding:5px 6px;border-bottom:0.5px solid var(--bd);text-align:right">${gv('d7',m)}</td></tr>`).join('')}</tbody>
-  </table>`:`<div style="font-size:13px;color:var(--muted)">KPI 데이터 없음 — <span style="color:var(--o);cursor:pointer" onclick="showTab('ck')">체크리스트에서 입력</span></div>`}
+  </table>`:`<div style="font-size:13px;color:var(--muted)"><div style='text-align:center;padding:20px'><div style='font-size:13px;color:var(--muted);margin-bottom:10px'>KPI 기준값이 없어요</div><button class='btn btn-o' onclick='showTab("kpi")'><i class='ti ti-chart-line'></i> KPI 탭에서 입력</button></div></div>`}
 </div>
 </div>
 
