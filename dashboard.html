@@ -570,67 +570,62 @@ window.calClick=(ds)=>{
 // 체크리스트 (통합)
 // ══════════════════════
 function renderCK(){
-  const allCats=[{id:'전체',label:'전체',color:'#888',icon:'ti-list'},...D.cats.map(c=>({...c,icon:c.icon||'ti-folder'})),{id:'회의록액션',label:'회의록 액션',color:'#E8680A',icon:'ti-list-check'}]
+  const allCats=[{id:"전체",label:"전체",color:"#888"},...D.cats,{id:"회의록액션",label:"회의록 액션",color:"#E8680A"}]
   const getItems=()=>{
-    if(window.activeCat==='전체')return D.items
-    if(window.activeCat==='회의록액션')return D.actionItems
+    if(window.activeCat==="전체")return D.items
+    if(window.activeCat==="회의록액션")return D.actionItems
     return D.items.filter(i=>i.category_id===window.activeCat)
   }
   const items=getItems()
   const total=items.length
-  const done=items.filter(i=>i.done||i.status==='완료').length
+  const done=items.filter(i=>i.done||i.status==="완료").length
 
-  // 카테고리별 완료 수
   function catDone(id){
-    if(id==='전체')return D.items.filter(i=>i.done).length
-    if(id==='회의록액션')return D.actionItems.filter(a=>a.status==='완료').length
+    if(id==="전체")return D.items.filter(i=>i.done).length
+    if(id==="회의록액션")return D.actionItems.filter(a=>a.status==="완료").length
     return D.items.filter(i=>i.category_id===id&&i.done).length
   }
   function catTotal(id){
-    if(id==='전체')return D.items.length
-    if(id==='회의록액션')return D.actionItems.length
+    if(id==="전체")return D.items.length
+    if(id==="회의록액션")return D.actionItems.length
     return D.items.filter(i=>i.category_id===id).length
   }
 
-  return`<div style="display:flex;gap:0;min-height:calc(100vh - 120px)">
+  const sidebarItems = allCats.map(cat=>{
+    const t=catTotal(cat.id), d=catDone(cat.id)
+    const isActive=window.activeCat===cat.id
+    const pct=t?Math.round(d/t*100):0
+    const activeStyle=isActive?"background:var(--ol);color:var(--o);font-weight:600;border-left:3px solid var(--o)":"background:none;color:var(--text);font-weight:400;border-left:3px solid transparent"
+    const countBadge=t>0?`<span style="font-size:10px;color:${isActive?"var(--o)":"var(--muted)"};flex-shrink:0">${d}/${t}</span>`:""
+    const progressBar=t>0?`<div style="margin:0 14px 4px;height:2px;background:var(--sf);border-radius:1px"><div style="width:${pct}%;height:100%;background:${pct===100?"#639922":cat.color};border-radius:1px"></div></div>`:""
+    return `<button onclick="setCat('` + cat.id + `')" style="width:100%;padding:9px 14px;border:none;${activeStyle};font-size:12px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:8px;transition:all .15s"><span style="width:8px;height:8px;border-radius:50%;background:${cat.color};flex-shrink:0"></span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${cat.label}</span>${countBadge}</button>${progressBar}`
+  }).join("")
 
-  <!-- 왼쪽 사이드바 -->
+  const catLabel = allCats.find(c=>c.id===window.activeCat)?.label||"전체"
+  const addCatId = (window.activeCat==="전체"||window.activeCat==="회의록액션")?"":window.activeCat
+  const progPct = total?Math.round(done/total*100):0
+  const progBar = total?`<div class="pgb" style="width:120px;display:inline-block;vertical-align:middle"><div class="pgf" style="width:${progPct}%;background:${done===total?"#639922":"var(--o)"}"></div></div>`:""
+  const kpiNote = window.activeCat==="kpicat"?`<div style="background:var(--ol);border-radius:8px;padding:9px 12px;font-size:12px;color:var(--od);margin-bottom:12px">KPI 수치는 <span style="font-weight:600;cursor:pointer;text-decoration:underline" onclick="showTab('kpi')">KPI 탭</span>에서 입력하세요.</div>`:""
+
+  return `<div style="display:flex;gap:0;min-height:calc(100vh - 140px)">
   <div style="width:200px;flex-shrink:0;background:var(--card);border:0.5px solid var(--bd);border-radius:12px;padding:10px 0;margin-right:14px;height:fit-content;position:sticky;top:80px">
-    ${allCats.map(cat=>{
-      const t=catTotal(cat.id), d=catDone(cat.id)
-      const isActive=window.activeCat===cat.id
-      const pct=t?Math.round(d/t*100):0
-      return`<button onclick="setCat('${cat.id}')" style="width:100%;padding:9px 14px;border:none;background:${isActive?'var(--ol)':'none'};color:${isActive?'var(--o)':'var(--text)'};font-size:12px;font-weight:${isActive?'600':'400'};cursor:pointer;text-align:left;display:flex;align-items:center;gap:8px;border-left:3px solid ${isActive?'var(--o)':'transparent'};transition:all .15s">
-        <span style="width:8px;height:8px;border-radius:50%;background:${cat.color};flex-shrink:0"></span>
-        <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${cat.label}</span>
-        <span style="font-size:10px;color:${isActive?'var(--o)':'var(--muted)'};flex-shrink:0">${t>0?`${d}/${t}`:''}</span>
-      </button>
-      ${t>0?`<div style="margin:0 14px 4px;height:2px;background:var(--sf);border-radius:1px"><div style="width:${pct}%;height:100%;background:${pct===100?'#639922':cat.color};border-radius:1px;transition:width .4s"></div></div>`:''}
-    `}).join('')}
+    ${sidebarItems}
     <div style="border-top:0.5px solid var(--bd);margin:8px 10px;padding-top:8px">
       <button class="btn" style="width:100%;justify-content:center;font-size:11px" onclick="openAddCat()"><i class="ti ti-folder-plus"></i> 카테고리 추가</button>
     </div>
   </div>
-
-  <!-- 오른쪽 콘텐츠 -->
   <div style="flex:1;min-width:0">
-    <!-- 헤더 -->
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
       <div style="display:flex;align-items:center;gap:10px">
-        <span style="font-size:15px;font-weight:500">${allCats.find(c=>c.id===window.activeCat)?.label||'전체'}</span>
+        <span style="font-size:15px;font-weight:500">${catLabel}</span>
         <span style="font-size:13px;color:var(--muted)">${done}/${total} 완료</span>
-        ${total?`<div class="pgb" style="width:120px;display:inline-block;vertical-align:middle"><div class="pgf" style="width:${total?Math.round(done/total*100):0}%;background:${done===total?'#639922':'var(--o)'}"></div></div>`:''}
+        ${progBar}
       </div>
-      <button class="btn btn-o" onclick="openAddItem('${window.activeCat==='전체'||window.activeCat==='회의록액션'?'':window.activeCat}','')"><i class="ti ti-plus"></i> 항목 추가</button>
+      <button class="btn btn-o" onclick="openAddItem('${addCatId}','')"><i class="ti ti-plus"></i> 항목 추가</button>
     </div>
-
-    <!-- KPI 인라인 -->
-    ${window.activeCat==='kpicat'?'<div style="background:var(--ol);border-radius:8px;padding:9px 12px;font-size:12px;color:var(--od);margin-bottom:12px"><i class="ti ti-info-circle"></i> KPI 수치는 <span style="font-weight:600;cursor:pointer;text-decoration:underline" onclick="showTab('kpi')">KPI 탭</span>에서 입력하세요.</div>':''}
-
-    <!-- 항목 목록 -->
-    ${window.activeCat==='회의록액션'?renderActionItems():renderCheckItems(items)}
+    ${kpiNote}
+    ${window.activeCat==="회의록액션"?renderActionItems():renderCheckItems(items)}
   </div>
-
   </div>`
 }
 
