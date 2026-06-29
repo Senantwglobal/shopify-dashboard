@@ -129,10 +129,14 @@ window.saveAllChanges=async(itemId)=>{
   const priority=document.getElementById('det-priority')?.value
   const titleEl=document.getElementById('item-title')
   const title=titleEl?.innerText?.trim()
+  const requester=document.getElementById('det-requester')?.value
   const updates={updated_at:new Date().toISOString()}
   if(deadline!==undefined)updates.deadline=deadline||null
   if(status)updates.status=status
   if(priority)updates.priority=priority
+  if(requester!==undefined)updates.requester=requester||null
+  const description=document.getElementById('det-description')?.value
+  if(description!==undefined)updates.description=description||null
   if(title&&_origItem&&title!==_origItem.text)updates.text=title
   const {error}=await sb.from('checklist_items').update(updates).eq('id',itemId)
   if(error){toast('저장 실패: '+error.message,false);return}
@@ -258,6 +262,18 @@ function renderItemDetail(item,subs,comments,cats){
           ${[['critical','긴급'],['high','중요'],['medium','보통']].map(([v,l])=>`<option value="${v}" ${item.priority===v?'selected':''}>${l}</option>`).join('')}
         </select>
       </div>
+      <div class="field">
+        <label>요청자</label>
+        <select class="inp" id="det-requester" onchange="markDirty()">
+          <option value="">없음</option>
+          ${MEMBERS.map(m=>`<option value="${m.name}" ${(item.requester||'')=== m.name?'selected':''}>${m.name}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <!-- 설명 필드 -->
+    <div class="field" style="margin-top:4px">
+      <label>설명 / 메모</label>
+      <textarea class="inp" id="det-description" rows="3" placeholder="항목에 대한 설명, 배경, 참고사항 등을 입력하세요..." onchange="markDirty()" style="margin:0;resize:vertical">${item.description||''}</textarea>
     </div>
   </div>
 

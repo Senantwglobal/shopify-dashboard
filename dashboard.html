@@ -185,6 +185,7 @@ select.inp{cursor:pointer}
   <button class="nb" onclick="showTab('ck')" id="tab-ck"><i class="ti ti-checklist"></i>체크리스트</button>
   <button class="nb" onclick="showTab('kpi')" id="tab-kpi"><i class="ti ti-chart-line"></i>KPI</button>
   <button class="nb" onclick="showTab('mtg')" id="tab-mtg"><i class="ti ti-notes"></i>회의록</button>
+  <button class="nb" onclick="showTab('files')" id="tab-files"><i class="ti ti-paperclip"></i>파일 보관함</button>
 </div>
 
 <div class="cnt" id="mc"><div style="text-align:center;padding:60px;color:var(--muted)">로딩중...</div></div>
@@ -262,7 +263,7 @@ function getCatColor(id){const c=D.cats.find(c=>c.id===id);return c?c.color:'#88
 function getOwners(a){return Array.isArray(a.owners)&&a.owners.length?a.owners:a.owner?[a.owner]:[]}
 function toast(msg,ok=true){const t=document.getElementById('toast');t.textContent=msg;t.style.background=ok?'#2d6a27':'#A32D2D';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
 function mkOv(id){const old=document.getElementById(id);if(old)old.remove();const w=document.createElement('div');w.id=id;w.className='overlay';w.onclick=e=>{if(e.target===w)w.remove()};return w}
-async function logH(action,target){await sb.from('history').insert({user_name:curUser.name,action,target})}
+async function logH(action,target,itemId=null){await sb.from('history').insert({user_name:curUser.name,action,target,item_id:itemId||null})}
 
 // ── 알림 ──
 window.goNotifItem=(id,catId)=>{
@@ -336,6 +337,7 @@ function render(){
   else if(activeTab==='cal')mc.innerHTML=renderCal()
   else if(activeTab==='ck')mc.innerHTML=renderCK()
   else if(activeTab==='kpi')mc.innerHTML=renderKPITab()
+  else if(activeTab==='files')mc.innerHTML=renderFiles()
   else mc.innerHTML=renderMTG()
 }
 
@@ -764,11 +766,11 @@ window.toggleItem=async(id,checked)=>{
   const newStatus=checked?'완료':'할 일'
   if(checked)expandCks[id]=false  // 완료 시 세부항목 접기
   await sb.from('checklist_items').update({done:checked,status:newStatus,done_by:checked?curUser.name:null,updated_at:new Date().toISOString()}).eq('id',id)
-  await logH(`항목 ${checked?'완료':'취소'}`,item.text);await loadAll()
+  await logH(`항목 ${checked?'완료':'취소'}`,item.text,id);await loadAll()
 }
 window.updateItemField=async(id,field,val)=>{
   await sb.from('checklist_items').update({[field]:val,updated_at:new Date().toISOString()}).eq('id',id)
-  const item=D.items.find(i=>i.id===id);await logH(`${field} 변경`,item?.text||'');await loadAll()
+  const item=D.items.find(i=>i.id===id);await logH(`${field} 변경`,item?.text||'',id);await loadAll()
 }
 window.toggleSub=async(sid,itemId,checked)=>{
   await sb.from('checklist_subs').update({done:checked,done_by:checked?curUser.name:null,verified:false}).eq('id',sid)
@@ -1253,6 +1255,99 @@ window.saveKPIDaily=async()=>{
 }
 
 // ══════════════════════
+// 파일 보관함
+// ══════════════════════
+function renderFiles(){
+  // 댓글에서 파일 첨부된 것 추출
+  const allComments=D.comments||[]
+  const files=[]
+
+  allComments.forEach(c=>{
+    try{
+      const parsed=JSON.parse(c.text)
+      if(parsed.file){
+        const item=D.items.find(i=>i.id===c.item_id)
+        const cat=D.cats.find(cat=>cat.id===item?.category_id)
+        files.push({
+          ...parsed.file,
+          comment_text:parsed.text||'',
+          link:parsed.link||null,
+          item_id:c.item_id,
+          item_text:item?.text||'삭제된 항목',
+          cat_label:cat?.label||'',
+          cat_color:cat?.color||'#888',
+          user:c.user_name,
+          created_at:c.created_at
+        })
+      }
+    }catch{}
+  })
+
+  // 회의록 원문도 포함 (텍스트지만 참고용)
+  const fileTypes={
+    image:files.filter(f=>f.type?.startsWith('image/')),
+    doc:files.filter(f=>!f.type?.startsWith('image/'))
+  }
+
+  return`
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+    <div>
+      <div style="font-size:16px;font-weight:500">파일 보관함</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:3px">체크리스트 댓글에 첨부된 파일 모음 — 총 ${files.length}개</div>
+    </div>
+  </div>
+
+  ${files.length===0?`<div style="text-align:center;padding:60px;color:var(--muted)">
+    <div style="font-size:48px;margin-bottom:12px">📎</div>
+    <div style="font-size:15px;font-weight:500;margin-bottom:8px">첨부파일이 없어요</div>
+    <div style="font-size:13px">체크리스트 상세 페이지에서 댓글 작성 시 파일을 첨부해주세요</div>
+  </div>`:`
+
+  <!-- 이미지 파일 -->
+  ${fileTypes.image.length?`<div class="card" style="margin-bottom:16px">
+    <div class="sh"><span class="st"><i class="ti ti-photo oi"></i> 이미지 (${fileTypes.image.length}개)</span></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px">
+    ${fileTypes.image.map(f=>`<div style="border:0.5px solid var(--bd);border-radius:10px;overflow:hidden;cursor:pointer" onclick="location.href='detail.html?type=item&id=${f.item_id}'">
+      <img src="${f.data}" style="width:100%;height:120px;object-fit:cover;display:block">
+      <div style="padding:8px">
+        <div style="font-size:11px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:3px">${f.name}</div>
+        <div style="font-size:10px;color:var(--muted);margin-bottom:4px">${f.user} · ${new Date(f.created_at).toLocaleDateString('ko-KR',{month:'2-digit',day:'2-digit'})}</div>
+        <div style="display:flex;gap:4px;align-items:center">
+          <span style="font-size:9px;padding:1px 6px;border-radius:4px;background:${f.cat_color}22;color:${f.cat_color}">${f.cat_label}</span>
+          <button onclick="event.stopPropagation();downloadFileGlobal('${f.name}','${f.data}')" style="font-size:10px;padding:2px 7px;border:0.5px solid var(--bd);border-radius:5px;background:var(--sf);cursor:pointer;margin-left:auto"><i class="ti ti-download"></i></button>
+        </div>
+      </div>
+    </div>`).join('')}
+    </div>
+  </div>`:''}
+
+  <!-- 문서 파일 -->
+  ${fileTypes.doc.length?`<div class="card">
+    <div class="sh"><span class="st"><i class="ti ti-files oi"></i> 문서 & 기타 (${fileTypes.doc.length}개)</span></div>
+    ${fileTypes.doc.map(f=>`<div style="display:flex;align-items:center;gap:12px;padding:10px;border:0.5px solid var(--bd);border-radius:10px;margin-bottom:8px;cursor:pointer" onclick="location.href='detail.html?type=item&id=${f.item_id}'">
+      <div style="width:40px;height:40px;border-radius:8px;background:var(--ol);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <i class="ti ti-file" style="color:var(--o);font-size:20px"></i>
+      </div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${f.name}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">${f.user} · ${new Date(f.created_at).toLocaleDateString('ko-KR',{month:'2-digit',day:'2-digit'})} · ${(f.size/1024).toFixed(1)}KB</div>
+        <div style="font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px">📌 ${f.item_text}</div>
+      </div>
+      <div style="display:flex;gap:6px;flex-shrink:0">
+        <span style="font-size:10px;padding:2px 7px;border-radius:5px;background:${f.cat_color}22;color:${f.cat_color}">${f.cat_label}</span>
+        <button onclick="event.stopPropagation();downloadFileGlobal('${f.name}','${f.data}')" style="font-size:11px;padding:4px 10px;border:0.5px solid var(--bd);border-radius:7px;background:var(--sf);cursor:pointer"><i class="ti ti-download"></i> 다운로드</button>
+      </div>
+    </div>`).join('')}
+  </div>`:''}
+  `}
+`
+}
+
+window.downloadFileGlobal=(name,dataUrl)=>{
+  const a=document.createElement('a');a.href=dataUrl;a.download=name;document.body.appendChild(a);a.click();document.body.removeChild(a)
+}
+
+// ══════════════════════
 // 회의록
 // ══════════════════════
 function renderMTG(){
@@ -1415,12 +1510,19 @@ function renderActivityItem(h,i,lastIdx){
   const icon=isComplete?'ti-circle-check':isAdd?'ti-circle-plus':isEdit?'ti-pencil':'ti-circle-dot'
   const m=MEMBERS.find(m=>m.name===h.user_name)||{color:'#888'}
 
-  // 클릭 시 이동 대상 결정
+  // item_id 있으면 상세 페이지로, 없으면 탭으로 이동
   let clickAction=''
-  if(h.action.includes('회의록'))clickAction="showTab('mtg')"
-  else if(h.action.includes('KPI')||h.action.includes('kpi'))clickAction="showTab('kpi')"
-  else if(h.action.includes('액션')||h.action.includes('댓글'))clickAction="showTab('ck');setCat('회의록액션')"
-  else clickAction="showTab('ck')"
+  if(h.item_id){
+    clickAction=`location.href='detail.html?type=item&id=${h.item_id}'`
+  } else if(h.action.includes('회의록')){
+    clickAction="showTab('mtg')"
+  } else if(h.action.includes('KPI')){
+    clickAction="showTab('kpi')"
+  } else if(h.action.includes('액션')){
+    clickAction="showTab('ck');setCat('회의록액션')"
+  } else {
+    clickAction="showTab('ck')"
+  }
 
   return`<div onclick="${clickAction}" style="display:flex;align-items:flex-start;gap:10px;padding:10px 4px;border-bottom:0.5px solid var(--bd);cursor:pointer;border-radius:8px;transition:background .12s;margin:0 -4px" onmouseover="this.style.background='var(--sf)'" onmouseout="this.style.background=''">
     <div style="position:relative;flex-shrink:0">
