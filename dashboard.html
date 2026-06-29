@@ -736,7 +736,8 @@ function renderCheckItems(items){
       </div>
     </div>
     <div class="ck-right" onclick="event.stopPropagation()">
-      ${item.status==='완료'?`<button class="btn btn-o" style="padding:3px 8px;font-size:11px;background:#3B6D11;border-color:#3B6D11" onclick="event.stopPropagation();updateItemField('${item.id}','status','검증완료')"><i class="ti ti-shield-check"></i> 검증</button>`:''}
+      ${item.status==='완료'?`<button class="btn" style="padding:3px 8px;font-size:11px;background:#FEF0E6;color:#B84E06;border-color:#F5C49A" onclick="event.stopPropagation();updateItemField('${item.id}','status','검증완료')"><i class="ti ti-clock"></i> 검증대기</button>`:''}
+      ${item.status==='검증완료'?`<span style="font-size:11px;color:#3B6D11;font-weight:500;white-space:nowrap;display:flex;align-items:center;gap:3px"><i class="ti ti-shield-check"></i> 검증완료 ${item.verified_by||''}</span>`:''}
       <button class="btn btn-g" style="padding:3px 8px;font-size:11px" onclick="location.href='detail.html?type=item&id=${item.id}'">
         <i class="ti ti-pencil"></i>${cmts.length?' '+cmts.length:''}
       </button>
@@ -747,8 +748,8 @@ function renderCheckItems(items){
       ${subs.map(s=>`<div class="sub-row" onclick="location.href='detail.html?type=item&id=${item.id}'">
       <input type="checkbox" ${s.done?'checked':''} onclick="event.stopPropagation()" onchange="toggleSub('${s.id}','${item.id}',this.checked)" style="accent-color:var(--o);width:13px;height:13px;flex-shrink:0">
       <span style="${s.done?'text-decoration:line-through;color:var(--muted);':''}flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.text}</span>
-      <span class="vbadge ${s.verified?'ok':''}">${s.verified?'✓검증':'미검증'}</span>
-      ${s.done&&!s.verified?`<button class="btn btn-o" style="font-size:10px;padding:1px 6px" onclick="event.stopPropagation();verifySub('${s.id}','${item.id}')">검증</button>`:''}
+      ${s.done&&!s.verified?`<button class="btn" style="font-size:10px;padding:1px 7px;background:#FEF0E6;color:#B84E06;border-color:#F5C49A" onclick="event.stopPropagation();verifySub('${s.id}','${item.id}')"><i class="ti ti-clock"></i> 검증대기</button>`:''}
+      ${s.verified?`<span style="font-size:10px;color:#3B6D11;font-weight:500;white-space:nowrap"><i class="ti ti-shield-check"></i> 검증완료 ${s.verified_by||''}</span>`:''}
       </div>`).join('')}
       <div style="display:flex;gap:5px;padding:2px 8px;margin-top:0">
         <input id="ns-${item.id}" style="flex:1;font-size:12px;padding:5px 8px;border:0.5px solid var(--bd);border-radius:7px;background:var(--sf);color:var(--text);outline:none" placeholder="세부 항목 추가..." onkeydown="if(event.key==='Enter'){addSub('${item.id}');event.preventDefault()}">
@@ -823,8 +824,12 @@ window.toggleItem=async(id,checked)=>{
   await logH(`항목 ${checked?'완료':'취소'}`,item.text,id);await loadAll()
 }
 window.updateItemField=async(id,field,val)=>{
-  await sb.from('checklist_items').update({[field]:val,updated_at:new Date().toISOString()}).eq('id',id)
-  const item=D.items.find(i=>i.id===id);await logH(`${field} 변경`,item?.text||'',id);await loadAll()
+  const upd={[field]:val,updated_at:new Date().toISOString()}
+  if(field==='status'&&val==='검증완료'){upd.verified_by=curUser.name;upd.verified_at=new Date().toISOString()}
+  await sb.from('checklist_items').update(upd).eq('id',id)
+  const item=D.items.find(i=>i.id===id)
+  const label=val==='검증완료'?`검증완료 (${curUser.name})`:`${field} 변경`
+  await logH(label,item?.text||'',id);await loadAll()
 }
 window.toggleSub=async(sid,itemId,checked)=>{
   await sb.from('checklist_subs').update({done:checked,done_by:checked?curUser.name:null,verified:false}).eq('id',sid)
