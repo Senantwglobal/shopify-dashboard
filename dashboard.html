@@ -156,7 +156,7 @@ select.inp{cursor:pointer}
 @media(max-width:640px){.two{grid-template-columns:1fr}.three{grid-template-columns:1fr}.cnt{padding:12px}}
 </style>
 </head>
-<body>
+<body style="visibility:hidden">
 
 <div class="hdr">
   <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
@@ -188,7 +188,16 @@ select.inp{cursor:pointer}
   <button class="nb" onclick="showTab('files')" id="tab-files"><i class="ti ti-paperclip"></i>파일 보관함</button>
 </div>
 
-<div class="cnt" id="mc"><div style="text-align:center;padding:60px;color:var(--muted)">로딩중...</div></div>
+<div class="cnt" id="mc">
+  <div style="animation:pulse 1.5s ease-in-out infinite">
+    <div style="height:110px;background:var(--card);border-radius:12px;margin-bottom:14px;border:0.5px solid var(--bd)"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div style="height:200px;background:var(--card);border-radius:12px;border:0.5px solid var(--bd)"></div>
+      <div style="height:200px;background:var(--card);border-radius:12px;border:0.5px solid var(--bd)"></div>
+    </div>
+  </div>
+</div>
+<style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}</style>
 <div class="toast" id="toast"></div>
 
 <script type="module">
@@ -314,6 +323,7 @@ async function loadAll(){
   ])
   D={cats:cR.data||[],items:iR.data||[],subs:sR.data||[],comments:cmR.data||[],kpiRows:kR.data||[],kpiAnalysis:kaR.data||{},actionItems:aR.data||[],meetings:mR.data||[],history:hR.data||[],kpiDaily:kdR.data||[]}
   updateNotif();render()
+  document.body.style.visibility='visible'
 }
 
 // 실시간

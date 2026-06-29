@@ -409,14 +409,10 @@ function renderItemDetail(item,subs,comments,cats){
   window.downloadFile=(name,dataUrl)=>{const a=document.createElement('a');a.href=dataUrl;a.download=name;document.body.appendChild(a);a.click();document.body.removeChild(a)}
 }
 
-</script>
-</body>
-</html>
+
 
 window.submitComment=async(itemId)=>{
-    const el=document.getElementById('cmt-text')
-    const txt=el?.value?.trim()
-    console.log('submitComment called, itemId:', itemId, 'txt:', txt, 'el:', el)
+    const txt=document.getElementById('cmt-text')?.value?.trim()
     const lnk=document.getElementById('cmt-link')?.value.trim()
     const ns=document.getElementById('cmt-status')?.value
     const fileInput=document.getElementById('cmt-file')
@@ -463,3 +459,6 @@ async function loadUXDetail(q,idx){
     await logH('UX 댓글 등록',title);toast('등록됨');await loadUXDetail(q,idx)
   }
 }
+</script>
+</body>
+</html>
