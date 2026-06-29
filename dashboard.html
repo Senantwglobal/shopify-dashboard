@@ -720,7 +720,7 @@ function renderCheckItems(items){
     const sdone=subs.filter(s=>s.done).length
     const isExp=expandCks[item.id]!==false
     const owners=item.owners?.length?item.owners:item.owner?[item.owner]:[]
-    return`<div class="ck-item ${item.done?'done-item':''}" onclick="location.href='detail.html?type=item&id=${item.id}'">
+    return`<div class="ck-item ${item.done?'done-item':''}" onclick="if(event.target.closest('button'))return;location.href='detail.html?type=item&id=${item.id}'">
     <input class="ck-cb" type="checkbox" ${item.done?'checked':''} onclick="event.stopPropagation()" onchange="toggleItem('${item.id}',this.checked)">
     <div class="ck-body" style="cursor:pointer">
       <div class="ck-title ${item.done?'done':''}">${item.text}</div>
@@ -736,7 +736,7 @@ function renderCheckItems(items){
       </div>
     </div>
     <div class="ck-right" onclick="event.stopPropagation()">
-      ${item.status==='완료'?`<button class="btn" style="padding:3px 8px;font-size:11px;background:#FEF0E6;color:#B84E06;border-color:#F5C49A" onclick="event.stopPropagation();updateItemField('${item.id}','status','검증완료')"><i class="ti ti-clock"></i> 검증대기</button>`:''}
+      ${item.status==='완료'?`<button class="btn" style="padding:3px 8px;font-size:11px;background:#FEF0E6;color:#B84E06;border-color:#F5C49A" onclick="event.stopPropagation();event.preventDefault();updateItemField('${item.id}','status','검증완료');return false"><span style="pointer-events:none"><i class="ti ti-clock"></i> 검증대기</span></button>`:''}
       ${item.status==='검증완료'?`<span style="font-size:11px;color:#3B6D11;font-weight:500;white-space:nowrap;display:flex;align-items:center;gap:3px"><i class="ti ti-shield-check"></i> 검증완료 ${item.verified_by||''}</span>`:''}
       <button class="btn btn-g" style="padding:3px 8px;font-size:11px" onclick="location.href='detail.html?type=item&id=${item.id}'">
         <i class="ti ti-pencil"></i>${cmts.length?' '+cmts.length:''}
@@ -745,10 +745,10 @@ function renderCheckItems(items){
     </div>
     </div>
     <div class="sub-wrap ${isExp?'open':''}" id="sub-${item.id}">
-      ${subs.map(s=>`<div class="sub-row" onclick="location.href='detail.html?type=item&id=${item.id}'">
+      ${subs.map(s=>`<div class="sub-row" onclick="if(event.target.closest('button'))return;location.href='detail.html?type=item&id=${item.id}'">
       <input type="checkbox" ${s.done?'checked':''} onclick="event.stopPropagation()" onchange="toggleSub('${s.id}','${item.id}',this.checked)" style="accent-color:var(--o);width:13px;height:13px;flex-shrink:0">
       <span style="${s.done?'text-decoration:line-through;color:var(--muted);':''}flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.text}</span>
-      ${s.done&&!s.verified?`<button class="btn" style="font-size:10px;padding:1px 7px;background:#FEF0E6;color:#B84E06;border-color:#F5C49A" onclick="event.stopPropagation();verifySub('${s.id}','${item.id}')"><i class="ti ti-clock"></i> 검증대기</button>`:''}
+      ${s.done&&!s.verified?`<button class="btn" style="font-size:10px;padding:1px 7px;background:#FEF0E6;color:#B84E06;border-color:#F5C49A" onclick="event.stopPropagation();event.preventDefault();verifySub('${s.id}','${item.id}');return false"><span style="pointer-events:none"><i class="ti ti-clock"></i> 검증대기</span></button>`:''}
       ${s.verified?`<span style="font-size:10px;color:#3B6D11;font-weight:500;white-space:nowrap"><i class="ti ti-shield-check"></i> 검증완료 ${s.verified_by||''}</span>`:''}
       </div>`).join('')}
       <div style="display:flex;gap:5px;padding:2px 8px;margin-top:0">
