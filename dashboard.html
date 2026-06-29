@@ -979,7 +979,8 @@ window.removeAIOwner=async(id,name)=>{
   await logH('담당자 제거',a.text);await loadAll();openAIDetail(id)
 }
 window.saveAICmt=async(id)=>{
-  const txt=document.getElementById('ai-cmt-'+id)?.value.trim();if(!txt)return
+  const el=document.getElementById('ai-cmt-'+id)||document.querySelector('[id^="ai-cmt-"]')
+  const txt=el?.value.trim();if(!txt)return
   const a=D.actionItems.find(a=>a.id===id);if(!a)return
   const comments=[...(a.comments||[]),{user:curUser.name,text:txt,time:ts()}]
   await sb.from('action_items').update({comments,last_comment:txt,last_comment_by:curUser.name,updated_at:new Date().toISOString()}).eq('id',id)
