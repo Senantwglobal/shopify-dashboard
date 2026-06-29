@@ -296,7 +296,7 @@ function updateNotif(){
 
 // ── 데이터 로드 ──
 async function loadAll(){
-  const [cR,iR,sR,cmR,kR,kaR,aR,mR,hR]=await Promise.all([
+  const [cR,iR,sR,cmR,kR,kaR,aR,mR,hR,kdR]=await Promise.all([
     sb.from('checklist_categories').select('*').order('sort_order'),
     sb.from('checklist_items').select('*').order('sort_order'),
     sb.from('checklist_subs').select('*').order('sort_order'),
@@ -306,8 +306,9 @@ async function loadAll(){
     sb.from('action_items').select('*').order('created_at'),
     sb.from('meetings').select('*').order('date',{ascending:false}),
     sb.from('history').select('*').order('created_at',{ascending:false}).limit(100),
+    sb.from('kpi_daily').select('*').order('record_date'),
   ])
-  D={cats:cR.data||[],items:iR.data||[],subs:sR.data||[],comments:cmR.data||[],kpiRows:kR.data||[],kpiAnalysis:kaR.data||{},actionItems:aR.data||[],meetings:mR.data||[],history:hR.data||[]}
+  D={cats:cR.data||[],items:iR.data||[],subs:sR.data||[],comments:cmR.data||[],kpiRows:kR.data||[],kpiAnalysis:kaR.data||{},actionItems:aR.data||[],meetings:mR.data||[],history:hR.data||[],kpiDaily:kdR.data||[]}
   updateNotif();render()
 }
 
@@ -948,163 +949,218 @@ window.saveAICmt=async(id)=>{
 // KPI 탭
 // ══════════════════════
 function renderKPITab(){
-  const cols=[{k:'baseline',l:'전환 전'},{k:'d1',l:'D+1'},{k:'d3',l:'D+3'},{k:'d7',l:'D+7'},{k:'d14',l:'D+14'}]
-  const gv=(col,m)=>{const r=D.kpiRows.find(r=>r.col===col&&r.metric===m);return r?.value||''}
-  const gn=(col,m)=>{const v=gv(col,m);return v?parseFloat(v.replace(/[,원%]/g,''))||0:null}
-
-  // KPI 정의 (카테고리별)
   const KPI_DEF=[
-    // 매출
-    {id:'revenue',     label:'일평균 매출',    unit:'원',   cat:'매출',   icon:'ti-coin',     color:'#3B6D11', desc:'당일 총 결제 완료 금액'},
-    {id:'order_count', label:'일평균 주문수',   unit:'건',   cat:'매출',   icon:'ti-shopping-cart',color:'#185FA5',desc:'결제 완료 주문 건수'},
-    {id:'aov',         label:'평균 주문액(AOV)',unit:'원',   cat:'매출',   icon:'ti-receipt',  color:'#0F6E56', desc:'총매출 ÷ 주문수'},
-    // 전환
-    {id:'cvr',         label:'전환율(CVR)',    unit:'%',    cat:'전환',   icon:'ti-arrows-right',color:'#534AB7',desc:'방문자 대비 구매 완료율'},
-    {id:'cart_abandon', label:'장바구니 이탈률',unit:'%',   cat:'전환',   icon:'ti-shopping-cart-off',color:'#854F0B',desc:'장바구니 추가 후 미결제율 — 낮을수록 좋음'},
-    {id:'checkout_drop',label:'체크아웃 이탈률',unit:'%',  cat:'전환',   icon:'ti-door-exit',color:'#A32D2D',desc:'체크아웃 진입 후 미완료율 — 낮을수록 좋음'},
-    // 결제·기술
-    {id:'pay_fail',    label:'결제 실패율',    unit:'%',    cat:'결제·기술',icon:'ti-credit-card-off',color:'#A32D2D',desc:'결제 시도 대비 실패율 — 3% 이하 목표'},
-    {id:'err_404',     label:'404 오류 수',   unit:'건',   cat:'결제·기술',icon:'ti-error-404',color:'#993556',desc:'URL 리다이렉트 누락 — 0건 목표'},
-    {id:'supla_miss',  label:'SUPLA 누락률',  unit:'%',    cat:'결제·기술',icon:'ti-package-off',color:'#854F0B',desc:'주문연동 누락 건수 비율 — 0% 목표'},
-    // 회원·CS
-    {id:'login_ok',    label:'로그인 성공률',  unit:'%',    cat:'회원·CS', icon:'ti-user-check',color:'#0F6E56',desc:'첫 방문 이메일 매칭 성공률 — 99% 이상 목표'},
-    {id:'cs_count',    label:'CS 문의량',     unit:'건',   cat:'회원·CS', icon:'ti-headset',  color:'#993556',desc:'일일 CS 접수 건수 — 전환 전 대비 모니터'},
-    // SEO
-    {id:'seo_index',   label:'검색 색인 수',  unit:'개',   cat:'SEO',    icon:'ti-search',   color:'#185FA5',desc:'GSC 기준 색인된 URL 수 — 전환 전 유지 목표'},
-    {id:'organic',     label:'유기 검색 유입', unit:'명',   cat:'SEO',    icon:'ti-brand-google',color:'#3B6D11',desc:'검색엔진 통한 방문자 수'},
+    {id:'revenue',     label:'일평균 매출',    unit:'원',   cat:'매출',   icon:'ti-coin',            color:'#3B6D11'},
+    {id:'order_count', label:'일평균 주문수',   unit:'건',   cat:'매출',   icon:'ti-shopping-cart',   color:'#185FA5'},
+    {id:'aov',         label:'평균 주문액(AOV)',unit:'원',   cat:'매출',   icon:'ti-receipt',         color:'#0F6E56'},
+    {id:'cvr',         label:'전환율(CVR)',    unit:'%',    cat:'전환',   icon:'ti-arrows-right',    color:'#534AB7'},
+    {id:'cart_abandon',label:'장바구니 이탈률',unit:'%',    cat:'전환',   icon:'ti-shopping-cart-off',color:'#854F0B'},
+    {id:'checkout_drop',label:'체크아웃 이탈률',unit:'%',  cat:'전환',   icon:'ti-door-exit',       color:'#A32D2D'},
+    {id:'pay_fail',    label:'결제 실패율',    unit:'%',    cat:'결제·기술',icon:'ti-credit-card-off',color:'#A32D2D'},
+    {id:'err_404',     label:'404 오류 수',   unit:'건',   cat:'결제·기술',icon:'ti-error-404',      color:'#993556'},
+    {id:'supla_miss',  label:'SUPLA 누락률',  unit:'%',    cat:'결제·기술',icon:'ti-package-off',    color:'#854F0B'},
+    {id:'login_ok',    label:'로그인 성공률',  unit:'%',    cat:'회원·CS', icon:'ti-user-check',     color:'#0F6E56'},
+    {id:'cs_count',    label:'CS 문의량',     unit:'건',   cat:'회원·CS', icon:'ti-headset',        color:'#993556'},
+    {id:'seo_index',   label:'검색 색인 수',  unit:'개',   cat:'SEO',    icon:'ti-search',          color:'#185FA5'},
+    {id:'organic',     label:'유기 검색 유입', unit:'명',   cat:'SEO',    icon:'ti-brand-google',    color:'#3B6D11'},
   ]
-
+  const IS_LOW_BETTER=['pay_fail','cart_abandon','checkout_drop','err_404','supla_miss','cs_count']
   const catGroups=[...new Set(KPI_DEF.map(k=>k.cat))]
 
-  // 상태 계산 (baseline 대비 변화율)
-  function calcChange(id){
-    const base=gn('baseline',id), d1=gn('d1',id)||gn('d3',id)||gn('d7',id)
-    if(!base||!d1)return null
-    const change=((d1-base)/base*100).toFixed(1)
-    return{change:parseFloat(change),isGood:['pay_fail','cart_abandon','checkout_drop','err_404','supla_miss','cs_count'].includes(id)?parseFloat(change)<=0:parseFloat(change)>=0}
+  // 날짜별 데이터 처리
+  const daily=D.kpiDaily||[]
+  const dates=[...new Set(daily.map(d=>d.record_date))].sort()
+  const baselineDate=dates[0]||null
+
+  // 지표별 최신값 & 기준값
+  function getVal(metricId, date){
+    const r=daily.find(d=>d.metric===metricId&&d.record_date===date)
+    return r?.value??null
+  }
+  function getLatest(metricId){
+    const rows=daily.filter(d=>d.metric===metricId).sort((a,b)=>b.record_date.localeCompare(a.record_date))
+    return rows[0]?.value??null
+  }
+  function getBaseline(metricId){
+    if(!baselineDate)return null
+    return getVal(metricId,baselineDate)
+  }
+  function calcChange(metricId){
+    const base=getBaseline(metricId), cur=getLatest(metricId)
+    if(base===null||cur===null||base===0)return null
+    const pct=((cur-base)/Math.abs(base)*100)
+    const isLowBetter=IS_LOW_BETTER.includes(metricId)
+    const isGood=isLowBetter?pct<=0:pct>=0
+    return{pct:parseFloat(pct.toFixed(1)),isGood,isCrit:!isGood&&Math.abs(pct)>=20,isWarn:!isGood&&Math.abs(pct)>=15}
+  }
+
+  // 오늘 날짜
+  const todayStr=new Date().toISOString().slice(0,10)
+
+  // SVG 라인 차트 생성
+  function miniChart(metricId, color){
+    const rows=daily.filter(d=>d.metric===metricId).sort((a,b)=>a.record_date.localeCompare(b.record_date))
+    if(rows.length<2)return`<div style="height:40px;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--muted)">데이터 2개 이상 필요</div>`
+    const vals=rows.map(r=>r.value)
+    const min=Math.min(...vals), max=Math.max(...vals)
+    const range=max-min||1
+    const W=160, H=40, pad=4
+    const pts=vals.map((v,i)=>`${pad+i*(W-pad*2)/(vals.length-1)},${H-pad-(v-min)/range*(H-pad*2)}`)
+    return`<svg width="${W}" height="${H}" style="overflow:visible"><polyline points="${pts.join(' ')}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round"/>${pts.map((p,i)=>{const[x,y]=p.split(',');return`<circle cx="${x}" cy="${y}" r="3" fill="${color}"/>`}).join('')}</svg>`
   }
 
   return`
-  <!-- 헤더 -->
   <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;flex-wrap:wrap;gap:8px">
     <div>
       <div style="font-size:16px;font-weight:500">KPI 대시보드</div>
       <div style="font-size:12px;color:var(--muted);margin-top:3px">전환 전 기준값 대비 실시간 추적 — <span style="color:#A32D2D;font-weight:500">-20% 초과 시 즉시 대응</span></div>
     </div>
-    <div style="display:flex;gap:8px">
-      <button class="btn" onclick="openAddKPI()"><i class="ti ti-plus"></i> 지표 추가</button>
-      <button class="btn btn-o" onclick="openKPIInput()"><i class="ti ti-pencil"></i> 수치 입력</button>
-    </div>
+    <button class="btn btn-o" onclick="openKPIInput()"><i class="ti ti-pencil"></i> 수치 입력</button>
   </div>
 
-  <!-- KPI 카드 그리드 (카테고리별) -->
+  <!-- KPI 카드 그리드 -->
   ${catGroups.map(cat=>{
     const kpis=KPI_DEF.filter(k=>k.cat===cat)
     return`<div style="margin-bottom:20px">
     <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;padding-bottom:6px;border-bottom:0.5px solid var(--bd)">${cat}</div>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px">
     ${kpis.map(k=>{
-      const base=gv('baseline',k.id), cur=gv('d1',k.id)||gv('d3',k.id)||gv('d7',k.id)||gv('d14',k.id)
+      const base=getBaseline(k.id), cur=getLatest(k.id)
       const ch=calcChange(k.id)
-      const hasData=!!base
-      return`<div class="card" style="padding:14px;cursor:pointer;border-left:3px solid ${k.color}" onclick="openKPIInput()">
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px">
-          <div>
-            <div style="font-size:11px;color:var(--muted);margin-bottom:4px;display:flex;align-items:center;gap:4px">
-              <i class="ti ${k.icon}" style="color:${k.color}"></i>${k.label}
-            </div>
-            <div style="font-size:24px;font-weight:600;color:${hasData?k.color:'var(--muted)'}">${cur||base||'—'}<span style="font-size:12px;font-weight:400;color:var(--muted);margin-left:3px">${cur||base?k.unit:''}</span></div>
-          </div>
-          ${ch?`<div style="text-align:right">
-            <div style="font-size:13px;font-weight:600;color:${ch.isGood?'#3B6D11':'#A32D2D'}">${ch.change>0?'+':''}${ch.change}%</div>
-            <div style="font-size:10px;color:var(--muted)">vs 기준값</div>
+      const hasData=base!==null
+      const dispVal=cur!==null?cur:base
+      return`<div class="card" style="padding:14px;border-left:3px solid ${k.color}">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;display:flex;align-items:center;gap:4px">
+          <i class="ti ${k.icon}" style="color:${k.color}"></i>${k.label}
+        </div>
+        <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:8px">
+          <div style="font-size:26px;font-weight:600;color:${hasData?k.color:'var(--muted)'}">${dispVal!==null?dispVal.toLocaleString():'—'}<span style="font-size:12px;font-weight:400;color:var(--muted);margin-left:3px">${dispVal!==null?k.unit:''}</span></div>
+          ${ch?`<div style="text-align:right;flex-shrink:0;margin-left:8px">
+            <div style="font-size:14px;font-weight:700;color:${ch.isGood?'#3B6D11':ch.isCrit?'#A32D2D':'var(--o)'}">${ch.pct>0?'+':''}${ch.pct}%</div>
+            <div style="font-size:9px;color:var(--muted)">vs 기준</div>
           </div>`:''}
         </div>
-        ${base?`<div style="margin-bottom:6px">
+        ${base!==null?`<div style="margin-bottom:6px">
           <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-bottom:3px">
-            <span>기준: ${base}${k.unit}</span>
-            ${ch?`<span style="color:${Math.abs(ch.change)>=20?'#A32D2D':Math.abs(ch.change)>=15?'var(--o)':'var(--muted)'}">${Math.abs(ch.change)>=20?'⚠ 임계초과':Math.abs(ch.change)>=15?'△ 주의':''}</span>`:''}
+            <span>기준: ${base.toLocaleString()}${k.unit}</span>
+            ${ch?`<span style="color:${ch.isCrit?'#A32D2D':ch.isWarn?'var(--o)':'var(--muted)'};font-weight:500">${ch.isCrit?'⚠ 즉시대응':ch.isWarn?'△ 주의':''}</span>`:''}
           </div>
-          <div class="pgb" style="height:4px"><div class="pgf" style="width:${ch?Math.min(Math.abs(ch.change)/20*100,100):0}%;background:${ch&&!ch.isGood?(Math.abs(ch.change)>=20?'#A32D2D':Math.abs(ch.change)>=15?'var(--o)':'#639922'):'#639922'}"></div></div>
-        </div>`:`<div style="font-size:11px;color:var(--muted);background:var(--sf);border-radius:6px;padding:6px 8px"><i class="ti ti-pencil" style="font-size:10px"></i> 기준값 입력 필요</div>`}
-        <div style="font-size:10px;color:var(--muted);margin-top:4px">${k.desc}</div>
+          <div class="pgb" style="height:3px"><div class="pgf" style="width:${ch?Math.min(Math.abs(ch.pct)/20*100,100):0}%;background:${ch&&!ch.isGood?(ch.isCrit?'#A32D2D':ch.isWarn?'var(--o)':'#639922'):'#639922'}"></div></div>
+        </div>`:`<div style="font-size:11px;color:var(--muted);background:var(--sf);border-radius:6px;padding:5px 8px">기준값 입력 필요</div>`}
+        <div style="margin-top:8px">${miniChart(k.id,k.color)}</div>
       </div>`
     }).join('')}
     </div></div>`
   }).join('')}
 
-  <!-- D+별 트렌드 테이블 -->
-  <div class="card">
-    <div class="sh"><span class="st"><i class="ti ti-table oi"></i> D-Day 기준 추적표</span></div>
-    <div style="overflow-x:auto">
+  <!-- 날짜별 입력 테이블 -->
+  <div class="card" style="margin-top:8px">
+    <div class="sh"><span class="st"><i class="ti ti-table oi"></i> 날짜별 데이터 추적표</span>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        ${dates.length?`<span style="font-size:11px;color:var(--muted);align-self:center">기준일: ${baselineDate}</span>`:''}
+        <button class="btn btn-o" style="font-size:12px" onclick="openKPIInput()"><i class="ti ti-plus"></i> 오늘 데이터 입력</button>
+      </div>
+    </div>
+    ${dates.length?`<div style="overflow-x:auto">
     <table class="kpi-tbl">
     <thead><tr>
       <th style="min-width:140px">지표</th>
-      ${cols.map(c=>`<th style="text-align:center;min-width:90px">${c.l}</th>`).join('')}
+      ${dates.map(d=>`<th style="text-align:center;min-width:90px;white-space:nowrap">${d.slice(5)}<br><span style="font-weight:400;font-size:10px">${d===baselineDate?'기준값':''}</span></th>`).join('')}
       <th style="text-align:center">변화율</th>
       <th style="text-align:center">상태</th>
     </tr></thead>
     <tbody>
     ${KPI_DEF.map(k=>{
       const ch=calcChange(k.id)
-      const isWarn=ch&&!ch.isGood&&Math.abs(ch.change)>=15
-      const isCrit=ch&&!ch.isGood&&Math.abs(ch.change)>=20
-      return`<tr style="${isCrit?'background:#FEF2F2':isWarn?'background:#FFFBEB':''}">
-      <td style="font-weight:500">${k.label}</td>
-      ${cols.map(c=>`<td style="text-align:center"><input class="kpi-cell" value="${gv(c.k,k.id)}" placeholder="—" onchange="saveKPI('${c.k}','${k.id}',this.value)" style="text-align:center;width:80px"></td>`).join('')}
-      <td style="text-align:center;font-weight:600;color:${ch?(ch.isGood?'#3B6D11':'#A32D2D'):'var(--muted)'}">${ch?`${ch.change>0?'+':''}${ch.change}%`:'—'}</td>
-      <td style="text-align:center">${isCrit?'<span class="badge br">⚠ 즉시대응</span>':isWarn?'<span class="badge bo">△ 주의</span>':ch?'<span class="badge bg">정상</span>':'<span class="badge bgr">미입력</span>'}</td>
+      return`<tr style="${ch?.isCrit?'background:#FEF2F2':ch?.isWarn?'background:#FFFBEB':''}">
+      <td style="font-weight:500;white-space:nowrap"><i class="ti ${k.icon}" style="color:${k.color};font-size:11px"></i> ${k.label}</td>
+      ${dates.map(d=>{const v=getVal(k.id,d);return`<td style="text-align:center;font-size:13px">${v!==null?v.toLocaleString()+k.unit:'—'}</td>`}).join('')}
+      <td style="text-align:center;font-weight:700;color:${ch?(ch.isGood?'#3B6D11':ch.isCrit?'#A32D2D':'var(--o)'):'var(--muted)'}">${ch?`${ch.pct>0?'+':''}${ch.pct}%`:'—'}</td>
+      <td style="text-align:center">${ch?.isCrit?'<span class="badge br">⚠ 즉시대응</span>':ch?.isWarn?'<span class="badge bo">△ 주의</span>':ch?'<span class="badge bg">정상</span>':'<span class="badge bgr">미입력</span>'}</td>
       </tr>`
     }).join('')}
     </tbody>
     </table>
-    </div>
+    </div>`:`<div style="text-align:center;padding:30px;color:var(--muted)"><div style="font-size:32px;margin-bottom:8px">📊</div><div style="font-size:14px;margin-bottom:12px">아직 데이터가 없어요<br><span style="font-size:12px">전환 전 기준값부터 입력해주세요</span></div><button class="btn btn-o" onclick="openKPIInput()"><i class="ti ti-pencil"></i> 첫 데이터 입력</button></div>`}
   </div>
 
-  <!-- 분석 3칸 -->
+  <!-- 분석 -->
   <div class="three">
-  <div class="card">
-    <div class="sh"><span class="st"><i class="ti ti-trending-down oi"></i> 매출 하락 분석</span></div>
-    <textarea class="inp" style="min-height:130px;margin:0" placeholder="원인 · 기간 · 영역 (SEO/UX/결제/로그인/리셀러)..." onchange="saveKA('sales_analysis',this.value)">${D.kpiAnalysis?.sales_analysis||''}</textarea>
-  </div>
-  <div class="card">
-    <div class="sh"><span class="st"><i class="ti ti-calculator oi"></i> 손실 산정</span></div>
-    <textarea class="inp" style="min-height:130px;margin:0" placeholder="3개월 평균 일매출: ___원&#10;하락율: ___%&#10;기간: ___일&#10;예상 손실: ___원" onchange="saveKA('loss_estimate',this.value)">${D.kpiAnalysis?.loss_estimate||''}</textarea>
-  </div>
-  <div class="card">
-    <div class="sh"><span class="st"><i class="ti ti-trending-up oi"></i> 회복 계획</span></div>
-    <textarea class="inp" style="min-height:130px;margin:0" placeholder="D+7 목표: ___&#10;D+14 목표: ___&#10;D+30 목표: ___&#10;회복 근거: ..." onchange="saveKA('recovery_plan',this.value)">${D.kpiAnalysis?.recovery_plan||''}</textarea>
-  </div>
+  <div class="card"><div class="sh"><span class="st"><i class="ti ti-trending-down oi"></i> 매출 하락 분석</span></div>
+  <textarea class="inp" style="min-height:120px;margin:0" placeholder="원인·기간·영역..." onchange="saveKA('sales_analysis',this.value)">${D.kpiAnalysis?.sales_analysis||''}</textarea></div>
+  <div class="card"><div class="sh"><span class="st"><i class="ti ti-calculator oi"></i> 손실 산정</span></div>
+  <textarea class="inp" style="min-height:120px;margin:0" placeholder="일매출×하락율×기간..." onchange="saveKA('loss_estimate',this.value)">${D.kpiAnalysis?.loss_estimate||''}</textarea></div>
+  <div class="card"><div class="sh"><span class="st"><i class="ti ti-trending-up oi"></i> 회복 계획</span></div>
+  <textarea class="inp" style="min-height:120px;margin:0" placeholder="D+7/D+14/D+30 목표..." onchange="saveKA('recovery_plan',this.value)">${D.kpiAnalysis?.recovery_plan||''}</textarea></div>
   </div>`
 }
 
 // KPI 수치 입력 모달
 window.openKPIInput=()=>{
-  const KPI_DEF=['revenue','order_count','aov','cvr','cart_abandon','checkout_drop','pay_fail','err_404','supla_miss','login_ok','cs_count','seo_index','organic']
-  const KPI_LABELS={'revenue':'일평균 매출','order_count':'일평균 주문수','aov':'평균 주문액','cvr':'전환율','cart_abandon':'장바구니 이탈률','checkout_drop':'체크아웃 이탈률','pay_fail':'결제 실패율','err_404':'404 오류 수','supla_miss':'SUPLA 누락률','login_ok':'로그인 성공률','cs_count':'CS 문의량','seo_index':'검색 색인 수','organic':'유기 검색 유입'}
-  const cols=[{k:'baseline',l:'전환 전 기준'},{k:'d1',l:'D+1'},{k:'d3',l:'D+3'},{k:'d7',l:'D+7'},{k:'d14',l:'D+14'}]
-  const gv=(col,m)=>{const r=D.kpiRows.find(r=>r.col===col&&r.metric===m);return r?.value||''}
+  const KPI_LABELS={revenue:'일평균 매출',order_count:'일평균 주문수',aov:'평균 주문액',cvr:'전환율',cart_abandon:'장바구니 이탈률',checkout_drop:'체크아웃 이탈률',pay_fail:'결제 실패율',err_404:'404 오류 수',supla_miss:'SUPLA 누락률',login_ok:'로그인 성공률',cs_count:'CS 문의량',seo_index:'검색 색인 수',organic:'유기 검색 유입'}
+  const KPI_UNITS={revenue:'원',order_count:'건',aov:'원',cvr:'%',cart_abandon:'%',checkout_drop:'%',pay_fail:'%',err_404:'건',supla_miss:'%',login_ok:'%',cs_count:'건',seo_index:'개',organic:'명'}
+  const ids=Object.keys(KPI_LABELS)
+  const todayStr=new Date().toISOString().slice(0,10)
+
+  // 오늘 기존 입력값
+  function getCurVal(id){const r=(D.kpiDaily||[]).find(d=>d.metric===id&&d.record_date===todayStr);return r?.value??''}
+
   const w=mkOv('kpi-input-ov')
-  w.innerHTML=`<div class="modal" style="width:700px">
+  w.innerHTML=`<div class="modal" style="width:520px">
   <div class="mh"><span style="font-weight:500"><i class="ti ti-pencil" style="color:var(--o)"></i> KPI 수치 입력</span><button class="btn btn-g" onclick="document.getElementById('kpi-input-ov').remove()"><i class="ti ti-x"></i></button></div>
-  <div class="mb" style="padding:12px">
-    <div style="font-size:12px;color:var(--muted);margin-bottom:10px;background:var(--ol);padding:8px 12px;border-radius:8px">기준값(전환 전)을 먼저 입력하고, D-Day 후 D+1부터 순차 입력하세요.</div>
-    <div style="overflow-x:auto">
-    <table class="kpi-tbl">
-    <thead><tr><th style="min-width:130px">지표</th>${cols.map(c=>`<th style="text-align:center;min-width:100px">${c.l}</th>`).join('')}</tr></thead>
-    <tbody>
-    ${KPI_DEF.map(m=>`<tr>
-    <td style="font-weight:500;font-size:12px">${KPI_LABELS[m]||m}</td>
-    ${cols.map(c=>`<td><input class="kpi-cell" id="ki-${c.k}-${m}" value="${gv(c.k,m)}" placeholder="—" style="text-align:center;width:90px" onchange="saveKPI('${c.k}','${m}',this.value)"></td>`).join('')}
-    </tr>`).join('')}
-    </tbody>
-    </table>
+  <div class="mb" style="padding:14px 18px">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+      <label style="font-size:12px;font-weight:500;white-space:nowrap">날짜 선택</label>
+      <input type="date" id="kpi-date" class="inp" style="margin:0;flex:1" value="${todayStr}" onchange="refreshKPIInputVals()">
+      <span style="font-size:11px;color:var(--muted);white-space:nowrap">첫 번째 날짜 = 기준값</span>
+    </div>
+    <div style="background:var(--ol);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--od);margin-bottom:12px">
+      <i class="ti ti-info-circle"></i> 전환 전 처음 입력한 날짜가 기준값(baseline)이 됩니다.
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px" id="kpi-input-grid">
+    ${ids.map(id=>`<div>
+      <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">${KPI_LABELS[id]} (${KPI_UNITS[id]})</label>
+      <input class="inp" style="margin:0" id="ki-${id}" type="number" step="any" placeholder="—" value="${getCurVal(id)}">
+    </div>`).join('')}
     </div>
   </div>
-  <div class="mf"><button class="btn btn-o" onclick="document.getElementById('kpi-input-ov').remove();toast('저장됨');loadAll()">완료</button></div>
+  <div class="mf">
+    <button class="btn" onclick="document.getElementById('kpi-input-ov').remove()">취소</button>
+    <button class="btn btn-o" onclick="saveKPIDaily()"><i class="ti ti-device-floppy"></i> 저장</button>
+  </div>
   </div>`
   document.body.appendChild(w)
 }
+
+window.refreshKPIInputVals=()=>{
+  const date=document.getElementById('kpi-date')?.value
+  if(!date)return
+  const ids=['revenue','order_count','aov','cvr','cart_abandon','checkout_drop','pay_fail','err_404','supla_miss','login_ok','cs_count','seo_index','organic']
+  ids.forEach(id=>{
+    const r=(D.kpiDaily||[]).find(d=>d.metric===id&&d.record_date===date)
+    const inp=document.getElementById('ki-'+id)
+    if(inp)inp.value=r?.value??''
+  })
+}
+
+window.saveKPIDaily=async()=>{
+  const date=document.getElementById('kpi-date')?.value
+  if(!date){toast('날짜를 선택해주세요.',false);return}
+  const ids=['revenue','order_count','aov','cvr','cart_abandon','checkout_drop','pay_fail','err_404','supla_miss','login_ok','cs_count','seo_index','organic']
+  const rows=ids.map(id=>{
+    const v=document.getElementById('ki-'+id)?.value
+    if(v===''||v===null||v===undefined)return null
+    return{metric:id,record_date:date,value:parseFloat(v),updated_by:curUser.name,updated_at:new Date().toISOString()}
+  }).filter(Boolean)
+  if(!rows.length){toast('입력값이 없어요.',false);return}
+  const {error}=await sb.from('kpi_daily').upsert(rows,{onConflict:'metric,record_date'})
+  if(error){toast('저장 실패: '+error.message,false);return}
+  await logH('KPI 수치 입력',date)
+  document.getElementById('kpi-input-ov').remove()
+  toast('저장됐어요 ✓')
+  await loadAll()
+}
+
 // ══════════════════════
 // 회의록
 // ══════════════════════
