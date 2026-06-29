@@ -212,6 +212,7 @@ window.activeCat='전체'
 window.setCat=(id)=>{window.activeCat=id;render()}
 window.ckFilter={status:'',priority:'',owner:'',requester:''}
 window.setCkFilter=(key,val)=>{window.ckFilter[key]=val;render()}
+window.resetCkFilter=()=>{window.ckFilter={status:'',priority:'',owner:'',requester:''};render()}
 let calYear=2026, calMonth=6
 let notifOpen=false
 let D={cats:[],items:[],subs:[],comments:[],kpiRows:[],kpiAnalysis:{},actionItems:[],meetings:[],history:[]}
@@ -284,7 +285,7 @@ window.toggleNotif=()=>{
   if(notifOpen)setTimeout(()=>document.addEventListener('click',()=>{notifOpen=false;document.getElementById('notif-panel').classList.remove('open')},{once:true}),100)
 }
 function updateNotif(){
-  const myItems=[...D.items,...D.actionItems].filter(a=>{
+  const myItems=D.items.filter(a=>{
     if(a.done||a.status==='완료')return false
     const o=getOwners(a)||[]
     return o.includes(curUser.name)||a.owner===curUser.name
@@ -348,7 +349,7 @@ function render(){
 // ══════════════════════
 function renderDash(){
   // 전체 항목 (체크리스트 + 액션아이템 통합)
-  const allItems=[...D.items,...D.actionItems]
+  const allItems=D.items
   const total=allItems.length
   const done=allItems.filter(i=>i.done||i.status==='완료').length
   const prog=total?Math.round(done/total*100):0
@@ -377,7 +378,7 @@ function renderDash(){
 
   // 담당자별 미완료
   const byMember=MEMBERS.map(m=>{
-    const mine=allItems.filter(a=>!a.done&&a.status!=='완료'&&(getOwners(a).includes(m.name)||a.owner===m.name))
+    const mine=D.items.filter(a=>!a.done&&a.status!=='완료'&&(getOwners(a).includes(m.name)||a.owner===m.name))
     return{...m,count:mine.length,items:mine.slice(0,3)}
   }).filter(m=>m.count>0)
 
@@ -482,7 +483,7 @@ function renderCal(){
   const first=new Date(yr,mo,1).getDay(),last=new Date(yr,mo+1,0).getDate()
   const days=['일','월','화','수','목','금','토']
   // 모든 항목 (체크리스트 + 액션)
-  const allItems=[...D.items,...D.actionItems]
+  const allItems=D.items
   function evsOn(d){
     const k=`${yr}-${String(mo+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`
     return allItems.filter(i=>i.deadline===k)
@@ -676,7 +677,7 @@ function renderCK(){
         <option value="">전체 요청자</option>
         ${MEMBERS.map(m=>`<option value="${m.name}" ${window.ckFilter.requester===m.name?'selected':''}>${m.name}</option>`).join('')}
       </select>
-      ${Object.values(window.ckFilter).some(v=>v)?`<button onclick="window.ckFilter={status:'',priority:'',owner:'',requester:''};render()" style="font-size:11px;padding:4px 10px;border:0.5px solid #A32D2D;border-radius:7px;background:#FCEBEB;color:#A32D2D;cursor:pointer"><i class="ti ti-x"></i> 필터 초기화</button>`:''}
+      ${Object.values(window.ckFilter).some(v=>v)?'<button onclick="resetCkFilter()" style="font-size:11px;padding:4px 10px;border:0.5px solid #A32D2D;border-radius:7px;background:#FCEBEB;color:#A32D2D;cursor:pointer"><i class="ti ti-x"></i> 필터 초기화</button>':''}
     </div>
     ${kpiNote}
     ${renderCheckItems(items)}
@@ -1628,8 +1629,7 @@ window.toggleActivityFeed=()=>{
 }
 
 window.openMemberTasks=(name)=>{
-  const allItems=[...D.items,...D.actionItems]
-  const myItems=allItems.filter(a=>{
+  const myItems=D.items.filter(a=>{
     const owners=Array.isArray(a.owners)&&a.owners.length?a.owners:a.owner?[a.owner]:[]
     return owners.includes(name)
   })
