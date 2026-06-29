@@ -180,10 +180,10 @@ function renderItemDetail(item,subs,comments,cats){
       <div class="field" style="grid-column:1/-1">
         <label>담당자 (복수 선택 가능)</label>
         <div style="display:flex;flex-wrap:wrap;gap:5px;padding:6px 8px;border:0.5px solid var(--bd);border-radius:8px;background:var(--sf);min-height:36px;margin-bottom:6px" id="det-owner-chips">
-          ${(item.owners?.length?item.owners:item.owner?[item.owner]:[]).map(o=>`<div class="ochip" style="background:${MEMBERS.find(m=>m.name===o)?.color||'#888'}">${o}<span class="ochip-x" onclick="detRemoveOwner('${item.id}','${o}',this.parentElement)">✕</span></div>`).join('')}
+          ${(item.owners?.length?item.owners:item.owner?[item.owner]:[]).map(o=>`<div class="ochip" style="background:${MEMBERS.find(m=>m.name===o)?.color||'#888'}">${o}<span class="ochip-x" onclick="event.stopPropagation();detRemoveOwner('${item.id}','${o}',this.parentElement)">✕</span></div>`).join('')}
           ${!(item.owners?.length||item.owner)?'<span style="font-size:12px;color:var(--muted);align-self:center">담당자 없음</span>':''}
         </div>
-        <select class="inp" style="margin:0" onchange="detAddOwner('${item.id}',this.value);this.value=''">
+        <select class="inp" style="margin:0" onchange="event.stopPropagation();detAddOwner('${item.id}',this.value);this.value=''">
           <option value="">+ 담당자 추가</option>
           ${MEMBERS.filter(m=>!(item.owners?.length?item.owners:item.owner?[item.owner]:[]).includes(m.name)).map(m=>`<option value="${m.name}">${m.name}</option>`).join('')}
         </select>
