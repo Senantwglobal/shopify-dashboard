@@ -55,6 +55,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .bgr{background:#F1EFE8;color:#5F5E5A}
 .bp{background:#EEEDFE;color:#534AB7}
 .bpu{background:#F0F0F0;color:#666666}
+.bgv{background:#1E4D0F;color:#fff}
 /* 입력 */
 .inp{width:100%;padding:8px 11px;border:0.5px solid var(--bd);border-radius:8px;font-size:13px;background:var(--sf);color:var(--text);margin-bottom:8px;outline:none;transition:border-color .15s}
 .inp:focus{border-color:var(--o)}
@@ -207,8 +208,8 @@ const sb=createClient('https://btutlgcidpjgedpypzri.supabase.co','eyJhbGciOiJIUz
 
 // ── 상수 ──
 const MC=['#E8680A','#534AB7','#0F6E56','#A32D2D','#185FA5','#854F0B','#993556','#5F5E5A']
-const STATUS_LIST=['할 일','진행중','검증대기','보류','완료']
-const STATUS_NEXT={'할 일':'진행중','진행중':'검증대기','검증대기':'완료','보류':'할 일','완료':'완료'}
+const STATUS_LIST=['할 일','진행중','검증대기','보류','완료','검증완료']
+const STATUS_NEXT={'할 일':'진행중','진행중':'검증대기','검증대기':'완료','완료':'완료','보류':'할 일','검증완료':'검증완료'}
 const TODAY=new Date()
 
 function getMembers(){
@@ -256,7 +257,7 @@ function dlc(dl,done){
   return`<span class="dlc dl-ok">D-${d}</span>`
 }
 function stBadge(s){
-  const m={'할 일':'bgr','진행중':'bb','검증대기':'bo','보류':'bpu','완료':'bg'}
+  const m={'할 일':'bgr','진행중':'bb','검증대기':'bo','보류':'bpu','완료':'bg','검증완료':'bgv'}
   return`<span class="badge ${m[s]||'bgr'}">${s||'할 일'}</span>`
 }
 function prBadge(p){return{critical:'<span class="badge br">긴급</span>',high:'<span class="badge bo">중요</span>',medium:'<span class="badge bg">보통</span>'}[p]||''}
@@ -296,7 +297,7 @@ window.toggleNotif=()=>{
 }
 function updateNotif(){
   const myItems=D.items.filter(a=>{
-    if(a.done||a.status==='완료')return false
+    if(a.done||a.status==='완료'||a.status==='검증완료')return false
     const o=getOwners(a)||[]
     return o.includes(curUser.name)||a.owner===curUser.name
   })
@@ -362,7 +363,7 @@ function renderDash(){
   // 전체 항목 (체크리스트 + 액션아이템 통합)
   const allItems=D.items
   const total=allItems.length
-  const done=allItems.filter(i=>i.done||i.status==='완료').length
+  const done=allItems.filter(i=>i.done||i.status==='완료'||i.status==='검증완료').length
   const prog=total?Math.round(done/total*100):0
 
   // 카테고리별 진행률
@@ -509,7 +510,7 @@ function renderCal(){
     <div class="cal-num">${d}</div>
     ${evs.slice(0,2).map(e=>{
       const color=e.category_id?getCatColor(e.category_id):'var(--o)'
-      const isDone=e.done||e.status==='완료'
+      const isDone=e.done||e.status==='완료'||e.status==='검증완료'
       return`<div class="cal-ev" draggable="true" style="background:${color}22;color:${color};border-left:2px solid ${color};${isDone?'text-decoration:line-through;opacity:.5':''}" onclick="event.stopPropagation();${e.category_id?`location.href='detail.html?type=item&id=${e.id}'`:`openAIDetail('${e.id}')`}" ondragstart="event.stopPropagation();calDragStart('${e.id}','${e.category_id?'item':'action'}',event)" ondragend="event.target.classList.remove('dragging')">${e.text}</div>`
     }).join('')}
     ${evs.length>2?`<div style="font-size:9px;color:var(--muted);padding:1px 2px">+${evs.length-2}개 더</div>`:''}
@@ -537,7 +538,7 @@ function renderCal(){
   <div class="sh"><span class="st"><i class="ti ti-list oi"></i> ${ML[mo]} 마감 항목 (${monthItems.length}건)</span></div>
   ${monthItems.map(i=>{
     const color=i.category_id?getCatColor(i.category_id):'var(--o)'
-    const isDone=i.done||i.status==='완료'
+    const isDone=i.done||i.status==='완료'||i.status==='검증완료'
     return`<div class="dash-row" style="cursor:pointer" onclick="${i.category_id?`location.href='detail.html?type=item&id=${i.id}'`:`openAIDetail('${i.id}')`}">
     <span style="width:8px;height:8px;border-radius:50%;background:${color};flex-shrink:0"></span>
     <div style="flex:1;min-width:0"><div style="font-size:13px;${isDone?'text-decoration:line-through;color:var(--muted)':''};overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${i.text}</div>
@@ -583,7 +584,7 @@ window.calClick=(ds)=>{
   </div>
   <div class="mb" style="padding:12px 16px">
     ${evs.map(e=>{
-      const isDone=e.done||e.status==='완료'
+      const isDone=e.done||e.status==='완료'||e.status==='검증완료'
       const color=e.category_id?getCatColor(e.category_id):'var(--o)'
       const catLabel=e.category_id?D.cats.find(c=>c.id===e.category_id)?.label||'':'회의록 액션'
       const owners=e.category_id?
@@ -619,9 +620,9 @@ function renderCK(){
   }
   const items=getItems()
   const total=items.length
-  const done=items.filter(i=>i.done||i.status==="완료").length
+  const done=items.filter(i=>i.done||i.status==="완료"||i.status==="검증완료").length
   // 완료 항목 기본 접힘
-  items.forEach(i=>{if((i.done||i.status==="완료")&&expandCks[i.id]===undefined)expandCks[i.id]=false})
+  items.forEach(i=>{if((i.done||i.status==="완료"||i.status==="검증완료")&&expandCks[i.id]===undefined)expandCks[i.id]=false})
 
   function catDone(id){
     if(id==="전체")return D.items.filter(i=>i.done).length
@@ -674,6 +675,7 @@ function renderCK(){
         <option value="검증대기" ${window.ckFilter.status==='검증대기'?'selected':''}>검증대기</option>
         <option value="보류" ${window.ckFilter.status==='보류'?'selected':''}>보류</option>
         <option value="완료" ${window.ckFilter.status==='완료'?'selected':''}>완료</option>
+        <option value="검증완료" ${window.ckFilter.status==='검증완료'?'selected':''}>검증완료</option>
       </select>
       <select style="font-size:12px;padding:4px 8px;border:0.5px solid var(--bd);border-radius:7px;background:var(--sf);color:var(--text);outline:none;cursor:pointer" onchange="setCkFilter('priority',this.value)">
         <option value="">전체 중요도</option>
@@ -734,7 +736,7 @@ function renderCheckItems(items){
       </div>
     </div>
     <div class="ck-right" onclick="event.stopPropagation()">
-      ${item.status==='검증대기'?`<button class="btn btn-o" style="padding:3px 8px;font-size:11px" onclick="event.stopPropagation();updateItemField('${item.id}','status','완료')"><i class="ti ti-check"></i> 검증완료</button>`:''}
+      ${item.status==='완료'?`<button class="btn btn-o" style="padding:3px 8px;font-size:11px;background:#3B6D11;border-color:#3B6D11" onclick="event.stopPropagation();updateItemField('${item.id}','status','검증완료')"><i class="ti ti-shield-check"></i> 검증</button>`:''}
       <button class="btn btn-g" style="padding:3px 8px;font-size:11px" onclick="location.href='detail.html?type=item&id=${item.id}'">
         <i class="ti ti-pencil"></i>${cmts.length?' '+cmts.length:''}
       </button>
@@ -767,16 +769,16 @@ function renderActionItems(){
     ${its.map(a=>{
       const owners=getOwners(a)
       return`<div class="ck-item">
-      <input class="ck-cb" type="checkbox" ${a.status==='완료'?'checked':''} onclick="event.stopPropagation()" onchange="updAI('${a.id}','status',this.checked?'완료':'할 일')">
+      <input class="ck-cb" type="checkbox" ${a.status==='완료'||a.status==='검증완료'?'checked':''} onclick="event.stopPropagation()" onchange="updAI('${a.id}','status',this.checked?'완료':'할 일')">
       <div class="ck-body">
-        <div class="ck-title ${a.status==='완료'?'done':''}">${a.text}</div>
+        <div class="ck-title ${a.status==='완료'||a.status==='검증완료'?'done':''}">${a.text}</div>
         <div class="ck-meta">
           <select class="st-sel" onclick="event.stopPropagation()" onchange="updAI('${a.id}','status',this.value)">
             ${STATUS_LIST.map(s=>`<option ${a.status===s?'selected':''}>${s}</option>`).join('')}
           </select>
           ${ownersEl(owners,18)}
           ${a.deadline?`<span>${fmtDate(a.deadline)}</span>`:''}
-          ${dlc(a.deadline,a.status==='완료')}
+          ${dlc(a.deadline,a.status==='완료'||a.status==='검증완료')}
           ${a.note?`<span style="color:var(--muted)">${a.note}</span>`:''}
         </div>
         ${(a.comments||[]).length?`<div style="font-size:11px;color:var(--muted);margin-top:3px;padding:3px 6px;background:var(--sf);border-radius:5px;border-left:2px solid var(--ob)"><span style="font-weight:500">${a.last_comment_by}</span>: ${a.last_comment}</div>`:''}
@@ -1647,7 +1649,7 @@ window.openMemberTasks=(name)=>{
     const owners=Array.isArray(a.owners)&&a.owners.length?a.owners:a.owner?[a.owner]:[]
     return owners.includes(name)
   })
-  const done=myItems.filter(i=>i.done||i.status==='완료')
+  const done=myItems.filter(i=>i.done||i.status==='완료'||i.status==='검증완료')
   const todo=myItems.filter(i=>!i.done&&i.status!=='완료').sort((a,b)=>new Date(a.deadline||'9999')-new Date(b.deadline||'9999'))
   const m=MEMBERS.find(m=>m.name===name)||{name,color:'#888'}
   const w=mkOv('member-tasks-ov')
@@ -1675,7 +1677,7 @@ window.openMemberTasks=(name)=>{
     <!-- 미완료 -->
     ${todo.length?`<div style="padding:10px 18px 6px;font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.3px">미완료 (${todo.length}건)</div>
     ${todo.map(i=>{
-      const isDone=i.done||i.status==='완료'
+      const isDone=i.done||i.status==='완료'||i.status==='검증완료'
       const color=i.category_id?getCatColor(i.category_id):'var(--o)'
       const cat=i.category_id?D.cats.find(c=>c.id===i.category_id)?.label||'':'회의록 액션'
       return`<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 18px;border-bottom:0.5px solid var(--bd);cursor:pointer;transition:background .12s" onclick="document.getElementById('member-tasks-ov').remove();${i.category_id?`location.href='detail.html?type=item&id=${i.id}'`:`openAIDetail('${i.id}')`}" onmouseover="this.style.background='var(--sf)'" onmouseout="this.style.background=''">
