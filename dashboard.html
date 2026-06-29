@@ -54,6 +54,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .bg{background:#EAF3DE;color:#3B6D11}
 .bgr{background:#F1EFE8;color:#5F5E5A}
 .bp{background:#EEEDFE;color:#534AB7}
+.bpu{background:#F0F0F0;color:#666666}
 /* 입력 */
 .inp{width:100%;padding:8px 11px;border:0.5px solid var(--bd);border-radius:8px;font-size:13px;background:var(--sf);color:var(--text);margin-bottom:8px;outline:none;transition:border-color .15s}
 .inp:focus{border-color:var(--o)}
@@ -206,8 +207,8 @@ const sb=createClient('https://btutlgcidpjgedpypzri.supabase.co','eyJhbGciOiJIUz
 
 // ── 상수 ──
 const MC=['#E8680A','#534AB7','#0F6E56','#A32D2D','#185FA5','#854F0B','#993556','#5F5E5A']
-const STATUS_LIST=['할 일','진행중','검증대기','완료']
-const STATUS_NEXT={'할 일':'진행중','진행중':'검증대기','검증대기':'완료','완료':'완료'}
+const STATUS_LIST=['할 일','진행중','검증대기','보류','완료']
+const STATUS_NEXT={'할 일':'진행중','진행중':'검증대기','검증대기':'완료','보류':'할 일','완료':'완료'}
 const TODAY=new Date()
 
 function getMembers(){
@@ -255,7 +256,7 @@ function dlc(dl,done){
   return`<span class="dlc dl-ok">D-${d}</span>`
 }
 function stBadge(s){
-  const m={'할 일':'bgr','진행중':'bb','검증대기':'bo','완료':'bg'}
+  const m={'할 일':'bgr','진행중':'bb','검증대기':'bo','보류':'bpu','완료':'bg'}
   return`<span class="badge ${m[s]||'bgr'}">${s||'할 일'}</span>`
 }
 function prBadge(p){return{critical:'<span class="badge br">긴급</span>',high:'<span class="badge bo">중요</span>',medium:'<span class="badge bg">보통</span>'}[p]||''}
@@ -671,6 +672,7 @@ function renderCK(){
         <option value="할 일" ${window.ckFilter.status==='할 일'?'selected':''}>할 일</option>
         <option value="진행중" ${window.ckFilter.status==='진행중'?'selected':''}>진행중</option>
         <option value="검증대기" ${window.ckFilter.status==='검증대기'?'selected':''}>검증대기</option>
+        <option value="보류" ${window.ckFilter.status==='보류'?'selected':''}>보류</option>
         <option value="완료" ${window.ckFilter.status==='완료'?'selected':''}>완료</option>
       </select>
       <select style="font-size:12px;padding:4px 8px;border:0.5px solid var(--bd);border-radius:7px;background:var(--sf);color:var(--text);outline:none;cursor:pointer" onchange="setCkFilter('priority',this.value)">
@@ -732,6 +734,7 @@ function renderCheckItems(items){
       </div>
     </div>
     <div class="ck-right" onclick="event.stopPropagation()">
+      ${item.status==='검증대기'?`<button class="btn btn-o" style="padding:3px 8px;font-size:11px" onclick="event.stopPropagation();updateItemField('${item.id}','status','완료')"><i class="ti ti-check"></i> 검증완료</button>`:''}
       <button class="btn btn-g" style="padding:3px 8px;font-size:11px" onclick="location.href='detail.html?type=item&id=${item.id}'">
         <i class="ti ti-pencil"></i>${cmts.length?' '+cmts.length:''}
       </button>
