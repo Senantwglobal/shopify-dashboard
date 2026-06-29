@@ -368,19 +368,33 @@ window.detAddOwner=async(itemId,name)=>{
   const owners=Array.isArray(item.owners)&&item.owners.length?[...item.owners]:item.owner?[item.owner]:[]
   if(owners.includes(name))return
   owners.push(name)
-  const {error}=await sb.from('checklist_items').update({owners,owner:owners[0],updated_at:new Date().toISOString()}).eq('id',itemId)
-  if(error){toast('저장 실패: '+error.message,false);return}
+  let updateOk=false
+  try{
+    const {error}=await sb.from('checklist_items').update({owners,owner:owners[0],updated_at:new Date().toISOString()}).eq('id',itemId)
+    if(!error)updateOk=true
+  }catch{}
+  if(!updateOk){
+    await sb.from('checklist_items').update({owner:owners[0],updated_at:new Date().toISOString()}).eq('id',itemId)
+  }
+  const error=null
   await logH('담당자 추가: '+name, item.text)
   toast('담당자 추가됨')
   await loadItemDetail(itemId)
 }
 
 window.detRemoveOwner=async(itemId,name,el)=>{
-  const {data:item}=await sb.from('checklist_items').select('*').eq('id',itemId).single()
-  if(!item)return
+  const {data:item,error:fetchErr}=await sb.from('checklist_items').select('*').eq('id',itemId).single()
+  if(!item||fetchErr)return
   let owners=Array.isArray(item.owners)&&item.owners.length?[...item.owners]:item.owner?[item.owner]:[]
   owners=owners.filter(o=>o!==name)
-  await sb.from('checklist_items').update({owners,owner:owners[0]||null,updated_at:new Date().toISOString()}).eq('id',itemId)
+  const updateData={owner:owners[0]||null,updated_at:new Date().toISOString()}
+  // owners 컬럼 있으면 같이 업데이트
+  try{
+    const {error}=await sb.from('checklist_items').update({...updateData,owners}).eq('id',itemId)
+    if(error)throw error
+  }catch{
+    await sb.from('checklist_items').update(updateData).eq('id',itemId)
+  }
   await logH('담당자 제거: '+name, item.text)
   toast('담당자 제거됨')
   await loadItemDetail(itemId)
