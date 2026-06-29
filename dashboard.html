@@ -365,7 +365,7 @@ function renderDash(){
   <div class="kpi" onclick="openDdayEdit()" style="cursor:pointer" title="클릭해서 D-Day 변경"><div class="kn" style="color:var(--o)">${calcDD()}</div><div class="kl">D-day까지</div></div>
   <div class="kpi" onclick="showTab('ck')" style="cursor:pointer" title="체크리스트 보기"><div class="kn" style="color:${prog>=70?'#3B6D11':'var(--text)'}">${prog}%</div><div class="kl">전체 진행률</div></div>
   <div class="kpi" onclick="showTab('ck')" style="cursor:pointer" title="체크리스트 보기"><div class="kn">${done}<span style="font-size:14px;color:var(--muted)">/${total}</span></div><div class="kl">완료 항목</div></div>
-  <div class="kpi" onclick="document.querySelector('.card-o').scrollIntoView({behavior:'smooth'})" style="cursor:pointer" title="Go/No-Go 현황 보기"><div class="kn" style="color:${gngPass===6?'#3B6D11':'#A32D2D'}">${gngPass}/6</div><div class="kl">Go/No-Go</div></div>
+  <div class="kpi" onclick="showTab('ck')" style="cursor:pointer" title="체크리스트 보기"><div class="kn" style="color:#185FA5">${D.actionItems.filter(a=>a.status==='진행중').length}</div><div class="kl">진행중</div></div>
   <div class="kpi" onclick="showTab('cal')" style="cursor:pointer" title="캘린더에서 마감 확인"><div class="kn" style="color:#A32D2D">${urgent.length}</div><div class="kl" style="color:#A32D2D;font-weight:500">마감 임박</div></div>
   <div class="kpi" onclick="showTab('mtg')" style="cursor:pointer" title="회의록 보기"><div class="kn" style="color:#185FA5">${D.meetings.length}</div><div class="kl">회의록</div></div>
 </div>
@@ -376,33 +376,12 @@ function renderDash(){
     <span class="st"><i class="ti ti-activity oi"></i> 최근 활동</span>
     <span style="font-size:11px;color:var(--muted)"><span class="rdot"></span>실시간 업데이트</span>
   </div>
-  ${D.history.length?`<div style="display:flex;flex-direction:column;gap:0">
-  ${D.history.slice(0,8).map((h,i)=>{
-    const isComplete=h.action.includes('완료')||h.action.includes('완료')
-    const isAdd=h.action.includes('추가')||h.action.includes('등록')
-    const isEdit=h.action.includes('변경')||h.action.includes('수정')
-    const iconColor=isComplete?'#3B6D11':isAdd?'#185FA5':isEdit?'#854F0B':'#888'
-    const icon=isComplete?'ti-circle-check':isAdd?'ti-circle-plus':isEdit?'ti-pencil':'ti-circle-dot'
-    const m=MEMBERS.find(m=>m.name===h.user_name)||{color:'#888'}
-    return`<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:${i<7?'0.5px solid var(--bd)':'none'}">
-      <div style="position:relative;flex-shrink:0">
-        <div class="av" style="width:28px;height:28px;font-size:11px;background:${m.color}">${h.user_name?h.user_name[0]:'?'}</div>
-        <div style="position:absolute;bottom:-2px;right:-2px;width:14px;height:14px;border-radius:50%;background:${iconColor};border:1.5px solid var(--card);display:flex;align-items:center;justify-content:center">
-          <i class="ti ${icon}" style="font-size:8px;color:#fff"></i>
-        </div>
-      </div>
-      <div style="flex:1;min-width:0">
-        <div style="font-size:13px;line-height:1.4">
-          <span style="font-weight:600">${h.user_name}</span>
-          <span style="color:var(--muted)">님이 </span>
-          <span style="color:${iconColor};font-weight:500">${h.action}</span>
-          ${h.target?`<span style="color:var(--muted)"> — </span><span style="font-size:12px;color:var(--text);background:var(--sf);padding:1px 6px;border-radius:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px;display:inline-block;vertical-align:middle">${h.target.slice(0,40)}${h.target.length>40?'...':''}</span>`:''}
-        </div>
-        <div style="font-size:11px;color:var(--muted);margin-top:3px">${new Date(h.created_at).toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}</div>
-      </div>
-    </div>`
-  }).join('')}
-  `:`<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px">아직 활동 내역이 없어요</div>`}
+  ${D.history.length?`<div id="activity-feed">
+  ${D.history.slice(0,3).map((h,i)=>renderActivityItem(h,i,2)).join('')}
+  </div>
+  ${D.history.length>3?`<button onclick="toggleActivityFeed()" id="activity-more-btn" style="width:100%;padding:8px;border:none;background:var(--sf);border-radius:8px;color:var(--muted);font-size:12px;cursor:pointer;margin-top:4px;transition:background .15s" onmouseover="this.style.background='var(--bd)'" onmouseout="this.style.background='var(--sf)'">
+    <i class="ti ti-chevron-down" id="activity-more-icon"></i> 더보기 (${D.history.length-3}건 더)
+  </button>`:''}`:`<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px">아직 활동 내역이 없어요</div>`}
 </div>
 
 <div class="two">
@@ -1248,6 +1227,56 @@ window.addParsedActions=async()=>{
 }
 
 // D-day 편집
+function renderActivityItem(h,i,lastIdx){
+  const isComplete=h.action.includes('완료')
+  const isAdd=h.action.includes('추가')||h.action.includes('등록')
+  const isEdit=h.action.includes('변경')||h.action.includes('수정')
+  const iconColor=isComplete?'#3B6D11':isAdd?'#185FA5':isEdit?'#854F0B':'#888'
+  const icon=isComplete?'ti-circle-check':isAdd?'ti-circle-plus':isEdit?'ti-pencil':'ti-circle-dot'
+  const m=MEMBERS.find(m=>m.name===h.user_name)||{color:'#888'}
+
+  // 클릭 시 이동 대상 결정
+  let clickAction=''
+  if(h.action.includes('회의록'))clickAction="showTab('mtg')"
+  else if(h.action.includes('KPI')||h.action.includes('kpi'))clickAction="showTab('kpi')"
+  else if(h.action.includes('액션')||h.action.includes('댓글'))clickAction="showTab('ck');setCat('회의록액션')"
+  else clickAction="showTab('ck')"
+
+  return`<div onclick="${clickAction}" style="display:flex;align-items:flex-start;gap:10px;padding:10px 4px;border-bottom:0.5px solid var(--bd);cursor:pointer;border-radius:8px;transition:background .12s;margin:0 -4px" onmouseover="this.style.background='var(--sf)'" onmouseout="this.style.background=''">
+    <div style="position:relative;flex-shrink:0">
+      <div class="av" style="width:28px;height:28px;font-size:11px;background:${m.color}">${h.user_name?h.user_name[0]:'?'}</div>
+      <div style="position:absolute;bottom:-2px;right:-2px;width:14px;height:14px;border-radius:50%;background:${iconColor};border:1.5px solid var(--card);display:flex;align-items:center;justify-content:center">
+        <i class="ti ${icon}" style="font-size:8px;color:#fff"></i>
+      </div>
+    </div>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:13px;line-height:1.4">
+        <span style="font-weight:600">${h.user_name}</span>
+        <span style="color:var(--muted)">님이 </span>
+        <span style="color:${iconColor};font-weight:500">${h.action}</span>
+        ${h.target?`<span style="color:var(--muted)"> — </span><span style="font-size:12px;color:var(--text);background:var(--sf);padding:1px 6px;border-radius:4px">${h.target.slice(0,40)}${h.target.length>40?'...':''}</span>`:''}
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-top:2px">${new Date(h.created_at).toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}</div>
+    </div>
+  </div>`
+}
+
+let _activityExpanded=false
+window.toggleActivityFeed=()=>{
+  _activityExpanded=!_activityExpanded
+  const feed=document.getElementById('activity-feed')
+  const btn=document.getElementById('activity-more-btn')
+  const icon=document.getElementById('activity-more-icon')
+  if(!feed||!btn)return
+  if(_activityExpanded){
+    feed.innerHTML=D.history.slice(0,20).map((h,i)=>renderActivityItem(h,i,19)).join('')
+    btn.innerHTML=`<i class="ti ti-chevron-up" id="activity-more-icon"></i> 접기`
+  } else {
+    feed.innerHTML=D.history.slice(0,3).map((h,i)=>renderActivityItem(h,i,2)).join('')
+    btn.innerHTML=`<i class="ti ti-chevron-down" id="activity-more-icon"></i> 더보기 (${D.history.length-3}건 더)`
+  }
+}
+
 window.openMemberTasks=(name)=>{
   const allItems=[...D.items,...D.actionItems]
   const myItems=allItems.filter(a=>{
