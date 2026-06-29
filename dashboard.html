@@ -962,7 +962,7 @@ window.openAIDetail=(id)=>{
     <div style="font-size:12px;font-weight:500;margin:14px 0 8px;border-top:0.5px solid var(--bd);padding-top:12px">댓글 (${(a.comments||[]).length})</div>
     ${(a.comments||[]).map(c=>`<div class="comment"><div class="cauth">${avEl(c.user,18)} ${c.user} <span class="ctime">${c.time}</span></div><div class="ctext">${c.text}</div></div>`).join('')}
     <textarea class="inp" id="ai-cmt-${id}" placeholder="댓글 입력..."></textarea>
-    <div style="display:flex;justify-content:flex-end"><button class="btn btn-o" onclick="saveAICmt('${id}')"><i class="ti ti-send"></i> 등록</button></div>
+    <div style="display:flex;justify-content:flex-end"><button class="btn btn-o" onclick="saveAICmt(this.getAttribute('data-aid'))" data-aid="${id}"><i class="ti ti-send"></i> 등록</button></div>
   </div></div>`
   document.body.appendChild(w)
 }
@@ -979,8 +979,8 @@ window.removeAIOwner=async(id,name)=>{
   await logH('담당자 제거',a.text);await loadAll();openAIDetail(id)
 }
 window.saveAICmt=async(id)=>{
-  const el=document.getElementById('ai-cmt-'+id)||document.querySelector('[id^="ai-cmt-"]')
-  const txt=el?.value.trim();if(!txt)return
+  const txt=document.getElementById('ai-cmt-current')?.value?.trim()
+  if(!txt){toast('내용을 입력해주세요.',false);return}
   const a=D.actionItems.find(a=>a.id===id);if(!a)return
   const comments=[...(a.comments||[]),{user:curUser.name,text:txt,time:ts()}]
   await sb.from('action_items').update({comments,last_comment:txt,last_comment_by:curUser.name,updated_at:new Date().toISOString()}).eq('id',id)
