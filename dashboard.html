@@ -85,7 +85,7 @@ select.inp{cursor:pointer}
 .cat-tab{padding:8px 14px;font-size:12px;border:none;background:none;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;white-space:nowrap;flex-shrink:0}
 .cat-tab.active{color:var(--o);border-bottom-color:var(--o);font-weight:500}
 .cat-tab:hover:not(.active){color:var(--text)}
-.ck-item{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:10px;border:0.5px solid var(--bd);margin-bottom:8px;background:var(--card);cursor:pointer;transition:border-color .15s}
+.ck-item{display:flex;align-items:flex-start;gap:10px;padding:9px 12px;border-radius:10px;border:0.5px solid var(--bd);margin-bottom:6px;background:var(--card);cursor:pointer;transition:border-color .15s}
 .ck-item:hover{border-color:var(--ob)}
 .ck-item.done-item{opacity:.6}
 .ck-cb{accent-color:var(--o);width:16px;height:16px;margin-top:2px;flex-shrink:0;cursor:pointer}
@@ -94,7 +94,7 @@ select.inp{cursor:pointer}
 .ck-title.done{text-decoration:line-through;color:var(--muted)}
 .ck-meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:11px;color:var(--muted)}
 .ck-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
-.sub-wrap{display:none;padding:6px 0 2px 26px}
+.sub-wrap{display:none;padding:2px 0 2px 26px}
 .sub-wrap.open{display:block}
 .sub-row{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:8px;font-size:12px;cursor:pointer}
 .sub-row:hover{background:var(--sf)}
@@ -671,7 +671,7 @@ function renderCheckItems(items){
       <span class="vbadge ${s.verified?'ok':''}">${s.verified?'✓검증':'미검증'}</span>
       ${s.done&&!s.verified?`<button class="btn btn-o" style="font-size:10px;padding:1px 6px" onclick="event.stopPropagation();verifySub('${s.id}','${item.id}')">검증</button>`:''}
       </div>`).join('')}
-      <div style="display:flex;gap:5px;padding:4px 8px;margin-top:3px">
+      <div style="display:flex;gap:5px;padding:2px 8px;margin-top:0">
         <input id="ns-${item.id}" style="flex:1;font-size:12px;padding:5px 8px;border:0.5px solid var(--bd);border-radius:7px;background:var(--sf);color:var(--text);outline:none" placeholder="세부 항목 추가..." onkeydown="if(event.key==='Enter'){addSub('${item.id}');event.preventDefault()}">
         <button class="btn btn-o" style="padding:4px 9px;font-size:11px;flex-shrink:0" onclick="addSub('${item.id}')"><i class="ti ti-plus"></i></button>
       </div>
