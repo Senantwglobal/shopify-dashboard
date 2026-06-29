@@ -265,6 +265,16 @@ function mkOv(id){const old=document.getElementById(id);if(old)old.remove();cons
 async function logH(action,target){await sb.from('history').insert({user_name:curUser.name,action,target})}
 
 // ── 알림 ──
+window.goNotifItem=(id,catId)=>{
+  document.getElementById('notif-panel').classList.remove('open')
+  notifOpen=false
+  if(catId){
+    location.href='detail.html?type=item&id='+id
+  } else {
+    openAIDetail(id)
+  }
+}
+
 window.toggleNotif=()=>{
   notifOpen=!notifOpen
   document.getElementById('notif-panel').classList.toggle('open',notifOpen)
@@ -280,7 +290,7 @@ function updateNotif(){
   badge.textContent=myItems.length;badge.classList.toggle('show',myItems.length>0)
   const list=document.getElementById('notif-list')
   list.innerHTML=myItems.length
-    ?myItems.slice(0,6).map(a=>`<div class="notif-item" onclick="document.getElementById('notif-panel').classList.remove('open');notifOpen=false;${a.category_id?`location.href='detail.html?type=item&id=${a.id}'`:`openAIDetail('${a.id}')`}"><div style="font-weight:500;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.text}</div><div style="font-size:11px;color:var(--muted);margin-top:2px">${dlc(a.deadline,false)}</div></div>`).join('')+(myItems.length>6?`<div style="padding:8px 14px;font-size:11px;color:var(--muted)">+${myItems.length-6}건 더</div>`:'')
+    ?myItems.slice(0,6).map(a=>`<div class="notif-item" onclick="goNotifItem('${a.id}','${a.category_id||''}')"><div style="font-weight:500;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.text}</div><div style="font-size:11px;color:var(--muted);margin-top:2px">${dlc(a.deadline,false)}</div></div>`).join('')+(myItems.length>6?`<div style="padding:8px 14px;font-size:11px;color:var(--muted)">+${myItems.length-6}건 더</div>`:'')
     :`<div style="padding:14px;font-size:13px;color:var(--muted);text-align:center">담당 항목 없음</div>`
 }
 
