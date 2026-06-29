@@ -344,7 +344,7 @@ function renderItemDetail(item,subs,comments,cats){
           <option value="">상태 변경 없음</option>
           ${STATUS_LIST.map(s=>`<option value="${s}" ${item.status===s?'selected':''}>${s}</option>`).join('')}
         </select>
-        <button class="btn btn-o" onclick="submitComment('${item.id}')"><i class="ti ti-send"></i> 등록</button>
+        <button class="btn btn-o" onclick="submitComment(this.dataset.iid)" data-iid="${item.id}"><i class="ti ti-send"></i> 등록</button>
       </div>
     </div>
   </div>`
