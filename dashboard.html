@@ -948,154 +948,245 @@ window.saveAICmt=async(id)=>{
 // ══════════════════════
 // KPI 탭
 // ══════════════════════
-function renderKPITab(){
-  const KPI_DEF=[
-    {id:'revenue',     label:'일평균 매출',    unit:'원',   cat:'매출',   icon:'ti-coin',            color:'#3B6D11'},
-    {id:'order_count', label:'일평균 주문수',   unit:'건',   cat:'매출',   icon:'ti-shopping-cart',   color:'#185FA5'},
-    {id:'aov',         label:'평균 주문액(AOV)',unit:'원',   cat:'매출',   icon:'ti-receipt',         color:'#0F6E56'},
-    {id:'cvr',         label:'전환율(CVR)',    unit:'%',    cat:'전환',   icon:'ti-arrows-right',    color:'#534AB7'},
-    {id:'cart_abandon',label:'장바구니 이탈률',unit:'%',    cat:'전환',   icon:'ti-shopping-cart-off',color:'#854F0B'},
-    {id:'checkout_drop',label:'체크아웃 이탈률',unit:'%',  cat:'전환',   icon:'ti-door-exit',       color:'#A32D2D'},
-    {id:'pay_fail',    label:'결제 실패율',    unit:'%',    cat:'결제·기술',icon:'ti-credit-card-off',color:'#A32D2D'},
-    {id:'err_404',     label:'404 오류 수',   unit:'건',   cat:'결제·기술',icon:'ti-error-404',      color:'#993556'},
-    {id:'supla_miss',  label:'SUPLA 누락률',  unit:'%',    cat:'결제·기술',icon:'ti-package-off',    color:'#854F0B'},
-    {id:'login_ok',    label:'로그인 성공률',  unit:'%',    cat:'회원·CS', icon:'ti-user-check',     color:'#0F6E56'},
-    {id:'cs_count',    label:'CS 문의량',     unit:'건',   cat:'회원·CS', icon:'ti-headset',        color:'#993556'},
-    {id:'seo_index',   label:'검색 색인 수',  unit:'개',   cat:'SEO',    icon:'ti-search',          color:'#185FA5'},
-    {id:'organic',     label:'유기 검색 유입', unit:'명',   cat:'SEO',    icon:'ti-brand-google',    color:'#3B6D11'},
+function getKPIDef(){
+  // localStorage에 저장된 커스텀 KPI 목록 반환
+  const defaults=[
+    {id:'revenue',     label:'일평균 매출',    unit:'원', cat:'매출',   icon:'ti-coin',            color:'#3B6D11'},
+    {id:'order_count', label:'일평균 주문수',   unit:'건', cat:'매출',   icon:'ti-shopping-cart',   color:'#185FA5'},
+    {id:'aov',         label:'평균 주문액(AOV)',unit:'원', cat:'매출',   icon:'ti-receipt',         color:'#0F6E56'},
+    {id:'cvr',         label:'전환율(CVR)',    unit:'%',  cat:'전환',   icon:'ti-arrows-right',    color:'#534AB7'},
+    {id:'cart_abandon',label:'장바구니 이탈률', unit:'%',  cat:'전환',   icon:'ti-shopping-cart-off',color:'#854F0B'},
+    {id:'checkout_drop',label:'체크아웃 이탈률',unit:'%', cat:'전환',   icon:'ti-door-exit',       color:'#A32D2D'},
+    {id:'pay_fail',    label:'결제 실패율',    unit:'%',  cat:'결제·기술',icon:'ti-credit-card-off',color:'#A32D2D'},
+    {id:'err_404',     label:'404 오류 수',   unit:'건', cat:'결제·기술',icon:'ti-error-404',      color:'#993556'},
+    {id:'supla_miss',  label:'SUPLA 누락률',  unit:'%',  cat:'결제·기술',icon:'ti-package-off',    color:'#854F0B'},
+    {id:'login_ok',    label:'로그인 성공률',  unit:'%',  cat:'회원·CS', icon:'ti-user-check',     color:'#0F6E56'},
+    {id:'cs_count',    label:'CS 문의량',     unit:'건', cat:'회원·CS', icon:'ti-headset',        color:'#993556'},
+    {id:'seo_index',   label:'검색 색인 수',  unit:'개', cat:'SEO',    icon:'ti-search',          color:'#185FA5'},
+    {id:'organic',     label:'유기 검색 유입', unit:'명', cat:'SEO',    icon:'ti-brand-google',    color:'#3B6D11'},
   ]
+  try{
+    const custom=JSON.parse(localStorage.getItem('ople-kpi-def')||'[]')
+    return custom.length?custom:defaults
+  }catch{return defaults}
+}
+function saveKPIDef(defs){localStorage.setItem('ople-kpi-def',JSON.stringify(defs))}
+
+function renderKPITab(){
+  const KPI_DEF=getKPIDef()
   const IS_LOW_BETTER=['pay_fail','cart_abandon','checkout_drop','err_404','supla_miss','cs_count']
   const catGroups=[...new Set(KPI_DEF.map(k=>k.cat))]
-
-  // 날짜별 데이터 처리
   const daily=D.kpiDaily||[]
   const dates=[...new Set(daily.map(d=>d.record_date))].sort()
   const baselineDate=dates[0]||null
 
-  // 지표별 최신값 & 기준값
-  function getVal(metricId, date){
-    const r=daily.find(d=>d.metric===metricId&&d.record_date===date)
-    return r?.value??null
-  }
-  function getLatest(metricId){
-    const rows=daily.filter(d=>d.metric===metricId).sort((a,b)=>b.record_date.localeCompare(a.record_date))
-    return rows[0]?.value??null
-  }
-  function getBaseline(metricId){
-    if(!baselineDate)return null
-    return getVal(metricId,baselineDate)
-  }
-  function calcChange(metricId){
-    const base=getBaseline(metricId), cur=getLatest(metricId)
+  function getVal(id,date){return daily.find(d=>d.metric===id&&d.record_date===date)?.value??null}
+  function getLatest(id){const rows=daily.filter(d=>d.metric===id).sort((a,b)=>b.record_date.localeCompare(a.record_date));return rows[0]?.value??null}
+  function getBaseline(id){return baselineDate?getVal(id,baselineDate):null}
+  function calcChange(id){
+    const base=getBaseline(id),cur=getLatest(id)
     if(base===null||cur===null||base===0)return null
-    const pct=((cur-base)/Math.abs(base)*100)
-    const isLowBetter=IS_LOW_BETTER.includes(metricId)
+    const pct=parseFloat(((cur-base)/Math.abs(base)*100).toFixed(1))
+    const isLowBetter=IS_LOW_BETTER.includes(id)
     const isGood=isLowBetter?pct<=0:pct>=0
-    return{pct:parseFloat(pct.toFixed(1)),isGood,isCrit:!isGood&&Math.abs(pct)>=20,isWarn:!isGood&&Math.abs(pct)>=15}
+    return{pct,isGood,isCrit:!isGood&&Math.abs(pct)>=20,isWarn:!isGood&&Math.abs(pct)>=15}
   }
-
-  // 오늘 날짜
-  const todayStr=new Date().toISOString().slice(0,10)
-
-  // SVG 라인 차트 생성
-  function miniChart(metricId, color){
-    const rows=daily.filter(d=>d.metric===metricId).sort((a,b)=>a.record_date.localeCompare(b.record_date))
-    if(rows.length<2)return`<div style="height:40px;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--muted)">데이터 2개 이상 필요</div>`
-    const vals=rows.map(r=>r.value)
-    const min=Math.min(...vals), max=Math.max(...vals)
-    const range=max-min||1
-    const W=160, H=40, pad=4
-    const pts=vals.map((v,i)=>`${pad+i*(W-pad*2)/(vals.length-1)},${H-pad-(v-min)/range*(H-pad*2)}`)
-    return`<svg width="${W}" height="${H}" style="overflow:visible"><polyline points="${pts.join(' ')}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round"/>${pts.map((p,i)=>{const[x,y]=p.split(',');return`<circle cx="${x}" cy="${y}" r="3" fill="${color}"/>`}).join('')}</svg>`
+  function miniChart(id,color){
+    const rows=daily.filter(d=>d.metric===id).sort((a,b)=>a.record_date.localeCompare(b.record_date))
+    if(rows.length<2)return''
+    const vals=rows.map(r=>Number(r.value))
+    const min=Math.min(...vals),max=Math.max(...vals),range=max-min||1
+    const W=140,H=36,p=4
+    const pts=vals.map((v,i)=>`${p+i*(W-p*2)/(vals.length-1)},${H-p-(v-min)/range*(H-p*2)}`).join(' ')
+    return`<svg width="${W}" height="${H}" style="overflow:visible;display:block;margin-top:6px"><polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg>`
   }
 
   return`
-  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px">
     <div>
       <div style="font-size:16px;font-weight:500">KPI 대시보드</div>
       <div style="font-size:12px;color:var(--muted);margin-top:3px">전환 전 기준값 대비 실시간 추적 — <span style="color:#A32D2D;font-weight:500">-20% 초과 시 즉시 대응</span></div>
     </div>
-    <button class="btn btn-o" onclick="openKPIInput()"><i class="ti ti-pencil"></i> 수치 입력</button>
+    <div style="display:flex;gap:7px">
+      <button class="btn" onclick="openAddKPIItem()"><i class="ti ti-plus"></i> 지표 추가</button>
+      <button class="btn btn-o" onclick="openKPIInput()"><i class="ti ti-pencil"></i> 수치 입력</button>
+    </div>
   </div>
 
-  <!-- KPI 카드 그리드 -->
   ${catGroups.map(cat=>{
     const kpis=KPI_DEF.filter(k=>k.cat===cat)
     return`<div style="margin-bottom:20px">
     <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;padding-bottom:6px;border-bottom:0.5px solid var(--bd)">${cat}</div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px">
     ${kpis.map(k=>{
-      const base=getBaseline(k.id), cur=getLatest(k.id)
-      const ch=calcChange(k.id)
-      const hasData=base!==null
-      const dispVal=cur!==null?cur:base
-      return`<div class="card" style="padding:14px;border-left:3px solid ${k.color}">
+      const base=getBaseline(k.id),cur=getLatest(k.id),ch=calcChange(k.id)
+      const dispVal=cur??base
+      return`<div class="card" style="padding:14px;border-left:3px solid ${k.color};position:relative;cursor:pointer" onclick="openKPICardInput('${k.id}','${k.label}','${k.unit}')">
+        <!-- 삭제 버튼 -->
+        <button onclick="event.stopPropagation();deleteKPIItem('${k.id}')" style="position:absolute;top:8px;right:8px;width:20px;height:20px;border-radius:50%;border:none;background:var(--sf);color:var(--muted);cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s" class="kpi-del-btn">✕</button>
         <div style="font-size:11px;color:var(--muted);margin-bottom:6px;display:flex;align-items:center;gap:4px">
           <i class="ti ${k.icon}" style="color:${k.color}"></i>${k.label}
         </div>
-        <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:8px">
-          <div style="font-size:26px;font-weight:600;color:${hasData?k.color:'var(--muted)'}">${dispVal!==null?dispVal.toLocaleString():'—'}<span style="font-size:12px;font-weight:400;color:var(--muted);margin-left:3px">${dispVal!==null?k.unit:''}</span></div>
+        <div style="display:flex;align-items:flex-end;justify-content:space-between">
+          <div>
+            <div style="font-size:26px;font-weight:600;color:${dispVal!==null?k.color:'var(--muted)'};line-height:1.1">${dispVal!==null?Number(dispVal).toLocaleString():'—'}</div>
+            <div style="font-size:11px;color:var(--muted)">${dispVal!==null?k.unit+' '+(base!==null&&cur!==null&&cur!==base?`(기준 ${Number(base).toLocaleString()})`:base!==null?'기준값':''):''}</div>
+          </div>
           ${ch?`<div style="text-align:right;flex-shrink:0;margin-left:8px">
-            <div style="font-size:14px;font-weight:700;color:${ch.isGood?'#3B6D11':ch.isCrit?'#A32D2D':'var(--o)'}">${ch.pct>0?'+':''}${ch.pct}%</div>
-            <div style="font-size:9px;color:var(--muted)">vs 기준</div>
+            <div style="font-size:15px;font-weight:700;color:${ch.isGood?'#3B6D11':ch.isCrit?'#A32D2D':'var(--o)'}">${ch.pct>0?'+':''}${ch.pct}%</div>
+            <div style="font-size:9px;color:${ch.isCrit?'#A32D2D':ch.isWarn?'var(--o)':'var(--muted)'}">${ch.isCrit?'⚠ 즉시대응':ch.isWarn?'△ 주의':'정상'}</div>
           </div>`:''}
         </div>
-        ${base!==null?`<div style="margin-bottom:6px">
-          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-bottom:3px">
-            <span>기준: ${base.toLocaleString()}${k.unit}</span>
-            ${ch?`<span style="color:${ch.isCrit?'#A32D2D':ch.isWarn?'var(--o)':'var(--muted)'};font-weight:500">${ch.isCrit?'⚠ 즉시대응':ch.isWarn?'△ 주의':''}</span>`:''}
-          </div>
-          <div class="pgb" style="height:3px"><div class="pgf" style="width:${ch?Math.min(Math.abs(ch.pct)/20*100,100):0}%;background:${ch&&!ch.isGood?(ch.isCrit?'#A32D2D':ch.isWarn?'var(--o)':'#639922'):'#639922'}"></div></div>
-        </div>`:`<div style="font-size:11px;color:var(--muted);background:var(--sf);border-radius:6px;padding:5px 8px">기준값 입력 필요</div>`}
-        <div style="margin-top:8px">${miniChart(k.id,k.color)}</div>
+        ${base!==null?`<div class="pgb" style="height:3px;margin-top:8px"><div class="pgf" style="width:${ch?Math.min(Math.abs(ch.pct)/20*100,100):0}%;background:${ch&&!ch.isGood?(ch.isCrit?'#A32D2D':ch.isWarn?'var(--o)':'#639922'):'#639922'}"></div></div>`:``}
+        ${miniChart(k.id,k.color)}
+        ${base===null?`<div style="font-size:11px;color:var(--o);margin-top:8px"><i class="ti ti-pencil"></i> 클릭해서 기준값 입력</div>`:''}
       </div>`
     }).join('')}
     </div></div>`
   }).join('')}
 
-  <!-- 날짜별 입력 테이블 -->
+  <style>.card:hover .kpi-del-btn{opacity:1!important}</style>
+
+  <!-- 추적표 -->
   <div class="card" style="margin-top:8px">
-    <div class="sh"><span class="st"><i class="ti ti-table oi"></i> 날짜별 데이터 추적표</span>
-      <div style="display:flex;gap:6px;flex-wrap:wrap">
-        ${dates.length?`<span style="font-size:11px;color:var(--muted);align-self:center">기준일: ${baselineDate}</span>`:''}
-        <button class="btn btn-o" style="font-size:12px" onclick="openKPIInput()"><i class="ti ti-plus"></i> 오늘 데이터 입력</button>
-      </div>
+    <div class="sh"><span class="st"><i class="ti ti-table oi"></i> 날짜별 추적표</span>
+      ${baselineDate?`<span style="font-size:11px;color:var(--muted)">기준일: ${baselineDate}</span>`:''}
     </div>
-    ${dates.length?`<div style="overflow-x:auto">
-    <table class="kpi-tbl">
-    <thead><tr>
-      <th style="min-width:140px">지표</th>
-      ${dates.map(d=>`<th style="text-align:center;min-width:90px;white-space:nowrap">${d.slice(5)}<br><span style="font-weight:400;font-size:10px">${d===baselineDate?'기준값':''}</span></th>`).join('')}
-      <th style="text-align:center">변화율</th>
-      <th style="text-align:center">상태</th>
-    </tr></thead>
-    <tbody>
+    ${dates.length?`<div style="overflow-x:auto"><table class="kpi-tbl"><thead><tr>
+      <th style="min-width:130px">지표</th>
+      ${dates.map(d=>`<th style="text-align:center;min-width:85px">${d.slice(5)}<div style="font-size:9px;font-weight:400;color:var(--muted)">${d===baselineDate?'기준':''}</div></th>`).join('')}
+      <th style="text-align:center">변화율</th><th style="text-align:center">상태</th>
+    </tr></thead><tbody>
     ${KPI_DEF.map(k=>{
       const ch=calcChange(k.id)
       return`<tr style="${ch?.isCrit?'background:#FEF2F2':ch?.isWarn?'background:#FFFBEB':''}">
-      <td style="font-weight:500;white-space:nowrap"><i class="ti ${k.icon}" style="color:${k.color};font-size:11px"></i> ${k.label}</td>
-      ${dates.map(d=>{const v=getVal(k.id,d);return`<td style="text-align:center;font-size:13px">${v!==null?v.toLocaleString()+k.unit:'—'}</td>`}).join('')}
-      <td style="text-align:center;font-weight:700;color:${ch?(ch.isGood?'#3B6D11':ch.isCrit?'#A32D2D':'var(--o)'):'var(--muted)'}">${ch?`${ch.pct>0?'+':''}${ch.pct}%`:'—'}</td>
+      <td style="font-weight:500;white-space:nowrap;font-size:12px"><i class="ti ${k.icon}" style="color:${k.color};font-size:10px"></i> ${k.label}</td>
+      ${dates.map(d=>{const v=getVal(k.id,d);return`<td style="text-align:center;font-size:12px;cursor:pointer" onclick="openKPICardInput('${k.id}','${k.label}','${k.unit}','${d}')">${v!==null?Number(v).toLocaleString()+k.unit:'<span style="color:var(--muted)">—</span>'}</td>`}).join('')}
+      <td style="text-align:center;font-weight:700;font-size:12px;color:${ch?(ch.isGood?'#3B6D11':ch.isCrit?'#A32D2D':'var(--o)'):'var(--muted)'}">${ch?`${ch.pct>0?'+':''}${ch.pct}%`:'—'}</td>
       <td style="text-align:center">${ch?.isCrit?'<span class="badge br">⚠ 즉시대응</span>':ch?.isWarn?'<span class="badge bo">△ 주의</span>':ch?'<span class="badge bg">정상</span>':'<span class="badge bgr">미입력</span>'}</td>
       </tr>`
     }).join('')}
-    </tbody>
-    </table>
-    </div>`:`<div style="text-align:center;padding:30px;color:var(--muted)"><div style="font-size:32px;margin-bottom:8px">📊</div><div style="font-size:14px;margin-bottom:12px">아직 데이터가 없어요<br><span style="font-size:12px">전환 전 기준값부터 입력해주세요</span></div><button class="btn btn-o" onclick="openKPIInput()"><i class="ti ti-pencil"></i> 첫 데이터 입력</button></div>`}
+    </tbody></table></div>`:`<div style="text-align:center;padding:30px;color:var(--muted)"><div style="font-size:32px;margin-bottom:10px">📊</div><div style="margin-bottom:12px">지표 카드를 클릭해서 기준값을 입력해보세요</div><button class="btn btn-o" onclick="openKPIInput()"><i class="ti ti-pencil"></i> 수치 입력</button></div>`}
   </div>
 
   <!-- 분석 -->
-  <div class="three">
+  <div class="three" style="margin-top:14px">
   <div class="card"><div class="sh"><span class="st"><i class="ti ti-trending-down oi"></i> 매출 하락 분석</span></div>
-  <textarea class="inp" style="min-height:120px;margin:0" placeholder="원인·기간·영역..." onchange="saveKA('sales_analysis',this.value)">${D.kpiAnalysis?.sales_analysis||''}</textarea></div>
+  <textarea class="inp" style="min-height:110px;margin:0" placeholder="원인·기간·영역..." onchange="saveKA('sales_analysis',this.value)">${D.kpiAnalysis?.sales_analysis||''}</textarea></div>
   <div class="card"><div class="sh"><span class="st"><i class="ti ti-calculator oi"></i> 손실 산정</span></div>
-  <textarea class="inp" style="min-height:120px;margin:0" placeholder="일매출×하락율×기간..." onchange="saveKA('loss_estimate',this.value)">${D.kpiAnalysis?.loss_estimate||''}</textarea></div>
+  <textarea class="inp" style="min-height:110px;margin:0" placeholder="일매출×하락율×기간..." onchange="saveKA('loss_estimate',this.value)">${D.kpiAnalysis?.loss_estimate||''}</textarea></div>
   <div class="card"><div class="sh"><span class="st"><i class="ti ti-trending-up oi"></i> 회복 계획</span></div>
-  <textarea class="inp" style="min-height:120px;margin:0" placeholder="D+7/D+14/D+30 목표..." onchange="saveKA('recovery_plan',this.value)">${D.kpiAnalysis?.recovery_plan||''}</textarea></div>
+  <textarea class="inp" style="min-height:110px;margin:0" placeholder="D+7/D+14/D+30 목표..." onchange="saveKA('recovery_plan',this.value)">${D.kpiAnalysis?.recovery_plan||''}</textarea></div>
   </div>`
 }
 
-// KPI 수치 입력 모달
+// 카드 클릭 → 개별 지표 입력
+window.openKPICardInput=(id,label,unit,preDate)=>{
+  const todayStr=new Date().toISOString().slice(0,10)
+  const date=preDate||todayStr
+  const existing=(D.kpiDaily||[]).filter(d=>d.metric===id).sort((a,b)=>b.record_date.localeCompare(a.record_date))
+  const curVal=(D.kpiDaily||[]).find(d=>d.metric===id&&d.record_date===date)?.value??''
+  const w=mkOv('kpi-card-ov')
+  w.innerHTML=`<div class="modal" style="width:360px">
+  <div class="mh"><span style="font-weight:500">${label} 입력</span><button class="btn btn-g" onclick="document.getElementById('kpi-card-ov').remove()"><i class="ti ti-x"></i></button></div>
+  <div class="mb">
+    <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">날짜</label>
+    <input type="date" class="inp" id="kcc-date" value="${date}" onchange="refreshKPICardVal('${id}',this.value)">
+    <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px;margin-top:10px">값 (${unit})</label>
+    <input type="number" step="any" class="inp" id="kcc-val" value="${curVal}" placeholder="예: 5200000" style="font-size:18px;font-weight:600">
+    ${existing.length?`<div style="margin-top:12px;border-top:0.5px solid var(--bd);padding-top:10px">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:6px">기존 입력 내역</div>
+      ${existing.slice(0,5).map(r=>`<div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:0.5px solid var(--sf)"><span style="color:var(--muted)">${r.record_date}</span><span style="font-weight:500">${Number(r.value).toLocaleString()}${unit}</span><button onclick="deleteKPIRow('${r.metric}','${r.record_date}')" style="border:none;background:none;color:#A32D2D;cursor:pointer;font-size:11px">삭제</button></div>`).join('')}
+    </div>`:''}
+  </div>
+  <div class="mf"><button class="btn" onclick="document.getElementById('kpi-card-ov').remove()">취소</button><button class="btn btn-o" onclick="saveKPICard('${id}')"><i class="ti ti-check"></i> 저장</button></div>
+  </div>`
+  document.body.appendChild(w)
+}
+
+window.refreshKPICardVal=async(id,date)=>{
+  const r=(D.kpiDaily||[]).find(d=>d.metric===id&&d.record_date===date)
+  const inp=document.getElementById('kcc-val')
+  if(inp)inp.value=r?.value??''
+}
+
+window.saveKPICard=async(id)=>{
+  const date=document.getElementById('kcc-date')?.value
+  const val=document.getElementById('kcc-val')?.value
+  if(!date||val===''||val===null){toast('날짜와 값을 입력해주세요.',false);return}
+  const {error}=await sb.from('kpi_daily').upsert({metric:id,record_date:date,value:parseFloat(val),updated_by:curUser.name,updated_at:new Date().toISOString()},{onConflict:'metric,record_date'})
+  if(error){toast('저장 실패: '+error.message,false);return}
+  await logH('KPI 입력: '+id,date)
+  document.getElementById('kpi-card-ov').remove()
+  toast('저장됐어요 ✓')
+  await loadAll()
+}
+
+window.deleteKPIRow=async(metric,date)=>{
+  if(!confirm(`${date} 데이터를 삭제할까요?`))return
+  await sb.from('kpi_daily').delete().eq('metric',metric).eq('record_date',date)
+  toast('삭제됨');await loadAll()
+  // 모달 닫기
+  document.getElementById('kpi-card-ov')?.remove()
+}
+
+// KPI 지표 추가
+window.openAddKPIItem=()=>{
+  const cats=[...new Set(getKPIDef().map(k=>k.cat))]
+  const colors=['#3B6D11','#185FA5','#0F6E56','#534AB7','#854F0B','#A32D2D','#993556','#E8680A']
+  const w=mkOv('add-kpi-item-ov')
+  w.innerHTML=`<div class="modal" style="width:400px">
+  <div class="mh"><span style="font-weight:500">KPI 지표 추가</span><button class="btn btn-g" onclick="document.getElementById('add-kpi-item-ov').remove()"><i class="ti ti-x"></i></button></div>
+  <div class="mb">
+    <input class="inp" id="aki-label" placeholder="지표 이름 (예: 신규 회원수)">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div><label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">단위</label><input class="inp" style="margin:0" id="aki-unit" placeholder="명, 원, %, 건"></div>
+      <div><label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">카테고리</label>
+        <select class="inp" style="margin:0" id="aki-cat">
+          ${cats.map(c=>`<option>${c}</option>`).join('')}
+          <option value="__new__">+ 새 카테고리</option>
+        </select>
+      </div>
+    </div>
+    <div id="aki-newcat-wrap" style="display:none;margin-top:6px"><input class="inp" style="margin:0" id="aki-newcat" placeholder="새 카테고리 이름"></div>
+    <label style="font-size:12px;color:var(--muted);display:block;margin:10px 0 6px">색상</label>
+    <div style="display:flex;gap:8px;flex-wrap:wrap" id="aki-colors">
+      ${colors.map((c,i)=>`<div onclick="document.querySelectorAll('#aki-colors div').forEach(d=>d.style.border='2px solid transparent');this.style.border='2px solid #1a1a1a';document.getElementById('aki-color').value='${c}'" style="width:28px;height:28px;border-radius:50%;background:${c};cursor:pointer;border:${i===0?'2px solid #1a1a1a':'2px solid transparent'}"></div>`).join('')}
+    </div>
+    <input type="hidden" id="aki-color" value="${colors[0]}">
+  </div>
+  <div class="mf"><button class="btn" onclick="document.getElementById('add-kpi-item-ov').remove()">취소</button><button class="btn btn-o" onclick="saveNewKPIItem()">추가</button></div>
+  </div>`
+  document.body.appendChild(w)
+  document.getElementById('aki-cat').addEventListener('change',function(){
+    document.getElementById('aki-newcat-wrap').style.display=this.value==='__new__'?'block':'none'
+  })
+}
+
+window.saveNewKPIItem=()=>{
+  const label=document.getElementById('aki-label')?.value.trim()
+  const unit=document.getElementById('aki-unit')?.value.trim()||''
+  let cat=document.getElementById('aki-cat')?.value
+  if(cat==='__new__')cat=document.getElementById('aki-newcat')?.value.trim()||'기타'
+  const color=document.getElementById('aki-color')?.value||'#888'
+  if(!label){toast('지표 이름을 입력해주세요.',false);return}
+  const defs=getKPIDef()
+  const id='kpi_'+Date.now()
+  defs.push({id,label,unit,cat,icon:'ti-chart-bar',color})
+  saveKPIDef(defs)
+  document.getElementById('add-kpi-item-ov').remove()
+  toast('지표 추가됐어요')
+  render()
+}
+
+window.deleteKPIItem=(id)=>{
+  if(!confirm('이 지표를 삭제할까요? 입력된 데이터도 함께 삭제됩니다.'))return
+  const defs=getKPIDef().filter(k=>k.id!==id)
+  saveKPIDef(defs)
+  // DB 데이터도 삭제
+  sb.from('kpi_daily').delete().eq('metric',id).then(()=>{toast('삭제됐어요');loadAll()})
+}
+
 window.openKPIInput=()=>{
   const KPI_LABELS={revenue:'일평균 매출',order_count:'일평균 주문수',aov:'평균 주문액',cvr:'전환율',cart_abandon:'장바구니 이탈률',checkout_drop:'체크아웃 이탈률',pay_fail:'결제 실패율',err_404:'404 오류 수',supla_miss:'SUPLA 누락률',login_ok:'로그인 성공률',cs_count:'CS 문의량',seo_index:'검색 색인 수',organic:'유기 검색 유입'}
   const KPI_UNITS={revenue:'원',order_count:'건',aov:'원',cvr:'%',cart_abandon:'%',checkout_drop:'%',pay_fail:'%',err_404:'건',supla_miss:'%',login_ok:'%',cs_count:'건',seo_index:'개',organic:'명'}
