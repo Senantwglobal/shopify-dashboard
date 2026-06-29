@@ -145,13 +145,23 @@ if(type==='item'&&id){
 }
 
 async function loadItemDetail(itemId){
-  const [{data:item},{data:subs},{data:comments},{data:cats}]=await Promise.all([
+  try{
+  const [itemRes,subsRes,cmtsRes,catsRes]=await Promise.all([
     sb.from('checklist_items').select('*').eq('id',itemId).single(),
     sb.from('checklist_subs').select('*').eq('item_id',itemId).order('sort_order'),
     sb.from('checklist_comments').select('*').eq('item_id',itemId).order('created_at'),
     sb.from('checklist_categories').select('*'),
   ])
-  if(!item){document.getElementById('page-content').innerHTML=`<div class="empty-state">항목을 찾을 수 없습니다.</div>`;return}
+  const item=itemRes.data, subs=subsRes.data, comments=cmtsRes.data, cats=catsRes.data
+  if(!item||itemRes.error){
+    document.getElementById('page-content').innerHTML=`<div class="empty-state" style="padding:60px;text-align:center">
+      <div style="font-size:48px;margin-bottom:12px">😕</div>
+      <div style="font-size:16px;font-weight:500;margin-bottom:8px">항목을 찾을 수 없어요</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:20px">삭제됐거나 잘못된 링크예요</div>
+      <button class="btn btn-o" onclick="history.back()">돌아가기</button>
+    </div>`
+    return
+  }
   const cat=cats?.find(c=>c.id===item.category_id)
   document.getElementById('breadcrumb').textContent=`${cat?.label||''} > ${item.text}`
   _origItem = item
@@ -485,6 +495,11 @@ window.submitComment=async(itemId)=>{
     await logH(`댓글 등록${ns?` + 상태 ${ns}`:''}`,item.text)
     toast('댓글 등록됨')
     await loadItemDetail(itemId)
+  }
+}
+
+  }catch(e){
+    document.getElementById('page-content').innerHTML=`<div class="empty-state" style="padding:60px;text-align:center"><div style="font-size:16px;font-weight:500;margin-bottom:12px">로딩 오류</div><div style="font-size:13px;color:var(--muted);margin-bottom:16px">${e.message}</div><button class="btn btn-o" onclick="history.back()">돌아가기</button></div>`
   }
 }
 
