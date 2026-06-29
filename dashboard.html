@@ -87,7 +87,7 @@ select.inp{cursor:pointer}
 .cat-tab:hover:not(.active){color:var(--text)}
 .ck-item{display:flex;align-items:flex-start;gap:10px;padding:9px 12px;border-radius:10px;border:0.5px solid var(--bd);margin-bottom:6px;background:var(--card);cursor:pointer;transition:border-color .15s}
 .ck-item:hover{border-color:var(--ob)}
-.ck-item.done-item{opacity:.6}
+.ck-item.done-item{opacity:.6;cursor:pointer}
 .ck-cb{accent-color:var(--o);width:16px;height:16px;margin-top:2px;flex-shrink:0;cursor:pointer}
 .ck-body{flex:1;min-width:0}
 .ck-title{font-size:13px;font-weight:500;margin-bottom:4px;line-height:1.4}
@@ -246,7 +246,17 @@ function stBadge(s){
   return`<span class="badge ${m[s]||'bgr'}">${s||'할 일'}</span>`
 }
 function prBadge(p){return{critical:'<span class="badge br">긴급</span>',high:'<span class="badge bo">중요</span>',medium:'<span class="badge bg">보통</span>'}[p]||''}
-function avEl(name,sz=22){const m=MEMBERS.find(m=>m.name===name);const c=m?m.color:'#888';return`<div class="av" style="width:${sz}px;height:${sz}px;font-size:${Math.round(sz*.42)}px;background:${c}" title="${name}">${name?name[0]:'?'}</div>`}
+function avEl(name,sz=22){
+  const m=MEMBERS.find(m=>m.name===name)
+  let c=m?m.color:'#888'
+  if(!m&&name){
+    // 이름 기반 일관된 색상 생성
+    const colors=['#185FA5','#3B6D11','#534AB7','#0F6E56','#854F0B','#993556','#5F5E5A','#A32D2D']
+    let hash=0;for(let i=0;i<name.length;i++)hash=(hash*31+name.charCodeAt(i))&0xfffffff
+    c=colors[hash%colors.length]
+  }
+  return`<div class="av" style="width:${sz}px;height:${sz}px;font-size:${Math.round(sz*.42)}px;background:${c}" title="${name}">${name?name[0]:'?'}</div>`
+}
 function ownersEl(owners,sz=20){return(Array.isArray(owners)?owners:[owners||'']).filter(Boolean).map(o=>avEl(o,sz)).join('')}
 function getCatColor(id){const c=D.cats.find(c=>c.id===id);return c?c.color:'#888'}
 function getOwners(a){return Array.isArray(a.owners)&&a.owners.length?a.owners:a.owner?[a.owner]:[]}
@@ -584,6 +594,8 @@ function renderCK(){
   const items=getItems()
   const total=items.length
   const done=items.filter(i=>i.done||i.status==="완료").length
+  // 완료 항목 기본 접힘
+  items.forEach(i=>{if((i.done||i.status==="완료")&&expandCks[i.id]===undefined)expandCks[i.id]=false})
 
   function catDone(id){
     if(id==="전체")return D.items.filter(i=>i.done).length
@@ -739,6 +751,7 @@ window.toggleCkExp=id=>{expandCks[id]=expandCks[id]===false;render()}
 window.toggleItem=async(id,checked)=>{
   const item=D.items.find(i=>i.id===id);if(!item)return
   const newStatus=checked?'완료':'할 일'
+  if(checked)expandCks[id]=false  // 완료 시 세부항목 접기
   await sb.from('checklist_items').update({done:checked,status:newStatus,done_by:checked?curUser.name:null,updated_at:new Date().toISOString()}).eq('id',id)
   await logH(`항목 ${checked?'완료':'취소'}`,item.text);await loadAll()
 }
