@@ -370,13 +370,39 @@ function renderDash(){
   <div class="kpi" onclick="showTab('mtg')" style="cursor:pointer" title="회의록 보기"><div class="kn" style="color:#185FA5">${D.meetings.length}</div><div class="kl">회의록</div></div>
 </div>
 
-<!-- Go/No-Go -->
+<!-- 최근 활동 피드 -->
 <div class="card card-o">
-  <div class="sh"><span class="st"><i class="ti ti-traffic-lights oi"></i> Go/No-Go 판정 <span style="font-size:11px;color:var(--muted);font-weight:400;margin-left:4px">${gngPass===6?'✅ 전환 가능':'⛔ 미충족 항목 있음'}</span></span><button class="btn" onclick="openDdayEdit()"><i class="ti ti-calendar"></i> D-Day 설정</button></div>
-  <div class="gng-grid" style="margin-bottom:10px">
-    ${gngItems.map(g=>`<div class="gng-c"><div class="gng-l ${g.done?'lg-g':'lg-o'}"></div><div style="font-size:12px;font-weight:500">${g.label}</div></div>`).join('')}
+  <div class="sh">
+    <span class="st"><i class="ti ti-activity oi"></i> 최근 활동</span>
+    <span style="font-size:11px;color:var(--muted)"><span class="rdot"></span>실시간 업데이트</span>
   </div>
-  ${gngPass<6?`<div style="background:var(--ol);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--od)"><i class="ti ti-alert-triangle"></i> ${6-gngPass}개 기준 미충족 — 체크리스트에서 완료 처리 필요</div>`:'<div style="background:#EAF3DE;border-radius:8px;padding:8px 12px;font-size:12px;color:#3B6D11">✅ 모든 기준 충족 — D-Day 전환 가능합니다.</div>'}
+  ${D.history.length?`<div style="display:flex;flex-direction:column;gap:0">
+  ${D.history.slice(0,8).map((h,i)=>{
+    const isComplete=h.action.includes('완료')||h.action.includes('완료')
+    const isAdd=h.action.includes('추가')||h.action.includes('등록')
+    const isEdit=h.action.includes('변경')||h.action.includes('수정')
+    const iconColor=isComplete?'#3B6D11':isAdd?'#185FA5':isEdit?'#854F0B':'#888'
+    const icon=isComplete?'ti-circle-check':isAdd?'ti-circle-plus':isEdit?'ti-pencil':'ti-circle-dot'
+    const m=MEMBERS.find(m=>m.name===h.user_name)||{color:'#888'}
+    return`<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:${i<7?'0.5px solid var(--bd)':'none'}">
+      <div style="position:relative;flex-shrink:0">
+        <div class="av" style="width:28px;height:28px;font-size:11px;background:${m.color}">${h.user_name?h.user_name[0]:'?'}</div>
+        <div style="position:absolute;bottom:-2px;right:-2px;width:14px;height:14px;border-radius:50%;background:${iconColor};border:1.5px solid var(--card);display:flex;align-items:center;justify-content:center">
+          <i class="ti ${icon}" style="font-size:8px;color:#fff"></i>
+        </div>
+      </div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;line-height:1.4">
+          <span style="font-weight:600">${h.user_name}</span>
+          <span style="color:var(--muted)">님이 </span>
+          <span style="color:${iconColor};font-weight:500">${h.action}</span>
+          ${h.target?`<span style="color:var(--muted)"> — </span><span style="font-size:12px;color:var(--text);background:var(--sf);padding:1px 6px;border-radius:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px;display:inline-block;vertical-align:middle">${h.target.slice(0,40)}${h.target.length>40?'...':''}</span>`:''}
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px">${new Date(h.created_at).toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}</div>
+      </div>
+    </div>`
+  }).join('')}
+  `:`<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px">아직 활동 내역이 없어요</div>`}
 </div>
 
 <div class="two">
