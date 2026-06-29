@@ -961,7 +961,7 @@ window.openAIDetail=(id)=>{
     <select class="inp" onchange="addAIOwner('${id}',this.value);this.value=''"><option value="">+ 담당자 추가</option>${MEMBERS.filter(m=>!owners.includes(m.name)).map(m=>`<option>${m.name}</option>`).join('')}</select>
     <div style="font-size:12px;font-weight:500;margin:14px 0 8px;border-top:0.5px solid var(--bd);padding-top:12px">댓글 (${(a.comments||[]).length})</div>
     ${(a.comments||[]).map(c=>`<div class="comment"><div class="cauth">${avEl(c.user,18)} ${c.user} <span class="ctime">${c.time}</span></div><div class="ctext">${c.text}</div></div>`).join('')}
-    <textarea class="inp" id="ai-cmt-${id}" placeholder="댓글 입력..."></textarea>
+    <textarea class="inp" id="ai-cmt-current" placeholder="댓글 입력..."></textarea>
     <div style="display:flex;justify-content:flex-end"><button class="btn btn-o" onclick="saveAICmt(this.getAttribute('data-aid'))" data-aid="${id}"><i class="ti ti-send"></i> 등록</button></div>
   </div></div>`
   document.body.appendChild(w)
