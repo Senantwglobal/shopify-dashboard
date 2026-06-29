@@ -3,333 +3,432 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>상세 — OPLE 대시보드</title>
+<title>상세 — OPLE</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--o:#E8680A;--ol:#FEF0E6;--od:#B84E06;--ob:#F5C49A;--bg:#f8f7f5;--card:#fff;--bd:#e5e3dc;--text:#1a1a1a;--muted:#888;--surface:#f3f2ef}
+:root{--o:#E8680A;--ol:#FEF0E6;--od:#B84E06;--ob:#F5C49A;--bg:#f8f7f5;--card:#fff;--bd:#e5e3dc;--text:#1a1a1a;--muted:#888;--sf:#f3f2ef}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-.hdr{background:var(--card);border-bottom:0.5px solid var(--bd);padding:10px 20px;display:flex;align-items:center;gap:12px}
+.hdr{background:var(--card);border-bottom:0.5px solid var(--bd);padding:10px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:50}
 .logo{background:var(--o);color:#fff;font-size:13px;font-weight:600;padding:4px 10px;border-radius:6px;text-decoration:none}
-.back-btn{display:flex;align-items:center;gap:4px;font-size:13px;color:var(--muted);text-decoration:none;padding:5px 10px;border-radius:8px;border:0.5px solid var(--bd);background:none;cursor:pointer}
-.back-btn:hover{color:var(--text);background:var(--surface)}
+.back-btn{display:flex;align-items:center;gap:4px;font-size:13px;color:var(--muted);padding:5px 10px;border-radius:8px;border:0.5px solid var(--bd);background:none;cursor:pointer}
+.back-btn:hover{color:var(--text);background:var(--sf)}
+#breadcrumb{font-size:13px;color:var(--muted)}
 .page{max-width:820px;margin:0 auto;padding:24px 20px}
 .card{background:var(--card);border:0.5px solid var(--bd);border-radius:14px;padding:20px;margin-bottom:16px}
-.card-title{font-size:13px;font-weight:500;color:var(--muted);margin-bottom:14px;display:flex;align-items:center;gap:6px;padding-bottom:10px;border-bottom:0.5px solid var(--bd)}
-.card-title i{color:var(--o)}
-.main-title{font-size:22px;font-weight:500;line-height:1.4;margin-bottom:8px}
-.meta-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:6px}
+.card-label{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.5px;margin-bottom:12px;padding-bottom:10px;border-bottom:0.5px solid var(--bd);display:flex;align-items:center;gap:5px}
+.card-label i{color:var(--o)}
+.main-title{font-size:22px;font-weight:600;line-height:1.4;margin-bottom:8px;outline:none;border-bottom:2px solid transparent;cursor:text}
+.main-title:focus{border-bottom-color:var(--o)}
+.meta-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
 .badge{font-size:11px;padding:3px 8px;border-radius:9px;font-weight:500;white-space:nowrap}
-.bo{background:var(--ol);color:var(--od)}
-.bb{background:#E6F1FB;color:#185FA5}
-.br{background:#FCEBEB;color:#A32D2D}
-.bg{background:#EAF3DE;color:#3B6D11}
-.bgr{background:#F1EFE8;color:#5F5E5A}
-.dl-chip{font-size:11px;font-weight:500;padding:3px 8px;border-radius:9px;white-space:nowrap}
-.dl-ok{background:#EAF3DE;color:#3B6D11}
-.dl-w{background:var(--ol);color:var(--od)}
-.dl-c{background:#FCEBEB;color:#A32D2D}
-.dl-d{background:#F1EFE8;color:#5F5E5A}
+.bo{background:var(--ol);color:var(--od)}.bb{background:#E6F1FB;color:#185FA5}.br{background:#FCEBEB;color:#A32D2D}.bg{background:#EAF3DE;color:#3B6D11}.bgr{background:#F1EFE8;color:#5F5E5A}
+.dlc{font-size:11px;font-weight:500;padding:3px 8px;border-radius:9px;white-space:nowrap}
+.dl-ok{background:#EAF3DE;color:#3B6D11}.dl-w{background:var(--ol);color:var(--od)}.dl-c{background:#FCEBEB;color:#A32D2D}.dl-d{background:#F1EFE8;color:#5F5E5A}
+.save-bar{display:none;margin-top:12px;padding:10px 14px;background:var(--ol);border-radius:10px;border:0.5px solid var(--ob);align-items:center;justify-content:space-between;gap:8px}
+.save-bar.show{display:flex}
 .field-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
 .field{display:flex;flex-direction:column;gap:5px}
 .field label{font-size:11px;font-weight:500;color:var(--muted)}
-.inp{width:100%;padding:9px 11px;border:0.5px solid var(--bd);border-radius:9px;font-size:13px;background:var(--surface);color:var(--text);outline:none;transition:border-color .15s}
+.inp{width:100%;padding:9px 11px;border:0.5px solid var(--bd);border-radius:9px;font-size:13px;background:var(--sf);color:var(--text);outline:none;transition:border-color .15s}
 .inp:focus{border-color:var(--o)}
 select.inp{cursor:pointer}
 textarea.inp{resize:vertical;min-height:80px;line-height:1.6}
 .btn{font-size:13px;padding:8px 14px;border-radius:9px;border:0.5px solid var(--bd);background:none;color:var(--text);cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all .15s}
-.btn:hover{background:var(--surface)}
+.btn:hover{background:var(--sf)}
 .btn-o{background:var(--o);color:#fff;border-color:var(--o)}
 .btn-o:hover{background:var(--od);color:#fff}
 .btn-g{border-color:transparent;color:var(--muted)}
-.btn-g:hover{color:var(--text);background:var(--surface)}
+.btn-g:hover{color:var(--text);background:var(--sf)}
 .btn-red{color:#A32D2D;border-color:#F09595}
 .btn-red:hover{background:#FCEBEB}
 .sub-item{display:flex;align-items:flex-start;gap:10px;padding:12px;border:0.5px solid var(--bd);border-radius:10px;margin-bottom:8px;background:var(--card)}
 .sub-item:hover{border-color:var(--ob)}
 .sub-item input[type=checkbox]{accent-color:var(--o);width:16px;height:16px;margin-top:2px;flex-shrink:0}
-.sub-body{flex:1;min-width:0}
-.sub-text{font-size:14px;margin-bottom:6px;line-height:1.4}
-.sub-meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.vbadge{font-size:10px;padding:2px 7px;border-radius:7px;background:#EEEDFE;color:#534AB7;white-space:nowrap}
+.vbadge{font-size:10px;padding:2px 7px;border-radius:7px;background:#EEEDFE;color:#534AB7}
 .vbadge.ok{background:#EAF3DE;color:#3B6D11}
-.comment-item{background:var(--surface);border-radius:10px;padding:14px;margin-bottom:10px;border-left:4px solid var(--o)}
-.comment-header{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-.av{border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;color:#fff;flex-shrink:0}
-.comment-author{font-size:13px;font-weight:500}
-.comment-time{font-size:11px;color:var(--muted)}
-.comment-text{font-size:14px;color:#333;line-height:1.6;white-space:pre-wrap}
-.ochip{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:500;color:#fff;white-space:nowrap}
-.ochip-x{cursor:pointer;opacity:.8;font-size:11px;margin-left:2px;line-height:1}
-.ochip-x:hover{opacity:1}
+.comment{background:var(--sf);border-radius:10px;padding:14px;margin-bottom:10px;border-left:4px solid var(--o)}
+.cauth{font-size:12px;font-weight:500;display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.ctime{font-size:10px;color:var(--muted);font-weight:400}
+.ctext{font-size:14px;color:#333;line-height:1.6;white-space:pre-wrap}
 .comment-link{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--o);background:var(--ol);padding:4px 10px;border-radius:7px;text-decoration:none;margin-top:8px;border:0.5px solid var(--ob)}
-.comment-link:hover{background:#fde8d4}
-.write-box{background:var(--surface);border-radius:12px;padding:16px;border:0.5px solid var(--bd)}
-.write-box:focus-within{border-color:var(--ob)}
-.write-author{display:flex;align-items:center;gap:8px;margin-bottom:10px}
-.write-author span{font-size:13px;font-weight:500;color:var(--text)}
-.pgb{height:6px;border-radius:3px;background:var(--surface);overflow:hidden;margin-top:6px;border:0.5px solid var(--bd)}
+.pgb{height:6px;border-radius:3px;background:var(--sf);overflow:hidden;margin-top:6px}
 .pgf{height:100%;border-radius:3px;transition:width .4s}
+.ochip{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:500;color:#fff;white-space:nowrap}
+.ochip-x{cursor:pointer;opacity:.8;font-size:11px}
+.ochip-x:hover{opacity:1}
+.owner-chips{display:flex;flex-wrap:wrap;gap:5px;padding:6px 8px;border:0.5px solid var(--bd);border-radius:8px;background:var(--sf);min-height:36px;margin-bottom:8px;align-items:center}
+.file-upload-label{flex:1;display:flex;align-items:center;gap:6px;padding:8px 12px;border:1.5px dashed var(--bd);border-radius:8px;cursor:pointer;font-size:12px;color:var(--muted);background:var(--sf)}
 .toast{position:fixed;bottom:20px;right:20px;background:#2d6a27;color:#fff;padding:10px 18px;border-radius:10px;font-size:13px;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none}
 .toast.show{opacity:1}
-.section-divider{height:1px;background:var(--bd);margin:20px 0}
-.progress-label{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:4px}
-.add-sub-row{display:flex;gap:8px;margin-top:12px;padding-top:12px;border-top:0.5px solid var(--bd)}
-.add-sub-row input{flex:1;padding:9px 11px;border:0.5px solid var(--bd);border-radius:9px;font-size:13px;background:var(--surface);color:var(--text);outline:none}
-.add-sub-row input:focus{border-color:var(--o)}
-.empty-state{text-align:center;padding:40px 20px;color:var(--muted);font-size:14px}
-.history-row{display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:0.5px solid var(--bd);font-size:12px}
-.history-row:last-child{border-bottom:none}
-@media(max-width:600px){.field-grid{grid-template-columns:1fr}.page{padding:16px 14px}}
+.empty-state{text-align:center;padding:60px 20px;color:var(--muted)}
+@media(max-width:600px){.field-grid{grid-template-columns:1fr}.page{padding:14px}}
 </style>
 </head>
 <body>
 <div class="hdr">
   <a href="dashboard.html" class="logo">OPLE</a>
-  <button class="back-btn" onclick="history.back()"><i class="ti ti-arrow-left"></i> 돌아가기</button>
-  <span style="font-size:13px;color:var(--muted);margin-left:4px" id="breadcrumb"></span>
+  <button class="back-btn" id="back-btn"><i class="ti ti-arrow-left"></i> 돌아가기</button>
+  <span id="breadcrumb"></span>
 </div>
-
-<div class="page" id="page-content">
-  <div class="empty-state">로딩 중...</div>
-</div>
-
+<div class="page" id="page-content"><div class="empty-state">로딩 중...</div></div>
 <div class="toast" id="toast"></div>
 
 <script type="module">
-let _dirty = false
-let _origItem = null
-
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-const sb = createClient(
-  'https://btutlgcidpjgedpypzri.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ0dXRsZ2NpZHBqZ2VkcHlwenJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0NTE0MjQsImV4cCI6MjA5ODAyNzQyNH0.qZp04DhOmm4oSho3Qsfz8UWEeY-eNhGcIydyVNejqBc'
-)
+const sb=createClient('https://btutlgcidpjgedpypzri.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ0dXRsZ2NpZHBqZ2VkcHlwenJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0NTE0MjQsImV4cCI6MjA5ODAyNzQyNH0.qZp04DhOmm4oSho3Qsfz8UWEeY-eNhGcIydyVNejqBc')
+
+// 전역 상태
+let _dirty=false, _origItem=null
 
 const {data:{session}}=await sb.auth.getSession()
-if(!session){location.href='index.html';throw new Error('no session')}
+if(!session){location.href='index.html';throw new Error()}
 
-const MEMBER_COLORS=['#E8680A','#534AB7','#0F6E56','#A32D2D','#185FA5','#854F0B','#993556','#5F5E5A']
-function getMembers(){try{const s=localStorage.getItem('ople-members');return(s?JSON.parse(s):[{name:'한덕희',email:'handeokhee@ople.co'},{name:'박영환',email:'younghwan@ople.co'},{name:'천세나',email:'sena@ople.co'},{name:'권현정',email:'hyunjeong@ople.co'},{name:'김현수',email:'hyunsu@ople.co'}]).map((m,i)=>({...m,color:MEMBER_COLORS[i%MEMBER_COLORS.length]}))}catch{return[]}}
-
+const MC=['#E8680A','#534AB7','#0F6E56','#A32D2D','#185FA5','#854F0B','#993556','#5F5E5A']
+function getMembers(){try{const s=localStorage.getItem('ople-members');return(s?JSON.parse(s):[{name:'한덕희',email:'handeokhee@ople.co'},{name:'박영환',email:'younghwan@ople.co'},{name:'천세나',email:'sena@ople.co'},{name:'권현정',email:'hyunjeong@ople.co'},{name:'김현수',email:'hyunsu@ople.co'}]).map((m,i)=>({...m,color:MC[i%MC.length]}))}catch{return[]}}
 const MEMBERS=getMembers()
 const curEmail=session.user.email
 const curUser=MEMBERS.find(m=>m.email===curEmail)||{name:curEmail.split('@')[0],color:'#888'}
 
+const STATUS_LIST=['할 일','진행중','검증대기','완료']
+const TODAY=new Date()
+
+function toast(msg,ok=true){const t=document.getElementById('toast');t.textContent=msg;t.style.background=ok?'#2d6a27':'#A32D2D';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
+function ts(){return new Date().toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}
+function ddu(ds){if(!ds)return 999;return Math.ceil((new Date(ds)-TODAY)/864e5)}
+function dlc(dl,done){
+  if(done)return`<span class="dlc dl-d">완료</span>`
+  if(!dl)return''
+  const d=ddu(dl)
+  if(d<0)return`<span class="dlc dl-c">D+${Math.abs(d)} 초과</span>`
+  if(d===0)return`<span class="dlc dl-c">오늘 마감</span>`
+  if(d<=3)return`<span class="dlc dl-c">D-${d}</span>`
+  if(d<=7)return`<span class="dlc dl-w">D-${d}</span>`
+  return`<span class="dlc dl-ok">D-${d}</span>`
+}
+function pb(p){return{critical:'<span class="badge br">긴급</span>',high:'<span class="badge bo">중요</span>',medium:'<span class="badge bg">보통</span>'}[p]||''}
+function sb2(s){const m={'완료':'bg','진행중':'bb','검증대기':'bo','할 일':'bgr'};return`<span class="badge ${m[s]||'bgr'}">${s||'할 일'}</span>`}
+function avEl(name,sz=32){
+  let m=MEMBERS.find(m=>m.name===name)
+  let c=m?m.color:'#888'
+  if(!m&&name){const colors=MC;let h=0;for(let i=0;i<name.length;i++)h=(h*31+name.charCodeAt(i))&0xfffffff;c=colors[h%colors.length]}
+  return`<div style="width:${sz}px;height:${sz}px;border-radius:50%;background:${c};display:flex;align-items:center;justify-content:center;font-size:${Math.round(sz*.4)}px;font-weight:600;color:#fff;flex-shrink:0">${name?name[0]:'?'}</div>`
+}
+async function logH(action,target){await sb.from('history').insert({user_name:curUser.name,action,target})}
+
+// 변경 감지
+window.markDirty=()=>{
+  _dirty=true
+  document.getElementById('save-bar')?.classList.add('show')
+}
+
+// 저장
+window.saveAllChanges=async(itemId)=>{
+  const deadline=document.getElementById('det-deadline')?.value
+  const status=document.getElementById('det-status')?.value
+  const priority=document.getElementById('det-priority')?.value
+  const titleEl=document.getElementById('item-title')
+  const title=titleEl?.innerText?.trim()
+  const updates={updated_at:new Date().toISOString()}
+  if(deadline!==undefined)updates.deadline=deadline||null
+  if(status)updates.status=status
+  if(priority)updates.priority=priority
+  if(title&&_origItem&&title!==_origItem.text)updates.text=title
+  const {error}=await sb.from('checklist_items').update(updates).eq('id',itemId)
+  if(error){toast('저장 실패: '+error.message,false);return}
+  await logH('항목 수정',title||itemId)
+  _dirty=false
+  document.getElementById('save-bar')?.classList.remove('show')
+  toast('저장됐어요')
+  await loadItemDetail(itemId)
+}
+
+window.cancelChanges=(itemId)=>{_dirty=false;loadItemDetail(itemId)}
+
+// 뒤로가기
+document.getElementById('back-btn').addEventListener('click',e=>{
+  if(_dirty){
+    if(!confirm('저장하지 않으면 변경내용이 삭제됩니다. 뒤로 가시겠어요?')){e.preventDefault();return}
+  }
+  // 이전 페이지 새로고침
+  const ref=document.referrer
+  if(ref&&ref.includes('dashboard.html')){
+    location.href=ref
+  } else {
+    history.back()
+  }
+})
+
+window.addEventListener('beforeunload',e=>{
+  if(_dirty){e.preventDefault();e.returnValue='저장하지 않으면 변경내용이 삭제됩니다.';return e.returnValue}
+})
+
+// 제목 변경 감지
+document.addEventListener('input',e=>{if(e.target.id==='item-title')markDirty()})
+
+// ── 데이터 로드 ──
 const params=new URLSearchParams(location.search)
 const type=params.get('type')||'item'
 const id=params.get('id')
 
-function toast(msg,ok=true){const t=document.getElementById('toast');t.textContent=msg;t.style.background=ok?'#2d6a27':'#A32D2D';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
-function ts(){return new Date().toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}
-function ddu(ds){if(!ds)return 999;return Math.ceil((new Date(ds)-new Date())/864e5)}
-function dlc(dl,done){
-  if(!dl&&!done)return''
-  if(done)return`<span class="dl-chip dl-d">완료</span>`
-  const d=ddu(dl)
-  if(d<0)return`<span class="dl-chip dl-c">D+${Math.abs(d)} 초과</span>`
-  if(d===0)return`<span class="dl-chip dl-c">오늘 마감</span>`
-  if(d<=3)return`<span class="dl-chip dl-c">D-${d}</span>`
-  if(d<=7)return`<span class="dl-chip dl-w">D-${d}</span>`
-  return`<span class="dl-chip dl-ok">D-${d}</span>`
-}
-function pb(p){return{critical:'<span class="badge br">긴급</span>',high:'<span class="badge bo">중요</span>',medium:'<span class="badge bg">보통</span>'}[p]||''}
-function sb2(s){const m={'완료':'bg','진행중':'bb','진행전':'bgr','보류':'br','이슈':'br'};return`<span class="badge ${m[s]||'bgr'}">${s||'진행전'}</span>`}
-function avEl(name,sz=32){const m=MEMBERS.find(m=>m.name===name);const c=m?m.color:'#888';return`<div class="av" style="width:${sz}px;height:${sz}px;font-size:${Math.round(sz*.4)}px;background:${c}">${name?name[0]:'?'}</div>`}
-
-async function logH(action,target){await sb.from('history').insert({user_name:curUser.name,action,target})}
-
 if(type==='item'&&id){
   await loadItemDetail(id)
 } else if(type==='ux'){
-  await loadUXDetail(params.get('q'), params.get('idx'))
+  await loadUXDetail(params.get('q'),params.get('idx'))
 } else {
-  document.getElementById('page-content').innerHTML=`<div class="empty-state">잘못된 접근입니다.</div>`
+  document.getElementById('page-content').innerHTML='<div class="empty-state">잘못된 접근입니다.</div>'
 }
 
 async function loadItemDetail(itemId){
   try{
-    const [itemRes,subsRes,cmtsRes,catsRes]=await Promise.all([
+    const [iR,sR,cR,catR]=await Promise.all([
       sb.from('checklist_items').select('*').eq('id',itemId).single(),
       sb.from('checklist_subs').select('*').eq('item_id',itemId).order('sort_order'),
       sb.from('checklist_comments').select('*').eq('item_id',itemId).order('created_at'),
       sb.from('checklist_categories').select('*'),
     ])
-    const item=itemRes.data, subs=subsRes.data||[], comments=cmtsRes.data||[], cats=catsRes.data||[]
+    const item=iR.data, subs=sR.data||[], comments=cR.data||[], cats=catR.data||[]
     if(!item){
-      document.getElementById('page-content').innerHTML=`<div style="text-align:center;padding:60px"><div style="font-size:48px;margin-bottom:12px">😕</div><div style="font-size:16px;font-weight:500;margin-bottom:8px">항목을 찾을 수 없어요</div><button class="btn btn-o" onclick="history.back()">돌아가기</button></div>`
+      document.getElementById('page-content').innerHTML='<div class="empty-state"><div style="font-size:48px;margin-bottom:12px">😕</div><div style="font-size:16px;font-weight:500;margin-bottom:16px">항목을 찾을 수 없어요</div><button class="btn btn-o" onclick="history.back()">돌아가기</button></div>'
       return
     }
     const cat=cats.find(c=>c.id===item.category_id)
-    document.getElementById('breadcrumb').textContent=`${cat?.label||''} > ${item.text}`
-    _origItem = item
-    _dirty = false
+    document.getElementById('breadcrumb').textContent=`${cat?.label||''} > ${item.text.slice(0,30)}`
+    _origItem=item
+    _dirty=false
+    document.getElementById('save-bar')?.classList.remove('show')
     renderItemDetail(item,subs,comments,cats)
   }catch(e){
-    document.getElementById('page-content').innerHTML=`<div style="text-align:center;padding:60px"><div style="font-size:16px;font-weight:500;margin-bottom:8px">로딩 오류</div><div style="font-size:13px;color:#888;margin-bottom:16px">${e.message}</div><button class="btn btn-o" onclick="history.back()">돌아가기</button></div>`
+    document.getElementById('page-content').innerHTML=`<div class="empty-state"><div style="font-size:16px;font-weight:500;margin-bottom:8px">로딩 오류</div><div style="font-size:13px;color:var(--muted);margin-bottom:16px">${e.message}</div><button class="btn btn-o" onclick="history.back()">돌아가기</button></div>`
   }
+}
+
+function renderItemDetail(item,subs,comments,cats){
+  const owners=item.owners?.length?item.owners:item.owner?[item.owner]:[]
+  const doneSubs=subs.filter(s=>s.done).length
+  const prog=subs.length?Math.round(doneSubs/subs.length*100):0
+
+  document.getElementById('page-content').innerHTML=`
+  <!-- 항목 정보 -->
+  <div class="card">
+    <div class="card-label"><i class="ti ti-info-circle"></i> 항목 정보</div>
+    <div class="main-title" id="item-title" contenteditable="true" spellcheck="false"
+      onfocus="this.style.borderBottomColor='var(--o)'"
+      onblur="this.style.borderBottomColor='transparent'"
+      onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}"
+    >${item.text}</div>
+    <div style="font-size:11px;color:var(--muted);margin-top:3px;margin-bottom:10px">클릭해서 제목 수정 가능</div>
+    <div class="meta-row">${pb(item.priority)}${sb2(item.status)}${dlc(item.deadline,item.done)}${item.done?`<span class="badge bg"><i class="ti ti-check"></i> 완료 · ${item.done_by||''}</span>`:''}</div>
+
+    <!-- 저장 바 -->
+    <div class="save-bar" id="save-bar">
+      <span style="font-size:13px;color:var(--od)"><i class="ti ti-pencil"></i> 변경사항이 있어요</span>
+      <div style="display:flex;gap:6px">
+        <button class="btn" onclick="cancelChanges('${item.id}')">취소</button>
+        <button class="btn btn-o" onclick="saveAllChanges('${item.id}')"><i class="ti ti-check"></i> 저장</button>
+      </div>
+    </div>
+
+    <!-- 필드 -->
+    <div class="field-grid" style="margin-top:16px">
+      <div class="field" style="grid-column:1/-1">
+        <label>담당자 (복수 선택 가능)</label>
+        <div class="owner-chips" id="det-owner-chips">
+          ${owners.map(o=>`<div class="ochip" style="background:${MEMBERS.find(m=>m.name===o)?.color||'#888'}">${o}<span class="ochip-x" onclick="event.stopPropagation();detRemoveOwner('${item.id}','${o}',this.parentElement)">✕</span></div>`).join('')}
+          ${!owners.length?'<span style="font-size:12px;color:var(--muted)">담당자 없음</span>':''}
+        </div>
+        <select class="inp" style="margin:0" onchange="event.stopPropagation();detAddOwner('${item.id}',this.value);this.value=''">
+          <option value="">+ 담당자 추가</option>
+          ${MEMBERS.filter(m=>!owners.includes(m.name)).map(m=>`<option value="${m.name}">${m.name}</option>`).join('')}
+        </select>
+      </div>
+      <div class="field">
+        <label>마감일</label>
+        <input class="inp" type="date" id="det-deadline" value="${item.deadline||''}" onchange="markDirty()">
+      </div>
+      <div class="field">
+        <label>상태</label>
+        <select class="inp" id="det-status" onchange="markDirty()">
+          ${STATUS_LIST.map(s=>`<option ${(item.status||'할 일')===s?'selected':''}>${s}</option>`).join('')}
+        </select>
+      </div>
+      <div class="field">
+        <label>우선순위</label>
+        <select class="inp" id="det-priority" onchange="markDirty()">
+          ${[['critical','긴급'],['high','중요'],['medium','보통']].map(([v,l])=>`<option value="${v}" ${item.priority===v?'selected':''}>${l}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- 세부 항목 -->
+  <div class="card">
+    <div class="card-label"><i class="ti ti-checklist"></i> 세부 항목 <span style="margin-left:auto;font-weight:400">${doneSubs}/${subs.length} 완료</span></div>
+    ${subs.length?`<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:4px"><span>진행률</span><span>${prog}%</span></div><div class="pgb" style="margin-bottom:14px"><div class="pgf" style="width:${prog}%;background:${prog===100?'#3B6D11':'var(--o)'}"></div></div>`:''}
+    ${subs.map(s=>`
+    <div class="sub-item">
+      <input type="checkbox" ${s.done?'checked':''} onchange="toggleSub('${s.id}','${item.id}',this.checked)">
+      <div style="flex:1;min-width:0">
+        <div style="${s.done?'text-decoration:line-through;color:var(--muted);':''}font-size:14px;margin-bottom:6px;line-height:1.4">${s.text}</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+          <input type="date" style="font-size:11px;padding:3px 7px;border:0.5px solid var(--bd);border-radius:6px;background:var(--sf);color:var(--text);outline:none" value="${s.deadline||''}" onchange="updateSubField('${s.id}','deadline',this.value)">
+          <select style="font-size:11px;padding:3px 7px;border:0.5px solid var(--bd);border-radius:6px;background:var(--sf);color:var(--text);outline:none" onchange="updateSubField('${s.id}','verifier',this.value)">
+            ${MEMBERS.map(m=>`<option ${s.verifier===m.name?'selected':''}>${m.name}</option>`).join('')}
+          </select>
+          <span class="vbadge ${s.verified?'ok':''}">${s.verified?`✓ ${s.verified_by||''}님 검증`:'미검증'}</span>
+          ${s.done&&!s.verified?`<button class="btn btn-o" style="font-size:11px;padding:3px 10px" onclick="verifySub('${s.id}','${item.id}')"><i class="ti ti-check"></i> 검증</button>`:''}
+          ${s.done&&s.done_by?`<span style="font-size:11px;color:var(--muted)">${s.done_by} 완료</span>`:''}
+          <button class="btn btn-g btn-red" style="font-size:11px;padding:2px 7px;margin-left:auto" onclick="deleteSub('${s.id}','${item.id}')"><i class="ti ti-trash"></i></button>
+        </div>
+      </div>
+    </div>`).join('')}
+    <div style="display:flex;gap:8px;margin-top:10px;padding-top:10px;border-top:0.5px solid var(--bd)">
+      <input id="new-sub-inp" class="inp" style="margin:0" placeholder="새 세부 항목 입력 후 Enter..." onkeydown="if(event.key==='Enter'){addSub('${item.id}');event.preventDefault()}">
+      <button class="btn btn-o" style="flex-shrink:0" onclick="addSub('${item.id}')"><i class="ti ti-plus"></i> 추가</button>
+    </div>
+  </div>
+
+  <!-- 댓글 & 파일 -->
+  <div class="card">
+    <div class="card-label"><i class="ti ti-message-circle"></i> 댓글 & 파일 첨부 <span style="margin-left:auto;font-weight:400">${comments.length}개</span></div>
+    ${comments.length?comments.map(c=>{
+      let text=c.text, link=c.link, fileData=null
+      try{const p=JSON.parse(c.text);if(p.text!==undefined){text=p.text;link=p.link||c.link;fileData=p.file||null}}catch{}
+      return`<div class="comment">
+      <div class="cauth">${avEl(c.user_name,28)}<div><div>${c.user_name}</div><div class="ctime">${new Date(c.created_at).toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}</div></div></div>
+      <div class="ctext">${text}</div>
+      ${link?`<a href="${link}" target="_blank" class="comment-link"><i class="ti ti-external-link"></i> ${link.length>50?link.slice(0,50)+'...':link}</a>`:''}
+      ${fileData?fileData.type?.startsWith('image/')?`<div style="margin-top:8px"><img src="${fileData.data}" style="max-width:100%;max-height:200px;border-radius:8px;cursor:pointer" onclick="downloadFile('${fileData.name}','${fileData.data}')" title="클릭해서 다운로드"><div style="font-size:11px;color:var(--muted);margin-top:3px"><i class="ti ti-download"></i> ${fileData.name} — 클릭해서 다운로드</div></div>`:`<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--sf);border-radius:8px;margin-top:8px;cursor:pointer" onclick="downloadFile('${fileData.name}','${fileData.data}')"><i class="ti ti-file-download" style="font-size:18px;color:var(--o)"></i><div><div style="font-size:12px;font-weight:500">${fileData.name}</div><div style="font-size:11px;color:var(--muted)">클릭해서 다운로드</div></div></div>`:''}
+      </div>`
+    }).join(''):`<div style="text-align:center;padding:24px;color:var(--muted)">아직 댓글이 없어요.<br>아래에서 첫 댓글을 남겨보세요.</div>`}
+
+    <div style="border-top:0.5px solid var(--bd);padding-top:14px;margin-top:6px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">${avEl(curUser.name,32)}<span style="font-size:13px;font-weight:500">${curUser.name}</span></div>
+      <textarea class="inp" id="cmt-text" placeholder="댓글, 진행 상황, 테스트 결과, 이슈..." rows="3"></textarea>
+      <div style="margin-top:8px">
+        <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:5px"><i class="ti ti-paperclip"></i> 파일 첨부 또는 링크</label>
+        <label class="file-upload-label">
+          <i class="ti ti-upload" style="color:var(--o)"></i>
+          <span id="file-upload-name">파일 선택 (이미지·PDF·문서)</span>
+          <input type="file" id="cmt-file" accept="image/*,.pdf,.doc,.docx,.xlsx,.pptx,.zip" style="display:none" onchange="handleFileSelect(this)">
+        </label>
+        <div id="file-preview" style="margin-top:6px"></div>
+        <input class="inp" id="cmt-link" placeholder="또는 OneDrive / Google Drive URL" style="margin-top:6px">
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;flex-wrap:wrap;gap:8px">
+        <select class="inp" id="cmt-status" style="width:auto;font-size:13px;margin:0">
+          <option value="">상태 변경 없음</option>
+          ${STATUS_LIST.map(s=>`<option value="${s}" ${item.status===s?'selected':''}>${s}</option>`).join('')}
+        </select>
+        <button class="btn btn-o" onclick="submitComment('${item.id}')"><i class="ti ti-send"></i> 등록</button>
+      </div>
+    </div>
+  </div>`
+
+  // window 함수들
+  window.updateField=async(id,field,val)=>{
+    await sb.from('checklist_items').update({[field]:val||null,updated_at:new Date().toISOString()}).eq('id',id)
+    await logH(`${field} 변경`,item.text);await loadItemDetail(id)
+  }
+  window.toggleSub=async(sid,itemId,checked)=>{
+    await sb.from('checklist_subs').update({done:checked,done_by:checked?curUser.name:null,verified:false}).eq('id',sid)
+    await logH(`세부 ${checked?'완료':'취소'}`,item.text);await loadItemDetail(itemId)
+  }
+  window.verifySub=async(sid,itemId)=>{
+    await sb.from('checklist_subs').update({verified:true,verified_by:curUser.name,verified_at:new Date().toISOString()}).eq('id',sid)
+    await logH('검증 완료',item.text);toast('✓ 검증 완료');await loadItemDetail(itemId)
+  }
+  window.updateSubField=async(sid,field,val)=>{
+    await sb.from('checklist_subs').update({[field]:val||null}).eq('id',sid);toast('저장됨')
+  }
+  window.addSub=async(itemId)=>{
+    const inp=document.getElementById('new-sub-inp');if(!inp?.value.trim())return
+    await sb.from('checklist_subs').insert({item_id:itemId,text:inp.value.trim(),verifier:curUser.name})
+    await logH('세부 추가',item.text);inp.value='';toast('추가됨');await loadItemDetail(itemId)
+  }
+  window.deleteSub=async(sid,itemId)=>{
+    const s=subs.find(s=>s.id===sid);if(!s||!confirm(`"${s.text}" 삭제?`))return
+    await sb.from('checklist_subs').delete().eq('id',sid);await logH('세부 삭제',s.text);await loadItemDetail(itemId)
+  }
+  window.submitComment=async(itemId)=>{
+    const txt=document.getElementById('cmt-text')?.value.trim()
+    const lnk=document.getElementById('cmt-link')?.value.trim()
+    const ns=document.getElementById('cmt-status')?.value
+    const fileInput=document.getElementById('cmt-file')
+    const file=fileInput?.files[0]
+    if(!txt&&!file){toast('내용을 입력해주세요.',false);return}
+    let commentText=txt||''
+    let commentLink=lnk||null
+    if(file){
+      if(file.size>5*1024*1024){toast('파일 크기는 5MB 이하만 가능합니다.',false);return}
+      const encoded=await new Promise((res,rej)=>{const r=new FileReader();r.onload=e=>res({name:file.name,type:file.type,size:file.size,data:e.target.result});r.onerror=rej;r.readAsDataURL(file)})
+      commentText=JSON.stringify({text:txt||file.name+' 첨부',link:lnk||null,file:encoded})
+      commentLink=null
+    }
+    await sb.from('checklist_comments').insert({item_id:itemId,user_name:curUser.name,text:commentText,link:commentLink})
+    if(ns)await sb.from('checklist_items').update({status:ns,updated_at:new Date().toISOString()}).eq('id',itemId)
+    await logH('댓글 등록',item.text);toast('등록됨');await loadItemDetail(itemId)
+  }
+  window.detAddOwner=async(itemId,name)=>{
+    if(!name)return
+    const {data:it}=await sb.from('checklist_items').select('*').eq('id',itemId).single()
+    if(!it)return
+    const owners=Array.isArray(it.owners)&&it.owners.length?[...it.owners]:it.owner?[it.owner]:[]
+    if(owners.includes(name))return
+    owners.push(name)
+    try{await sb.from('checklist_items').update({owners,owner:owners[0],updated_at:new Date().toISOString()}).eq('id',itemId)}
+    catch{await sb.from('checklist_items').update({owner:owners[0],updated_at:new Date().toISOString()}).eq('id',itemId)}
+    await logH('담당자 추가: '+name,it.text);toast('담당자 추가됨');await loadItemDetail(itemId)
+  }
+  window.detRemoveOwner=async(itemId,name,el)=>{
+    const {data:it}=await sb.from('checklist_items').select('*').eq('id',itemId).single()
+    if(!it)return
+    let owners=Array.isArray(it.owners)&&it.owners.length?[...it.owners]:it.owner?[it.owner]:[]
+    owners=owners.filter(o=>o!==name)
+    try{await sb.from('checklist_items').update({owners,owner:owners[0]||null,updated_at:new Date().toISOString()}).eq('id',itemId)}
+    catch{await sb.from('checklist_items').update({owner:owners[0]||null,updated_at:new Date().toISOString()}).eq('id',itemId)}
+    await logH('담당자 제거: '+name,it.text);toast('담당자 제거됨');await loadItemDetail(itemId)
+  }
+  window.handleFileSelect=(input)=>{
+    const file=input.files[0];if(!file)return
+    const label=document.getElementById('file-upload-name');if(label)label.textContent=file.name
+    const preview=document.getElementById('file-preview');if(!preview)return
+    if(file.type.startsWith('image/')){
+      const reader=new FileReader();reader.onload=e=>{preview.innerHTML=`<img src="${e.target.result}" style="max-width:100%;max-height:150px;border-radius:8px;border:0.5px solid var(--bd)">`};reader.readAsDataURL(file)
+    } else {
+      preview.innerHTML=`<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--sf);border-radius:8px;border:0.5px solid var(--bd)"><i class="ti ti-file" style="color:var(--o)"></i><div style="font-size:12px">${file.name} (${(file.size/1024).toFixed(1)}KB)</div></div>`
+    }
+  }
+  window.downloadFile=(name,dataUrl)=>{const a=document.createElement('a');a.href=dataUrl;a.download=name;document.body.appendChild(a);a.click();document.body.removeChild(a)}
 }
 
 async function loadUXDetail(q,idx){
   const question=decodeURIComponent(q||'')
   document.getElementById('breadcrumb').textContent=`UX 베타 > 점검항목 ${parseInt(idx||0)+1}`
   const {data:comments}=await sb.from('checklist_comments').select('*').eq('item_id','ux-'+idx).order('created_at')
-  const STATUSES=['진행전','진행중','완료','보류']
   document.getElementById('page-content').innerHTML=`
   <div class="card">
-    <div class="card-title"><i class="ti ti-device-mobile"></i> UX 핵심 점검 항목</div>
-    <div style="background:var(--ol);border:0.5px solid var(--ob);border-radius:8px;padding:6px 12px;font-size:11px;color:var(--od);margin-bottom:12px">항목 ${parseInt(idx||0)+1}</div>
-    <div class="main-title" contenteditable="true" spellcheck="false"
-      style="outline:none;border-bottom:2px solid transparent;cursor:text"
-      onfocus="this.style.borderBottomColor='var(--o)'"
-      onblur="this.style.borderBottomColor='transparent'"
-      onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}"
-    >${question}</div>
-    <div style="font-size:11px;color:var(--muted);margin-top:4px">클릭해서 제목 수정 가능 (로컬 저장)</div>
-    <div class="field-grid" style="margin-top:16px">
-      <div class="field">
-        <label>담당자</label>
-        <select class="inp">
-          <option value="">없음</option>
-          ${MEMBERS.map(m=>`<option>${m.name}</option>`).join('')}
-        </select>
-      </div>
-      <div class="field">
-        <label>마감일</label>
-        <input class="inp" type="date">
-      </div>
-      <div class="field">
-        <label>상태</label>
-        <select class="inp" id="ux-status">
-          ${STATUSES.map(s=>`<option>${s}</option>`).join('')}
-        </select>
-      </div>
-      <div class="field">
-        <label>결과 링크</label>
-        <input class="inp" placeholder="원드라이브 / 구글닥스 URL...">
-      </div>
-    </div>
+    <div class="card-label"><i class="ti ti-device-mobile"></i> UX 핵심 점검 항목</div>
+    <div style="background:var(--ol);border-radius:8px;padding:6px 12px;font-size:11px;color:var(--od);margin-bottom:12px">항목 ${parseInt(idx||0)+1}</div>
+    <div class="main-title">${question}</div>
   </div>
-
   <div class="card">
-    <div class="card-title"><i class="ti ti-message-circle"></i> 댓글 & 결과 공유 <span style="margin-left:auto;font-weight:400">${(comments||[]).length}개</span></div>
-    ${(comments||[]).length?(comments||[]).map(c=>`
-    <div class="comment-item">
-      <div class="comment-header">
-        ${avEl(c.user_name,32)}
-        <div>
-          <div class="comment-author">${c.user_name}</div>
-          <div class="comment-time">${new Date(c.created_at).toLocaleString('ko-KR',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}</div>
-        </div>
-      </div>
-      <div class="comment-text">${c.text}</div>
-      ${c.link?`<a href="${c.link}" target="_blank" class="comment-link"><i class="ti ti-external-link"></i> ${c.link.length>50?c.link.slice(0,50)+'...':c.link}</a>`:''}
-    </div>`).join(''):`<div class="empty-state" style="padding:24px">아직 댓글이 없어요.<br>아래에서 테스트 결과나 의견을 공유해주세요.</div>`}
-
-    <div class="section-divider"></div>
-    <div class="write-box">
-      <div class="write-author">${avEl(curUser.name,32)}<span>${curUser.name}</span></div>
-      <textarea class="inp" id="ux-cmt-text" placeholder="테스트 결과, 이슈, 특이사항, 개선안 등을 자유롭게 입력하세요..." rows="5"></textarea>
-      <div style="margin-top:8px">
-        <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:5px"><i class="ti ti-paperclip"></i> 파일 링크 (OneDrive / Google Drive)</label>
-        <input class="inp" id="ux-cmt-link" placeholder="https://...">
-      </div>
-      <div style="display:flex;justify-content:flex-end;margin-top:12px">
+    <div class="card-label"><i class="ti ti-message-circle"></i> 댓글 & 결과 공유 <span style="margin-left:auto;font-weight:400">${(comments||[]).length}개</span></div>
+    ${(comments||[]).map(c=>`<div class="comment"><div class="cauth">${avEl(c.user_name,28)}<div><div>${c.user_name}</div><div class="ctime">${new Date(c.created_at).toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}</div></div></div><div class="ctext">${c.text}</div>${c.link?`<a href="${c.link}" target="_blank" class="comment-link"><i class="ti ti-external-link"></i> ${c.link.slice(0,50)}</a>`:''}</div>`).join('')||`<div style="text-align:center;padding:24px;color:var(--muted)">아직 댓글이 없어요.</div>`}
+    <div style="border-top:0.5px solid var(--bd);padding-top:14px;margin-top:6px">
+      <textarea class="inp" id="ux-cmt-text" placeholder="테스트 결과, 이슈, 특이사항..." rows="4"></textarea>
+      <input class="inp" id="ux-cmt-link" placeholder="파일 링크...">
+      <div style="display:flex;justify-content:flex-end">
         <button class="btn btn-o" onclick="submitUXComment('ux-${idx}','${question}')"><i class="ti ti-send"></i> 등록</button>
       </div>
     </div>
   </div>`
-
   window.submitUXComment=async(uxId,title)=>{
     const txt=document.getElementById('ux-cmt-text')?.value.trim()
     const lnk=document.getElementById('ux-cmt-link')?.value.trim()
     if(!txt){toast('내용을 입력해주세요.',false);return}
     await sb.from('checklist_comments').insert({item_id:uxId,user_name:curUser.name,text:txt,link:lnk||null})
-    await logH('UX 댓글 등록',title)
-    toast('등록됨')
-    await loadUXDetail(q,idx)
-  }
-}
-
-// ── 파일 업로드 처리 ──
-window.handleFileSelect=(input)=>{
-  const file=input.files[0];if(!file)return
-  const label=document.getElementById('file-upload-name');if(label)label.textContent=file.name
-  const preview=document.getElementById('file-preview');if(!preview)return
-  
-  // 이미지 미리보기
-  if(file.type.startsWith('image/')){
-    const reader=new FileReader()
-    reader.onload=e=>{
-      preview.style.display='block'
-      preview.innerHTML=`<div style="position:relative;display:inline-block">
-        <img src="${e.target.result}" style="max-width:100%;max-height:180px;border-radius:8px;border:0.5px solid var(--bd)">
-        <div style="font-size:11px;color:var(--muted);margin-top:4px">${file.name} (${(file.size/1024).toFixed(1)}KB)</div>
-      </div>`
-    }
-    reader.readAsDataURL(file)
-  } else {
-    preview.style.display='block'
-    const icons={'pdf':'ti-file-type-pdf','doc':'ti-file-type-doc','docx':'ti-file-type-doc','xlsx':'ti-file-type-xls','pptx':'ti-file-type-ppt','zip':'ti-file-zip'}
-    const ext=file.name.split('.').pop().toLowerCase()
-    preview.innerHTML=`<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--sf);border-radius:8px;border:0.5px solid var(--bd)">
-      <i class="ti ${icons[ext]||'ti-file'}" style="font-size:20px;color:var(--o)"></i>
-      <div><div style="font-size:12px;font-weight:500">${file.name}</div><div style="font-size:11px;color:var(--muted)">${(file.size/1024).toFixed(1)}KB</div></div>
-    </div>`
-  }
-}
-
-// 파일을 Base64로 인코딩해서 댓글에 포함
-async function encodeFile(file){
-  return new Promise((resolve,reject)=>{
-    const reader=new FileReader()
-    reader.onload=e=>{
-      resolve({
-        name:file.name,
-        type:file.type,
-        size:file.size,
-        data:e.target.result // base64 data URL
-      })
-    }
-    reader.onerror=reject
-    reader.readAsDataURL(file)
-  })
-}
-
-// submitComment 오버라이드 — 파일 포함 버전
-const _origSubmitComment=window.submitComment
-window.submitComment=async(itemId)=>{
-  const fileInput=document.getElementById('cmt-file')
-  const file=fileInput?.files[0]
-  
-  if(file){
-    // 파일 크기 제한 5MB
-    if(file.size>5*1024*1024){toast('파일 크기는 5MB 이하만 가능합니다.',false);return}
-    
-    const txt=document.getElementById('cmt-text')?.value.trim()||''
-    const lnk=document.getElementById('cmt-link')?.value.trim()||''
-    const ns=document.getElementById('cmt-status')?.value
-    const encoded=await encodeFile(file)
-    
-    // 파일 데이터를 댓글 텍스트에 포함 (JSON 형태로 저장)
-    const commentData={
-      text:txt||(file.name+' 첨부'),
-      link:lnk||null,
-      file:{name:encoded.name,type:encoded.type,size:encoded.size,data:encoded.data}
-    }
-    
-    await sb.from('checklist_comments').insert({
-      item_id:itemId,
-      user_name:curUser.name,
-      text:JSON.stringify(commentData),
-      link:lnk||null
-    })
-    if(ns)await sb.from('checklist_items').update({status:ns,updated_at:new Date().toISOString()}).eq('id',itemId)
-    await logH('파일 첨부',file.name)
-    toast('파일 첨부됨')
-    await loadItemDetail(itemId)
-  } else {
-    _origSubmitComment(itemId)
+    await logH('UX 댓글 등록',title);toast('등록됨');await loadUXDetail(q,idx)
   }
 }
 </script>
