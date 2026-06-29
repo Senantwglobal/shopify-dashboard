@@ -554,7 +554,7 @@ window.calDrop=async(newDate,event)=>{
 }
 window.calNav=(dir)=>{calMonth+=dir;if(calMonth>11){calMonth=0;calYear++}if(calMonth<0){calMonth=11;calYear--};render()}
 window.calClick=(ds)=>{
-  const evs=[...D.items,...D.actionItems].filter(i=>i.deadline===ds)
+  const evs=D.items.filter(i=>i.deadline===ds)
   if(evs.length===0){openAddItem('',ds);return}
   // 날짜 클릭 → 해당 날짜 항목 팝업
   const w=mkOv('cal-day-ov')

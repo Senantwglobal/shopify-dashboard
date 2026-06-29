@@ -374,25 +374,8 @@ function renderItemDetail(item,subs,comments,cats){
     const s=subs.find(s=>s.id===sid);if(!s||!confirm(`"${s.text}" 삭제?`))return
     await sb.from('checklist_subs').delete().eq('id',sid);await logH('세부 삭제',s.text);await loadItemDetail(itemId)
   }
-  window.submitComment=async(itemId)=>{
-    const txt=document.getElementById('cmt-text')?.value.trim()
-    const lnk=document.getElementById('cmt-link')?.value.trim()
-    const ns=document.getElementById('cmt-status')?.value
-    const fileInput=document.getElementById('cmt-file')
-    const file=fileInput?.files[0]
-    if(!txt&&!file){toast('내용을 입력해주세요.',false);return}
-    let commentText=txt||''
-    let commentLink=lnk||null
-    if(file){
-      if(file.size>5*1024*1024){toast('파일 크기는 5MB 이하만 가능합니다.',false);return}
-      const encoded=await new Promise((res,rej)=>{const r=new FileReader();r.onload=e=>res({name:file.name,type:file.type,size:file.size,data:e.target.result});r.onerror=rej;r.readAsDataURL(file)})
-      commentText=JSON.stringify({text:txt||file.name+' 첨부',link:lnk||null,file:encoded})
-      commentLink=null
-    }
-    await sb.from('checklist_comments').insert({item_id:itemId,user_name:curUser.name,text:commentText,link:commentLink})
-    if(ns)await sb.from('checklist_items').update({status:ns,updated_at:new Date().toISOString()}).eq('id',itemId)
-    await logH('댓글 등록',item.text);toast('등록됨');await loadItemDetail(itemId)
-  }
+
+
   window.detAddOwner=async(itemId,name)=>{
     if(!name)return
     const {data:it}=await sb.from('checklist_items').select('*').eq('id',itemId).single()
@@ -426,6 +409,31 @@ function renderItemDetail(item,subs,comments,cats){
   window.downloadFile=(name,dataUrl)=>{const a=document.createElement('a');a.href=dataUrl;a.download=name;document.body.appendChild(a);a.click();document.body.removeChild(a)}
 }
 
+</script>
+</body>
+</html>
+
+window.submitComment=async(itemId)=>{
+    const el=document.getElementById('cmt-text')
+    const txt=el?.value?.trim()
+    console.log('submitComment called, itemId:', itemId, 'txt:', txt, 'el:', el)
+    const lnk=document.getElementById('cmt-link')?.value.trim()
+    const ns=document.getElementById('cmt-status')?.value
+    const fileInput=document.getElementById('cmt-file')
+    const file=fileInput?.files[0]
+    if(!txt&&!file){toast('내용을 입력해주세요.',false);return}
+    let commentText=txt||''
+    let commentLink=lnk||null
+    if(file){
+      if(file.size>5*1024*1024){toast('파일 크기는 5MB 이하만 가능합니다.',false);return}
+      const encoded=await new Promise((res,rej)=>{const r=new FileReader();r.onload=e=>res({name:file.name,type:file.type,size:file.size,data:e.target.result});r.onerror=rej;r.readAsDataURL(file)})
+      commentText=JSON.stringify({text:txt||file.name+' 첨부',link:lnk||null,file:encoded})
+      commentLink=null
+    }
+    await sb.from('checklist_comments').insert({item_id:itemId,user_name:curUser.name,text:commentText,link:commentLink})
+    if(ns)await sb.from('checklist_items').update({status:ns,updated_at:new Date().toISOString()}).eq('id',itemId)
+    await logH('댓글 등록',itemId);toast('등록됨');await loadItemDetail(itemId)
+  }
 async function loadUXDetail(q,idx){
   const question=decodeURIComponent(q||'')
   document.getElementById('breadcrumb').textContent=`UX 베타 > 점검항목 ${parseInt(idx||0)+1}`
@@ -455,6 +463,3 @@ async function loadUXDetail(q,idx){
     await logH('UX 댓글 등록',title);toast('등록됨');await loadUXDetail(q,idx)
   }
 }
-</script>
-</body>
-</html>
