@@ -97,6 +97,9 @@ textarea.inp{resize:vertical;min-height:80px;line-height:1.6}
 <div class="toast" id="toast"></div>
 
 <script type="module">
+let _dirty = false
+let _origItem = null
+
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 const sb = createClient(
   'https://btutlgcidpjgedpypzri.supabase.co',
@@ -309,9 +312,6 @@ function renderItemDetail(item,subs,comments,cats){
 
   // 전역 함수 등록
   // ── 변경 감지 & 저장 ──
-let _dirty = false
-let _origItem = null
-
 window.markDirty=()=>{
   _dirty = true
   const bar = document.getElementById('save-bar')
