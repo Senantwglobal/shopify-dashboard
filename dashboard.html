@@ -210,6 +210,8 @@ let MEMBERS=[], curUser=null, activeTab='dash'
 let expandCks={}
 window.activeCat='전체'
 window.setCat=(id)=>{window.activeCat=id;render()}
+window.ckFilter={status:'',priority:'',owner:'',requester:''}
+window.setCkFilter=(key,val)=>{window.ckFilter[key]=val;render()}
 let calYear=2026, calMonth=6
 let notifOpen=false
 let D={cats:[],items:[],subs:[],comments:[],kpiRows:[],kpiAnalysis:{},actionItems:[],meetings:[],history:[]}
@@ -598,10 +600,9 @@ window.calClick=(ds)=>{
 // 체크리스트 (통합)
 // ══════════════════════
 function renderCK(){
-  const allCats=[{id:"전체",label:"전체",color:"#888"},...D.cats,{id:"회의록액션",label:"회의록 액션",color:"#E8680A"}]
+  const allCats=[{id:"전체",label:"전체",color:"#888"},...D.cats]
   const getItems=()=>{
     if(window.activeCat==="전체")return D.items
-    if(window.activeCat==="회의록액션")return D.actionItems
     return D.items.filter(i=>i.category_id===window.activeCat)
   }
   const items=getItems()
@@ -612,12 +613,10 @@ function renderCK(){
 
   function catDone(id){
     if(id==="전체")return D.items.filter(i=>i.done).length
-    if(id==="회의록액션")return D.actionItems.filter(a=>a.status==="완료").length
     return D.items.filter(i=>i.category_id===id&&i.done).length
   }
   function catTotal(id){
     if(id==="전체")return D.items.length
-    if(id==="회의록액션")return D.actionItems.length
     return D.items.filter(i=>i.category_id===id).length
   }
 
@@ -645,7 +644,7 @@ function renderCK(){
     </div>
   </div>
   <div style="flex:1;min-width:0">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
       <div style="display:flex;align-items:center;gap:10px">
         <span style="font-size:15px;font-weight:500">${catLabel}</span>
         <span style="font-size:13px;color:var(--muted)">${done}/${total} 완료</span>
@@ -653,15 +652,54 @@ function renderCK(){
       </div>
       <button class="btn btn-o" onclick="openAddItem('${addCatId}','')"><i class="ti ti-plus"></i> 항목 추가</button>
     </div>
+    <!-- 필터 바 -->
+    <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:14px;padding:10px 12px;background:var(--card);border:0.5px solid var(--bd);border-radius:10px">
+      <i class="ti ti-filter" style="color:var(--muted);font-size:13px"></i>
+      <select style="font-size:12px;padding:4px 8px;border:0.5px solid var(--bd);border-radius:7px;background:var(--sf);color:var(--text);outline:none;cursor:pointer" onchange="setCkFilter('status',this.value)">
+        <option value="">전체 상태</option>
+        <option value="할 일" ${window.ckFilter.status==='할 일'?'selected':''}>할 일</option>
+        <option value="진행중" ${window.ckFilter.status==='진행중'?'selected':''}>진행중</option>
+        <option value="검증대기" ${window.ckFilter.status==='검증대기'?'selected':''}>검증대기</option>
+        <option value="완료" ${window.ckFilter.status==='완료'?'selected':''}>완료</option>
+      </select>
+      <select style="font-size:12px;padding:4px 8px;border:0.5px solid var(--bd);border-radius:7px;background:var(--sf);color:var(--text);outline:none;cursor:pointer" onchange="setCkFilter('priority',this.value)">
+        <option value="">전체 중요도</option>
+        <option value="critical" ${window.ckFilter.priority==='critical'?'selected':''}>긴급</option>
+        <option value="high" ${window.ckFilter.priority==='high'?'selected':''}>중요</option>
+        <option value="medium" ${window.ckFilter.priority==='medium'?'selected':''}>보통</option>
+      </select>
+      <select style="font-size:12px;padding:4px 8px;border:0.5px solid var(--bd);border-radius:7px;background:var(--sf);color:var(--text);outline:none;cursor:pointer" onchange="setCkFilter('owner',this.value)">
+        <option value="">전체 담당자</option>
+        ${MEMBERS.map(m=>`<option value="${m.name}" ${window.ckFilter.owner===m.name?'selected':''}>${m.name}</option>`).join('')}
+      </select>
+      <select style="font-size:12px;padding:4px 8px;border:0.5px solid var(--bd);border-radius:7px;background:var(--sf);color:var(--text);outline:none;cursor:pointer" onchange="setCkFilter('requester',this.value)">
+        <option value="">전체 요청자</option>
+        ${MEMBERS.map(m=>`<option value="${m.name}" ${window.ckFilter.requester===m.name?'selected':''}>${m.name}</option>`).join('')}
+      </select>
+      ${Object.values(window.ckFilter).some(v=>v)?`<button onclick="window.ckFilter={status:'',priority:'',owner:'',requester:''};render()" style="font-size:11px;padding:4px 10px;border:0.5px solid #A32D2D;border-radius:7px;background:#FCEBEB;color:#A32D2D;cursor:pointer"><i class="ti ti-x"></i> 필터 초기화</button>`:''}
+    </div>
     ${kpiNote}
-    ${window.activeCat==="회의록액션"?renderActionItems():renderCheckItems(items)}
+    ${renderCheckItems(items)}
   </div>
   </div>`
 }
 
 function renderCheckItems(items){
-  if(!items.length)return`<div style="text-align:center;padding:40px;color:var(--muted);font-size:14px">항목이 없어요.<br><span style="color:var(--o);cursor:pointer" onclick="openAddItem('${activeCat}','')">+ 추가하기</span></div>`
-  return items.map(item=>{
+  // 필터 적용
+  let filtered=[...items]
+  if(window.ckFilter.status)filtered=filtered.filter(i=>(i.status||'할 일')===window.ckFilter.status)
+  if(window.ckFilter.priority)filtered=filtered.filter(i=>i.priority===window.ckFilter.priority)
+  if(window.ckFilter.owner)filtered=filtered.filter(i=>{
+    const owners=Array.isArray(i.owners)&&i.owners.length?i.owners:i.owner?[i.owner]:[]
+    return owners.includes(window.ckFilter.owner)
+  })
+  if(window.ckFilter.requester)filtered=filtered.filter(i=>i.requester===window.ckFilter.requester)
+
+  if(!filtered.length){
+    const hasFilter=Object.values(window.ckFilter).some(v=>v)
+    return`<div style="text-align:center;padding:40px;color:var(--muted);font-size:14px">${hasFilter?`<div style="font-size:32px;margin-bottom:8px">🔍</div>필터 조건에 맞는 항목이 없어요.<br><span style="color:var(--o);cursor:pointer;font-size:13px" onclick="window.ckFilter={status:'',priority:'',owner:'',requester:''};render()">필터 초기화</span>`:'항목이 없어요.<br><span style="color:var(--o);cursor:pointer" onclick="openAddItem(\'\',\'\')">+ 추가하기</span>'}</div>`
+  }
+  return filtered.map(item=>{
     const subs=D.subs.filter(s=>s.item_id===item.id)
     const cmts=D.comments.filter(c=>c.item_id===item.id)
     const sdone=subs.filter(s=>s.done).length
@@ -1494,11 +1532,41 @@ window.saveParsedMtg=async()=>{
 
 window.addParsedActions=async()=>{
   const p=window._parsedMtg;if(!p||!p.actions?.length)return
-  for(const a of p.actions)await sb.from('action_items').insert({cat:'회의록',text:a,owner:null,owners:[],status:'할 일',comments:[],created_by:curUser.name})
-  await logH('회의록에서 액션 '+p.actions.length+'건 추가',p.title)
-  toast('액션아이템 '+p.actions.length+'건 추가됨')
-  document.getElementById('ai-mtg-ov').remove();await loadAll()
-  window.activeCat='회의록액션';showTab('ck')
+  const catOpts=D.cats.map(c=>`<option value="${c.id}">${c.label}</option>`).join('')
+  const w=mkOv('action-cat-ov')
+  w.innerHTML=`<div class="modal" style="width:420px">
+  <div class="mh"><span style="font-weight:500"><i class="ti ti-list-check" style="color:var(--o)"></i> 체크리스트에 추가</span><button class="btn btn-g" onclick="document.getElementById('action-cat-ov').remove()"><i class="ti ti-x"></i></button></div>
+  <div class="mb">
+    <div style="font-size:12px;color:var(--muted);margin-bottom:10px">회의록 액션 ${p.actions.length}건을 체크리스트 어느 카테고리에 추가할까요?</div>
+    <div style="max-height:160px;overflow-y:auto;margin-bottom:12px">${p.actions.map(a=>`<div style="padding:6px 10px;background:var(--sf);border-radius:7px;margin-bottom:4px;font-size:12px">${a}</div>`).join('')}</div>
+    <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">카테고리</label>
+    <select class="inp" id="action-cat-sel">${catOpts}</select>
+    <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">담당자</label>
+    <select class="inp" id="action-owner-sel"><option value="">없음</option>${MEMBERS.map(m=>`<option>${m.name}</option>`).join('')}</select>
+  </div>
+  <div class="mf"><button class="btn" onclick="document.getElementById('action-cat-ov').remove()">취소</button><button class="btn btn-o" onclick="confirmAddActions()"><i class="ti ti-check"></i> 추가</button></div>
+  </div>`
+  document.body.appendChild(w)
+}
+
+window.confirmAddActions=async()=>{
+  const p=window._parsedMtg;if(!p)return
+  const catId=document.getElementById('action-cat-sel')?.value
+  const owner=document.getElementById('action-owner-sel')?.value||null
+  if(!catId){toast('카테고리를 선택해주세요.',false);return}
+  for(const a of p.actions){
+    await sb.from('checklist_items').insert({
+      category_id:catId,text:a,
+      owner:owner||null,owners:owner?[owner]:[],
+      status:'할 일',priority:'high',created_by:curUser.name
+    })
+  }
+  await logH('회의록 액션 '+p.actions.length+'건 추가',p.title)
+  toast('체크리스트에 '+p.actions.length+'건 추가됐어요')
+  document.getElementById('action-cat-ov')?.remove()
+  document.getElementById('ai-mtg-ov')?.remove()
+  await loadAll()
+  window.activeCat=catId;showTab('ck')
 }
 
 // D-day 편집
