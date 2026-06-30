@@ -1545,24 +1545,49 @@ window.runAIMtg=async()=>{
     const actBox=document.getElementById('aim-actions-box')
     if(p.actions?.length){
       actBox.style.display='block'
-      actBox.innerHTML=`<div style="font-weight:500;font-size:13px;color:var(--o);margin-bottom:8px"><i class="ti ti-list-check"></i> 📌 액션아이템 (${p.actions.length}건) — 체크리스트에 추가할 항목을 선택하세요</div>`+
+      const catOpts=D.cats.map(c=>`<option value="${c.id}">${c.label}</option>`).join('')
+      const memberOpts=MEMBERS.map(m=>`<option value="${m.name}">${m.name}</option>`).join('')
+      const prOpts=[['critical','긴급'],['high','중요'],['medium','보통']].map(([v,l])=>`<option value="${v}">${l}</option>`).join('')
+      const stOpts=STATUS_LIST.map(s=>`<option value="${s}">${s}</option>`).join('')
+      actBox.innerHTML=`<div style="font-weight:500;font-size:13px;color:var(--o);margin-bottom:10px"><i class="ti ti-list-check"></i> 📌 액션아이템 (${p.actions.length}건) — 추가할 항목을 선택하고 정보를 입력하세요</div>`+
         p.actions.map((a,i)=>`
-        <div style="background:var(--sf);border:0.5px solid var(--bd);border-radius:9px;padding:10px 12px;margin-bottom:8px">
-          <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:8px">
-            <input type="checkbox" id="act-chk-${i}" checked style="margin-top:3px;accent-color:var(--o);flex-shrink:0">
-            <label for="act-chk-${i}" style="font-size:13px;flex:1;cursor:pointer">${a}</label>
+        <div style="background:var(--sf);border:0.5px solid var(--bd);border-radius:10px;padding:12px 14px;margin-bottom:10px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+            <input type="checkbox" id="act-chk-${i}" checked style="accent-color:var(--o);width:15px;height:15px;flex-shrink:0">
+            <input class="inp" id="act-txt-${i}" value="${a.replace(/"/g,'&quot;')}" style="margin:0;font-size:13px;font-weight:500;flex:1">
           </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;padding-left:22px">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
             <div>
-              <div style="font-size:11px;color:var(--muted);margin-bottom:3px">요청자</div>
-              <select class="inp" id="act-req-${i}" style="margin:0;font-size:12px;padding:5px 8px">
-                <option value="">없음</option>
-                ${MEMBERS.map(m=>`<option value="${m.name}">${m.name}</option>`).join('')}
+              <div style="font-size:11px;color:var(--muted);margin-bottom:3px">카테고리</div>
+              <select class="inp" id="act-cat-${i}" style="margin:0;font-size:12px;padding:5px 8px">${catOpts}</select>
+            </div>
+            <div>
+              <div style="font-size:11px;color:var(--muted);margin-bottom:3px">우선순위</div>
+              <select class="inp" id="act-pr-${i}" style="margin:0;font-size:12px;padding:5px 8px">${prOpts}</select>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+            <div>
+              <div style="font-size:11px;color:var(--muted);margin-bottom:3px">담당자</div>
+              <select class="inp" id="act-own-${i}" style="margin:0;font-size:12px;padding:5px 8px">
+                <option value="">없음</option>${memberOpts}
               </select>
             </div>
             <div>
+              <div style="font-size:11px;color:var(--muted);margin-bottom:3px">요청자</div>
+              <select class="inp" id="act-req-${i}" style="margin:0;font-size:12px;padding:5px 8px">
+                <option value="">없음</option>${memberOpts}
+              </select>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div>
               <div style="font-size:11px;color:var(--muted);margin-bottom:3px">마감일</div>
               <input type="date" class="inp" id="act-dl-${i}" style="margin:0;font-size:12px;padding:5px 8px">
+            </div>
+            <div>
+              <div style="font-size:11px;color:var(--muted);margin-bottom:3px">상태</div>
+              <select class="inp" id="act-st-${i}" style="margin:0;font-size:12px;padding:5px 8px">${stOpts}</select>
             </div>
           </div>
         </div>`).join('')+
@@ -1604,48 +1629,39 @@ window.addParsedActions=async()=>{
 
 window.addCheckedActions=async()=>{
   const p=window._parsedMtg;if(!p||!p.actions?.length)return
-  const catOpts=D.cats.map(c=>`<option value="${c.id}">${c.label}</option>`).join('')
-  // 선택된 항목 수집
   const selected=p.actions.map((a,i)=>{
     const chk=document.getElementById(`act-chk-${i}`)
     if(!chk?.checked)return null
+    const owner=document.getElementById(`act-own-${i}`)?.value||null
     return{
-      text:a,
+      text:document.getElementById(`act-txt-${i}`)?.value.trim()||a,
+      category_id:document.getElementById(`act-cat-${i}`)?.value||null,
+      priority:document.getElementById(`act-pr-${i}`)?.value||'high',
+      owner,
+      owners:owner?[owner]:[],
       requester:document.getElementById(`act-req-${i}`)?.value||null,
-      deadline:document.getElementById(`act-dl-${i}`)?.value||null
+      deadline:document.getElementById(`act-dl-${i}`)?.value||null,
+      status:document.getElementById(`act-st-${i}`)?.value||'할 일'
     }
   }).filter(Boolean)
   if(!selected.length){toast('추가할 항목을 선택해주세요.',false);return}
-  // 카테고리 선택 모달
-  const w=mkOv('action-cat-ov')
-  w.innerHTML=`<div class="modal" style="width:380px">
-  <div class="mh"><span style="font-weight:500"><i class="ti ti-list-check" style="color:var(--o)"></i> 카테고리 선택</span><button class="btn btn-g" onclick="document.getElementById('action-cat-ov').remove()"><i class="ti ti-x"></i></button></div>
-  <div class="mb">
-    <div style="font-size:12px;color:var(--muted);margin-bottom:10px">${selected.length}건을 추가할 카테고리를 선택하세요</div>
-    <select class="inp" id="action-cat-sel">${catOpts}</select>
-  </div>
-  <div class="mf">
-    <button class="btn" onclick="document.getElementById('action-cat-ov').remove()">취소</button>
-    <button class="btn btn-o" onclick="confirmAddChecked()"><i class="ti ti-check"></i> 추가</button>
-  </div>
-  </div>`
-  document.body.appendChild(w)
   window._selectedActions=selected
+  await confirmAddChecked()
 }
 
 window.confirmAddChecked=async()=>{
-  const catId=document.getElementById('action-cat-sel')?.value
-  if(!catId){toast('카테고리를 선택해주세요.',false);return}
   const items=window._selectedActions||[]
+  if(!items.length)return
   for(const a of items){
     await sb.from('checklist_items').insert({
-      category_id:catId,
+      category_id:a.category_id||null,
       text:a.text,
+      owner:a.owner||null,
+      owners:a.owners||[],
       requester:a.requester||null,
       deadline:a.deadline||null,
-      owners:[],
-      status:'할 일',
-      priority:'high',
+      status:a.status||'할 일',
+      priority:a.priority||'high',
       created_by:curUser.name
     })
   }
@@ -1653,7 +1669,7 @@ window.confirmAddChecked=async()=>{
   toast('체크리스트에 '+items.length+'건 추가됐어요')
   document.getElementById('action-cat-ov')?.remove()
   document.getElementById('ai-mtg-ov')?.remove()
-  await loadAll();window.activeCat=catId;showTab('ck')
+  await loadAll();showTab('ck')
 }
 
 window.confirmAddActions=async()=>{
