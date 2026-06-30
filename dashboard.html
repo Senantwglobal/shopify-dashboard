@@ -736,7 +736,7 @@ function renderCheckItems(items){
       </div>
     </div>
     <div class="ck-right" onclick="event.stopPropagation()">
-      ${item.status==='완료'?`<button class="btn verify-btn" data-id="${item.id}" style="padding:3px 8px;font-size:11px;background:#FEF0E6;color:#B84E06;border-color:#F5C49A;cursor:pointer"><i class="ti ti-clock" style="pointer-events:none"></i> <span style="pointer-events:none">검증대기</span></button>`:''}
+      ${item.status==='완료'?`<span class="badge bo" style="font-size:10px"><i class="ti ti-clock"></i> 검증대기</span>`:''}
       ${item.status==='검증완료'?`<span style="font-size:11px;color:#3B6D11;font-weight:500;white-space:nowrap;display:flex;align-items:center;gap:3px"><i class="ti ti-shield-check"></i> 검증완료 ${item.verified_by||''}</span>`:''}
       <button class="btn btn-g" style="padding:3px 8px;font-size:11px" onclick="location.href='detail.html?type=item&id=${item.id}'">
         <i class="ti ti-pencil"></i>${cmts.length?' '+cmts.length:''}
@@ -1728,16 +1728,6 @@ window.openDdayEdit=()=>{
 
 await loadAll()
 
-// 검증대기 버튼 이벤트 위임 (capture phase)
-document.addEventListener('click', async function(e) {
-  const btn = e.target.closest('.verify-btn')
-  if (!btn) return
-  e.stopPropagation()
-  e.preventDefault()
-  const id = btn.dataset.id
-  if (!id) return
-  await window.updateItemField(id, 'status', '검증완료')
-}, true)
 </script>
 </body>
 </html>
