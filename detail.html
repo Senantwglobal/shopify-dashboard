@@ -322,7 +322,7 @@ function renderItemDetail(item,subs,comments,cats){
       try{const p=JSON.parse(c.text);if(p.text!==undefined){text=p.text;link=p.link||c.link;fileData=p.file||null}}catch{}
       return`<div class="comment">
       <div class="cauth">${avEl(c.user_name,28)}<div><div>${c.user_name}</div><div class="ctime">${new Date(c.created_at).toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}</div></div></div>
-      <div class="ctext">${text}</div>
+      <div class="ctext">${text.replace(/@(\S+)/g,"<span style=\"color:var(--o);font-weight:500\">@$1</span>")}</div>
       ${link?`<a href="${link}" target="_blank" class="comment-link"><i class="ti ti-external-link"></i> ${link.length>50?link.slice(0,50)+'...':link}</a>`:''}
       ${fileData?fileData.type?.startsWith('image/')?`<div style="margin-top:8px"><img src="${fileData.data}" style="max-width:100%;max-height:200px;border-radius:8px;cursor:pointer" onclick="downloadFile('${fileData.name}','${fileData.data}')" title="클릭해서 다운로드"><div style="font-size:11px;color:var(--muted);margin-top:3px"><i class="ti ti-download"></i> ${fileData.name} — 클릭해서 다운로드</div></div>`:`<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--sf);border-radius:8px;margin-top:8px;cursor:pointer" onclick="downloadFile('${fileData.name}','${fileData.data}')"><i class="ti ti-file-download" style="font-size:18px;color:var(--o)"></i><div><div style="font-size:12px;font-weight:500">${fileData.name}</div><div style="font-size:11px;color:var(--muted)">클릭해서 다운로드</div></div></div>`:''}
       </div>`
@@ -330,7 +330,10 @@ function renderItemDetail(item,subs,comments,cats){
 
     <div style="border-top:0.5px solid var(--bd);padding-top:14px;margin-top:6px">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">${avEl(curUser.name,32)}<span style="font-size:13px;font-weight:500">${curUser.name}</span></div>
-      <textarea class="inp" id="cmt-text" placeholder="댓글, 진행 상황, 테스트 결과, 이슈..." rows="3"></textarea>
+      <div style="position:relative">
+        <textarea class="inp" id="cmt-text" placeholder="댓글, 진행 상황, 테스트 결과, 이슈... (@이름 으로 멘션)" rows="3" oninput="handleMentionInput(this)"></textarea>
+        <div id="mention-dropdown" style="display:none;position:absolute;left:0;right:0;top:100%;background:var(--card);border:0.5px solid var(--bd);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.1);z-index:50;overflow:hidden"></div>
+      </div>
       <div style="margin-top:8px">
         <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:5px"><i class="ti ti-paperclip"></i> 파일 첨부 또는 링크</label>
         <label class="file-upload-label">
@@ -402,6 +405,38 @@ function renderItemDetail(item,subs,comments,cats){
     catch{await sb.from('checklist_items').update({owner:owners[0]||null,updated_at:new Date().toISOString()}).eq('id',itemId)}
     await logH('담당자 제거: '+name,it.text);toast('담당자 제거됨');await loadItemDetail(itemId)
   }
+  // ── 멘션 자동완성 ──
+  let _mentionStart=-1
+  window.handleMentionInput=(ta)=>{
+    const val=ta.value, pos=ta.selectionStart
+    const before=val.slice(0,pos)
+    const atIdx=before.lastIndexOf('@')
+    const dd=document.getElementById('mention-dropdown')
+    if(atIdx>=0&&!before.slice(atIdx+1).includes(' ')){
+      _mentionStart=atIdx
+      const q=before.slice(atIdx+1).toLowerCase()
+      const matched=MEMBERS.filter(m=>m.name.toLowerCase().includes(q)&&m.name!==curUser.name)
+      if(matched.length){
+        dd.style.display='block'
+        dd.innerHTML=matched.map(m=>`<div onclick="insertMention('${m.name}')" style="padding:8px 12px;cursor:pointer;display:flex;align-items:center;gap:8px;font-size:13px" onmouseover="this.style.background='var(--sf)'" onmouseout="this.style.background=''">${avEl(m.name,24)}<span>${m.name}</span></div>`).join('')
+        return
+      }
+    }
+    dd.style.display='none'
+    _mentionStart=-1
+  }
+  window.insertMention=(name)=>{
+    const ta=document.getElementById('cmt-text')
+    const val=ta.value, pos=ta.selectionStart
+    const before=val.slice(0,_mentionStart)
+    const after=val.slice(pos)
+    ta.value=before+'@'+name+' '+after
+    ta.focus()
+    const newPos=before.length+name.length+2
+    ta.setSelectionRange(newPos,newPos)
+    document.getElementById('mention-dropdown').style.display='none'
+    _mentionStart=-1
+  }
   window.handleFileSelect=(input)=>{
     const file=input.files[0];if(!file)return
     const label=document.getElementById('file-upload-name');if(label)label.textContent=file.name
@@ -432,7 +467,9 @@ window.submitComment=async(itemId)=>{
       commentText=JSON.stringify({text:txt||file.name+' 첨부',link:lnk||null,file:encoded})
       commentLink=null
     }
-    await sb.from('checklist_comments').insert({item_id:itemId,user_name:curUser.name,text:commentText,link:commentLink})
+    // 멘션 추출
+    const mentions=[...new Set([...commentText.matchAll(/@(\S+)/g)].map(m=>m[1]).filter(n=>MEMBERS.some(mb=>mb.name===n)))]
+    await sb.from('checklist_comments').insert({item_id:itemId,user_name:curUser.name,text:commentText,link:commentLink,mentions:mentions.length?mentions:null})
     if(ns)await sb.from('checklist_items').update({status:ns,updated_at:new Date().toISOString()}).eq('id',itemId)
     await logH('댓글 등록',itemId);toast('등록됨');await loadItemDetail(itemId)
   }

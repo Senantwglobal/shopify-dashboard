@@ -301,12 +301,31 @@ function updateNotif(){
     const o=getOwners(a)||[]
     return o.includes(curUser.name)||a.owner===curUser.name
   })
+  const mentionCmts=D.comments.filter(c=>{
+    try{
+      const mentions=c.mentions||(typeof c.text==='string'&&c.text.includes('@')?[...c.text.matchAll(/@(\S+)/g)].map(m=>m[1]):[])
+      return mentions.includes(curUser.name)
+    }catch{return false}
+  }).slice(0,3)
+  const total=myItems.length+mentionCmts.length
   const badge=document.getElementById('notif-badge')
-  badge.textContent=myItems.length;badge.classList.toggle('show',myItems.length>0)
+  badge.textContent=total;badge.classList.toggle('show',total>0)
   const list=document.getElementById('notif-list')
-  list.innerHTML=myItems.length
-    ?myItems.slice(0,6).map(a=>`<div class="notif-item" onclick="goNotifItem('${a.id}','${a.category_id||''}')"><div style="font-weight:500;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.text}</div><div style="font-size:11px;color:var(--muted);margin-top:2px">${dlc(a.deadline,false)}</div></div>`).join('')+(myItems.length>6?`<div style="padding:8px 14px;font-size:11px;color:var(--muted)">+${myItems.length-6}건 더</div>`:'')
-    :`<div style="padding:14px;font-size:13px;color:var(--muted);text-align:center">담당 항목 없음</div>`
+  const mentionHtml=mentionCmts.length?`<div style="padding:8px 14px;font-size:11px;font-weight:600;color:var(--o);border-bottom:0.5px solid var(--bd)"><i class="ti ti-at"></i> 멘션</div>`+
+    mentionCmts.map(c=>{
+      let txt=c.text;try{const p=JSON.parse(c.text);txt=p.text||txt}catch{}
+      const item=D.items.find(i=>i.id===c.item_id)
+      return`<div class="notif-item" onclick="location.href='detail.html?type=item&id=${c.item_id}'">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:2px"><i class="ti ti-at" style="color:var(--o)"></i> ${c.user_name}님이 언급</div>
+        <div style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${txt.replace(/@(\S+)/g,'<b style="color:var(--o)">@$1</b>')}</div>
+        ${item?`<div style="font-size:11px;color:var(--muted);margin-top:2px">${item.text}</div>`:''}
+      </div>`
+    }).join('')+`<div style="height:1px;background:var(--bd);margin:0"></div>`:''
+  const taskHtml=myItems.length
+    ?`<div style="padding:8px 14px;font-size:11px;font-weight:600;color:var(--muted)">담당 항목</div>`+myItems.slice(0,5).map(a=>`<div class="notif-item" onclick="goNotifItem('${a.id}','${a.category_id||''}')"><div style="font-weight:500;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.text}</div><div style="font-size:11px;color:var(--muted);margin-top:2px">${dlc(a.deadline,false)}</div></div>`).join('')+(myItems.length>5?`<div style="padding:8px 14px;font-size:11px;color:var(--muted)">+${myItems.length-5}건 더</div>`:'')
+    :''
+  list.innerHTML=mentionHtml+taskHtml||(mentionHtml+taskHtml?mentionHtml+taskHtml:`<div style="padding:14px;font-size:13px;color:var(--muted);text-align:center">새 알림 없음</div>`)
+  if(!mentionHtml&&!taskHtml)list.innerHTML=`<div style="padding:14px;font-size:13px;color:var(--muted);text-align:center">새 알림 없음</div>`
 }
 
 // ── 데이터 로드 ──
@@ -407,6 +426,35 @@ function renderDash(){
   <div class="kpi" onclick="showTab('cal')" style="cursor:pointer" title="캘린더에서 마감 확인"><div class="kn" style="color:#A32D2D">${urgent.length}</div><div class="kl" style="color:#A32D2D;font-weight:500">마감 임박</div></div>
   <div class="kpi" onclick="showTab('mtg')" style="cursor:pointer" title="회의록 보기"><div class="kn" style="color:#185FA5">${D.meetings.length}</div><div class="kl">회의록</div></div>
 </div>
+
+<!-- 멘션 알림 -->
+${(()=>{
+  const mentionCmts=D.comments.filter(c=>{
+    try{
+      const mentions=c.mentions||(typeof c.text==='string'&&c.text.includes('@')?[...c.text.matchAll(/@(\S+)/g)].map(m=>m[1]):[])
+      return mentions.includes(curUser.name)
+    }catch{return false}
+  }).sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,5)
+  if(!mentionCmts.length)return''
+  return`<div class="card" style="border-left:3px solid var(--o)">
+  <div class="sh"><span class="st"><i class="ti ti-at oi"></i> 나를 언급한 댓글</span><span class="badge bo">${mentionCmts.length}</span></div>
+  ${mentionCmts.map(c=>{
+    const item=D.items.find(i=>i.id===c.item_id)
+    let txt=c.text
+    try{const p=JSON.parse(c.text);txt=p.text||txt}catch{}
+    const highlighted=txt.replace(/@(\S+)/g,'<span style="color:var(--o);font-weight:600">@$1</span>')
+    return`<div style="padding:10px 0;border-bottom:0.5px solid var(--bd);cursor:pointer" onclick="location.href='detail.html?type=item&id=${c.item_id}'">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+        ${avEl(c.user_name,22)}
+        <span style="font-size:12px;font-weight:500">${c.user_name}</span>
+        <span style="font-size:11px;color:var(--muted)">${new Date(c.created_at).toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}</span>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-left:28px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${item?`<i class="ti ti-file-text" style="font-size:10px"></i> ${item.text} ·`:''}</div>
+      <div style="font-size:13px;margin-left:28px;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${highlighted}</div>
+    </div>`
+  }).join('')}
+  </div>`
+})()}
 
 <!-- 최근 활동 피드 -->
 <div class="card card-o">
@@ -1051,7 +1099,7 @@ function renderKPITab(){
     const pct=parseFloat(((cur-base)/Math.abs(base)*100).toFixed(1))
     const isLowBetter=IS_LOW_BETTER.includes(id)
     const isGood=isLowBetter?pct<=0:pct>=0
-    return{pct,isGood,isCrit:!isGood&&Math.abs(pct)>=20,isWarn:!isGood&&Math.abs(pct)>=15}
+    const th=JSON.parse(localStorage.getItem('ople-kpi-thresh')||'{"crit":20,"warn":15}');return{pct,isGood,isCrit:!isGood&&Math.abs(pct)>=th.crit,isWarn:!isGood&&Math.abs(pct)>=th.warn}
   }
   function miniChart(id,color){
     const rows=daily.filter(d=>d.metric===id).sort((a,b)=>a.record_date.localeCompare(b.record_date))
@@ -1063,11 +1111,18 @@ function renderKPITab(){
     return`<svg width="${W}" height="${H}" style="overflow:visible;display:block;margin-top:6px"><polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg>`
   }
 
+  // 헤더 임계값 레이블 업데이트
+  setTimeout(()=>{
+    const th=JSON.parse(localStorage.getItem('ople-kpi-thresh')||'{"crit":20,"warn":15}')
+    const el=document.getElementById('kpi-thresh-label')
+    if(el)el.textContent=`-${th.crit}% 초과 시 즉시 대응 (주의: -${th.warn}%)`
+  },0)
+
   return`
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px">
     <div>
       <div style="font-size:16px;font-weight:500">KPI 대시보드</div>
-      <div style="font-size:12px;color:var(--muted);margin-top:3px">전환 전 기준값 대비 실시간 추적 — <span style="color:#A32D2D;font-weight:500">-20% 초과 시 즉시 대응</span></div>
+      <div style="font-size:12px;color:var(--muted);margin-top:3px">전환 전 기준값 대비 실시간 추적 — <span id="kpi-thresh-label" style="color:#A32D2D;font-weight:500;cursor:pointer;text-decoration:underline dotted" onclick="openThreshEdit()" title="클릭해서 수정"></span></div>
     </div>
     <div style="display:flex;gap:7px">
       <button class="btn" onclick="openAddKPIItem()"><i class="ti ti-plus"></i> 지표 추가</button>
@@ -1099,7 +1154,7 @@ function renderKPITab(){
             <div style="font-size:9px;color:${ch.isCrit?'#A32D2D':ch.isWarn?'var(--o)':'var(--muted)'}">${ch.isCrit?'⚠ 즉시대응':ch.isWarn?'△ 주의':'정상'}</div>
           </div>`:''}
         </div>
-        ${base!==null?`<div class="pgb" style="height:3px;margin-top:8px"><div class="pgf" style="width:${ch?Math.min(Math.abs(ch.pct)/20*100,100):0}%;background:${ch&&!ch.isGood?(ch.isCrit?'#A32D2D':ch.isWarn?'var(--o)':'#639922'):'#639922'}"></div></div>`:``}
+        ${base!==null?`<div class="pgb" style="height:3px;margin-top:8px"><div class="pgf" style="width:${ch?Math.min(Math.abs(ch.pct)/(JSON.parse(localStorage.getItem('ople-kpi-thresh')||'{"crit":20}').crit)*100,100):0}%;background:${ch&&!ch.isGood?(ch.isCrit?'#A32D2D':ch.isWarn?'var(--o)':'#639922'):'#639922'}"></div></div>`:``}
         ${miniChart(k.id,k.color)}
         ${base===null?`<div style="font-size:11px;color:var(--o);margin-top:8px"><i class="ti ti-pencil"></i> 클릭해서 기준값 입력</div>`:''}
       </div>`
@@ -1670,6 +1725,40 @@ window.confirmAddChecked=async()=>{
   document.getElementById('action-cat-ov')?.remove()
   document.getElementById('ai-mtg-ov')?.remove()
   await loadAll();showTab('ck')
+}
+
+window.openThreshEdit=()=>{
+  const th=JSON.parse(localStorage.getItem('ople-kpi-thresh')||'{"crit":20,"warn":15}')
+  const w=mkOv('thresh-ov')
+  w.innerHTML=`<div class="modal" style="width:340px">
+  <div class="mh"><span style="font-weight:500"><i class="ti ti-adjustments" style="color:var(--o)"></i> KPI 임계값 설정</span><button class="btn btn-g" onclick="document.getElementById('thresh-ov').remove()"><i class="ti ti-x"></i></button></div>
+  <div class="mb">
+    <div style="font-size:12px;color:var(--muted);margin-bottom:14px">기준값 대비 변화율이 아래 수치를 초과하면 경고가 표시됩니다.</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div>
+        <label style="font-size:12px;color:#A32D2D;font-weight:500;display:block;margin-bottom:4px">⚠ 즉시대응 (%)</label>
+        <input class="inp" type="number" id="th-crit" value="${th.crit}" min="1" max="100" style="margin:0;text-align:center;font-size:16px;font-weight:600">
+      </div>
+      <div>
+        <label style="font-size:12px;color:var(--o);font-weight:500;display:block;margin-bottom:4px">△ 주의 (%)</label>
+        <input class="inp" type="number" id="th-warn" value="${th.warn}" min="1" max="100" style="margin:0;text-align:center;font-size:16px;font-weight:600">
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--muted);margin-top:10px">예: 즉시대응 20, 주의 15 → 변화율 -20% 이상이면 빨간 경고</div>
+  </div>
+  <div class="mf">
+    <button class="btn" onclick="document.getElementById('thresh-ov').remove()">취소</button>
+    <button class="btn btn-o" onclick="saveThresh()"><i class="ti ti-check"></i> 저장</button>
+  </div>
+  </div>`
+  document.body.appendChild(w)
+}
+window.saveThresh=()=>{
+  const crit=parseInt(document.getElementById('th-crit')?.value)||20
+  const warn=parseInt(document.getElementById('th-warn')?.value)||15
+  localStorage.setItem('ople-kpi-thresh',JSON.stringify({crit,warn}))
+  document.getElementById('thresh-ov')?.remove()
+  toast('임계값 저장됨');showTab(activeTab)
 }
 
 window.confirmAddActions=async()=>{
