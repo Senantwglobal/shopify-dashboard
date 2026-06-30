@@ -95,7 +95,7 @@ select.inp{cursor:pointer}
 .ck-title{font-size:13px;font-weight:500;margin-bottom:4px;line-height:1.4}
 .ck-title.done{text-decoration:line-through;color:var(--muted)}
 .ck-meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:11px;color:var(--muted)}
-.ck-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.ck-right{display:flex;align-items:center;gap:6px;flex-shrink:0;position:relative;z-index:2}
 .sub-wrap{display:none;padding:2px 0 2px 26px}
 .sub-wrap.open{display:block}
 .sub-row{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:8px;font-size:12px;cursor:pointer}
@@ -720,7 +720,7 @@ function renderCheckItems(items){
     const sdone=subs.filter(s=>s.done).length
     const isExp=expandCks[item.id]!==false
     const owners=item.owners?.length?item.owners:item.owner?[item.owner]:[]
-    return`<div class="ck-item ${item.done?'done-item':''}" onclick="if(event.target.closest('button'))return;location.href='detail.html?type=item&id=${item.id}'">
+    return`<div class="ck-item ${item.done?'done-item':''}" onclick="if(event.target.closest('button')||event.target.closest('.ck-right'))return;location.href='detail.html?type=item&id=${item.id}'">
     <input class="ck-cb" type="checkbox" ${item.done?'checked':''} onclick="event.stopPropagation()" onchange="toggleItem('${item.id}',this.checked)">
     <div class="ck-body" style="cursor:pointer">
       <div class="ck-title ${item.done?'done':''}">${item.text}</div>
