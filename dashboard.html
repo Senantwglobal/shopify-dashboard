@@ -303,7 +303,7 @@ function updateNotif(){
   })
   const mentionCmts=D.comments.filter(c=>{
     try{
-      const mentions=c.mentions||(typeof c.text==='string'&&c.text.includes('@')?[...c.text.matchAll(/@(\S+)/g)].map(m=>m[1]):[])
+      let mentions=[];try{const p=JSON.parse(c.text);const t=p.text||c.text;mentions=[...t.matchAll(/@(\S+)/g)].map(m=>m[1])}catch{mentions=typeof c.text==='string'?[...c.text.matchAll(/@(\S+)/g)].map(m=>m[1]):[]}
       return mentions.includes(curUser.name)
     }catch{return false}
   }).slice(0,3)
@@ -431,7 +431,7 @@ function renderDash(){
 ${(()=>{
   const mentionCmts=D.comments.filter(c=>{
     try{
-      const mentions=c.mentions||(typeof c.text==='string'&&c.text.includes('@')?[...c.text.matchAll(/@(\S+)/g)].map(m=>m[1]):[])
+      let mentions=[];try{const p=JSON.parse(c.text);const t=p.text||c.text;mentions=[...t.matchAll(/@(\S+)/g)].map(m=>m[1])}catch{mentions=typeof c.text==='string'?[...c.text.matchAll(/@(\S+)/g)].map(m=>m[1]):[]}
       return mentions.includes(curUser.name)
     }catch{return false}
   }).sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,5)

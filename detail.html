@@ -467,9 +467,8 @@ window.submitComment=async(itemId)=>{
       commentText=JSON.stringify({text:txt||file.name+' 첨부',link:lnk||null,file:encoded})
       commentLink=null
     }
-    // 멘션 추출
-    const mentions=[...new Set([...commentText.matchAll(/@(\S+)/g)].map(m=>m[1]).filter(n=>MEMBERS.some(mb=>mb.name===n)))]
-    await sb.from('checklist_comments').insert({item_id:itemId,user_name:curUser.name,text:commentText,link:commentLink,mentions:mentions.length?mentions:null})
+    const{error:cmtErr}=await sb.from('checklist_comments').insert({item_id:itemId,user_name:curUser.name,text:commentText,link:commentLink})
+    if(cmtErr){toast('댓글 저장 실패: '+cmtErr.message,false);console.error(cmtErr);return}
     if(ns)await sb.from('checklist_items').update({status:ns,updated_at:new Date().toISOString()}).eq('id',itemId)
     await logH('댓글 등록',itemId);toast('등록됨');await loadItemDetail(itemId)
   }
