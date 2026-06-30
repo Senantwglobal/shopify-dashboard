@@ -736,7 +736,7 @@ function renderCheckItems(items){
       </div>
     </div>
     <div class="ck-right" onclick="event.stopPropagation()">
-      ${item.status==='완료'?`<span class="badge bo" style="font-size:10px"><i class="ti ti-clock"></i> 검증대기</span>`:''}
+      ${item.status==='완료'?`<button class="btn verify-btn" data-id="${item.id}" style="padding:3px 8px;font-size:11px;background:#FEF0E6;color:#B84E06;border-color:#F5C49A;cursor:pointer"><i class="ti ti-clock" style="pointer-events:none"></i> <span style="pointer-events:none">검증대기</span></button>`:''}
       ${item.status==='검증완료'?`<span style="font-size:11px;color:#3B6D11;font-weight:500;white-space:nowrap;display:flex;align-items:center;gap:3px"><i class="ti ti-shield-check"></i> 검증완료 ${item.verified_by||''}</span>`:''}
       <button class="btn btn-g" style="padding:3px 8px;font-size:11px" onclick="location.href='detail.html?type=item&id=${item.id}'">
         <i class="ti ti-pencil"></i>${cmts.length?' '+cmts.length:''}
@@ -1511,11 +1511,11 @@ window.openAIMtg=()=>{
     <textarea class="inp" id="aim-raw" style="min-height:160px;margin-top:8px" placeholder="회의록 전문을 붙여넣으세요..."></textarea>
     <div id="aim-loading" style="display:none;text-align:center;padding:16px;color:var(--muted)"><i class="ti ti-loader" style="font-size:20px;animation:spin 1s linear infinite;display:inline-block"></i><div style="margin-top:6px;font-size:13px">AI 분석 중...</div></div>
     <div id="aim-result" style="display:none;margin-top:12px;border-top:0.5px solid var(--bd);padding-top:12px">
+      <div id="aim-actions-box" style="display:none;margin-bottom:12px"></div>
       <div style="font-size:12px;font-weight:500;color:var(--o);margin-bottom:8px"><i class="ti ti-sparkles"></i> AI 요약 결과</div>
       <div id="aim-summary-box" style="background:var(--sf);border-radius:9px;padding:12px;font-size:13px;line-height:1.8;white-space:pre-wrap"></div>
       <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
         <button class="btn btn-o" onclick="saveParsedMtg()"><i class="ti ti-device-floppy"></i> 회의록 저장</button>
-        <button class="btn" onclick="addParsedActions()"><i class="ti ti-list-check"></i> 액션아이템으로 추가</button>
       </div>
     </div>
   </div>
@@ -1531,14 +1531,45 @@ window.runAIMtg=async()=>{
   const btn=document.getElementById('aim-btn');btn.disabled=true
   try{
     const resp=await fetch('/api/summarize',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:raw})})
-    const respData=await resp.json().catch(()=>({error:'응답 파싱 실패'}))
+    const rawText=await resp.text()
+    const cleanText=rawText.replace(/^```json\s*/,'').replace(/^```\s*/,'').replace(/```\s*$/,'').trim()
+    let respData;try{respData=JSON.parse(cleanText)}catch{throw new Error('JSON 파싱 실패: '+cleanText.slice(0,80))}
     if(!resp.ok||respData.error)throw new Error(respData.error||'서버 오류 '+resp.status)
     const p=respData
     window._parsedMtg={...p,title:document.getElementById('aim-title')?.value.trim()||'AI 회의록',date:document.getElementById('aim-date')?.value,attendees:document.getElementById('aim-att')?.value.split(',').map(s=>s.trim()).filter(Boolean),raw}
     document.getElementById('aim-loading').style.display='none'
     document.getElementById('aim-result').style.display='block'
     document.getElementById('aim-summary-box').innerHTML=
-      `<strong>핵심 요약</strong>\n${p.summary||''}\n\n<strong style="color:#3B6D11">✅ 결정사항 (${(p.decisions||[]).length}건)</strong>\n${(p.decisions||[]).map((d,i)=>`${i+1}. ${d}`).join('\n')||'없음'}\n\n<strong style="color:#A32D2D">❓ 미확인 사항</strong>\n${(p.pending||[]).map(x=>`• ${x}`).join('\n')||'없음'}\n\n<strong style="color:var(--o)">📌 액션아이템 (${(p.actions||[]).length}건)</strong>\n${(p.actions||[]).map((a,i)=>`${i+1}. ${a}`).join('\n')||'없음'}`
+      `<strong>핵심 요약</strong>\n${p.summary||''}\n\n<strong style="color:#3B6D11">✅ 결정사항 (${(p.decisions||[]).length}건)</strong>\n${(p.decisions||[]).map((d,i)=>`${i+1}. ${d}`).join('\n')||'없음'}\n\n<strong style="color:#A32D2D">❓ 미확인 사항</strong>\n${(p.pending||[]).map(x=>`• ${x}`).join('\n')||'없음'}`
+    // 액션아이템 카드 렌더링
+    const actBox=document.getElementById('aim-actions-box')
+    if(p.actions?.length){
+      actBox.style.display='block'
+      actBox.innerHTML=`<div style="font-weight:500;font-size:13px;color:var(--o);margin-bottom:8px"><i class="ti ti-list-check"></i> 📌 액션아이템 (${p.actions.length}건) — 체크리스트에 추가할 항목을 선택하세요</div>`+
+        p.actions.map((a,i)=>`
+        <div style="background:var(--sf);border:0.5px solid var(--bd);border-radius:9px;padding:10px 12px;margin-bottom:8px">
+          <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:8px">
+            <input type="checkbox" id="act-chk-${i}" checked style="margin-top:3px;accent-color:var(--o);flex-shrink:0">
+            <label for="act-chk-${i}" style="font-size:13px;flex:1;cursor:pointer">${a}</label>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;padding-left:22px">
+            <div>
+              <div style="font-size:11px;color:var(--muted);margin-bottom:3px">요청자</div>
+              <select class="inp" id="act-req-${i}" style="margin:0;font-size:12px;padding:5px 8px">
+                <option value="">없음</option>
+                ${MEMBERS.map(m=>`<option value="${m.name}">${m.name}</option>`).join('')}
+              </select>
+            </div>
+            <div>
+              <div style="font-size:11px;color:var(--muted);margin-bottom:3px">마감일</div>
+              <input type="date" class="inp" id="act-dl-${i}" style="margin:0;font-size:12px;padding:5px 8px">
+            </div>
+          </div>
+        </div>`).join('')+
+        `<button class="btn btn-o" style="width:100%;margin-top:4px" onclick="addCheckedActions()"><i class="ti ti-circle-plus"></i> 선택 항목 체크리스트에 추가</button>`
+    } else {
+      actBox.style.display='none'
+    }
   }catch(e){
     document.getElementById('aim-loading').style.display='none'
     toast('AI 분석 실패: '+e.message,false)
@@ -1569,6 +1600,60 @@ window.addParsedActions=async()=>{
   <div class="mf"><button class="btn" onclick="document.getElementById('action-cat-ov').remove()">취소</button><button class="btn btn-o" onclick="confirmAddActions()"><i class="ti ti-check"></i> 추가</button></div>
   </div>`
   document.body.appendChild(w)
+}
+
+window.addCheckedActions=async()=>{
+  const p=window._parsedMtg;if(!p||!p.actions?.length)return
+  const catOpts=D.cats.map(c=>`<option value="${c.id}">${c.label}</option>`).join('')
+  // 선택된 항목 수집
+  const selected=p.actions.map((a,i)=>{
+    const chk=document.getElementById(`act-chk-${i}`)
+    if(!chk?.checked)return null
+    return{
+      text:a,
+      requester:document.getElementById(`act-req-${i}`)?.value||null,
+      deadline:document.getElementById(`act-dl-${i}`)?.value||null
+    }
+  }).filter(Boolean)
+  if(!selected.length){toast('추가할 항목을 선택해주세요.',false);return}
+  // 카테고리 선택 모달
+  const w=mkOv('action-cat-ov')
+  w.innerHTML=`<div class="modal" style="width:380px">
+  <div class="mh"><span style="font-weight:500"><i class="ti ti-list-check" style="color:var(--o)"></i> 카테고리 선택</span><button class="btn btn-g" onclick="document.getElementById('action-cat-ov').remove()"><i class="ti ti-x"></i></button></div>
+  <div class="mb">
+    <div style="font-size:12px;color:var(--muted);margin-bottom:10px">${selected.length}건을 추가할 카테고리를 선택하세요</div>
+    <select class="inp" id="action-cat-sel">${catOpts}</select>
+  </div>
+  <div class="mf">
+    <button class="btn" onclick="document.getElementById('action-cat-ov').remove()">취소</button>
+    <button class="btn btn-o" onclick="confirmAddChecked()"><i class="ti ti-check"></i> 추가</button>
+  </div>
+  </div>`
+  document.body.appendChild(w)
+  window._selectedActions=selected
+}
+
+window.confirmAddChecked=async()=>{
+  const catId=document.getElementById('action-cat-sel')?.value
+  if(!catId){toast('카테고리를 선택해주세요.',false);return}
+  const items=window._selectedActions||[]
+  for(const a of items){
+    await sb.from('checklist_items').insert({
+      category_id:catId,
+      text:a.text,
+      requester:a.requester||null,
+      deadline:a.deadline||null,
+      owners:[],
+      status:'할 일',
+      priority:'high',
+      created_by:curUser.name
+    })
+  }
+  await logH('회의록 액션 '+items.length+'건 추가',window._parsedMtg?.title||'')
+  toast('체크리스트에 '+items.length+'건 추가됐어요')
+  document.getElementById('action-cat-ov')?.remove()
+  document.getElementById('ai-mtg-ov')?.remove()
+  await loadAll();window.activeCat=catId;showTab('ck')
 }
 
 window.confirmAddActions=async()=>{
@@ -1728,6 +1813,16 @@ window.openDdayEdit=()=>{
 
 await loadAll()
 
+// 검증대기 버튼 이벤트 위임 (capture phase)
+document.addEventListener('click', async function(e) {
+  const btn = e.target.closest('.verify-btn')
+  if (!btn) return
+  e.stopPropagation()
+  e.preventDefault()
+  const id = btn.dataset.id
+  if (!id) return
+  await window.updateItemField(id, 'status', '검증완료')
+}, true)
 </script>
 </body>
 </html>
