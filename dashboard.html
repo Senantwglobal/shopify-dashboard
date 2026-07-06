@@ -1792,8 +1792,10 @@ function renderActivityItem(h,i,lastIdx){
 
   // item_id 있으면 상세 페이지로, 없으면 탭으로 이동
   let clickAction=''
-  if(h.item_id){
-    clickAction=`location.href='detail.html?type=item&id=${h.item_id}'`
+  // item_id 직접 있으면 우선, 없으면 target 텍스트로 항목 매칭
+  const resolvedId=h.item_id||(h.target?D.items.find(i=>i.text&&i.text.trim()===h.target.trim())?.id:null)
+  if(resolvedId){
+    clickAction=`location.href='detail.html?type=item&id=${resolvedId}'`
   } else if(h.action.includes('회의록')){
     clickAction="showTab('mtg')"
   } else if(h.action.includes('KPI')){

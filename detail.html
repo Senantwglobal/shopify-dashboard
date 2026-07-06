@@ -468,6 +468,24 @@ function renderItemDetail(item,subs,comments,cats){
     }
   }
   window.downloadFile=(name,dataUrl)=>{const a=document.createElement('a');a.href=dataUrl;a.download=name;document.body.appendChild(a);a.click();document.body.removeChild(a)}
+  window.previewImage=(src,name)=>{
+    const ov=document.createElement('div')
+    ov.id='img-preview-ov'
+    ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px'
+    ov.innerHTML=`
+      <div style="position:absolute;top:16px;right:16px;display:flex;gap:8px">
+        <button onclick="downloadFile('${name.replace(/'/g,"\\'")}','${src.slice(0,30)}...')" style="background:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:13px;cursor:pointer;font-weight:500;display:flex;align-items:center;gap:6px"><i class="ti ti-download"></i> 다운로드</button>
+        <button onclick="document.getElementById('img-preview-ov').remove()" style="background:#fff;border:none;border-radius:8px;padding:8px 12px;font-size:16px;cursor:pointer">✕</button>
+      </div>
+      <img src="${src}" style="max-width:90vw;max-height:80vh;border-radius:10px;object-fit:contain;box-shadow:0 4px 32px rgba(0,0,0,.5)">
+      <div style="color:#fff;font-size:12px;margin-top:12px;opacity:.7">${name}</div>`
+    ov.onclick=e=>{if(e.target===ov)ov.remove()}
+    // 기존 미리보기 있으면 제거
+    document.getElementById('img-preview-ov')?.remove()
+    document.body.appendChild(ov)
+    // 다운로드 버튼에 실제 src 연결
+    ov.querySelector('button').onclick=()=>downloadFile(name,src)
+  }
 }
 
 
