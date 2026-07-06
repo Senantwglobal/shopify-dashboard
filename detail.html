@@ -114,7 +114,7 @@ function avEl(name,sz=32){
   if(!m&&name){const colors=MC;let h=0;for(let i=0;i<name.length;i++)h=(h*31+name.charCodeAt(i))&0xfffffff;c=colors[h%colors.length]}
   return`<div style="width:${sz}px;height:${sz}px;border-radius:50%;background:${c};display:flex;align-items:center;justify-content:center;font-size:${Math.round(sz*.4)}px;font-weight:600;color:#fff;flex-shrink:0">${name?name[0]:'?'}</div>`
 }
-async function logH(action,target){await sb.from('history').insert({user_name:curUser.name,action,target})}
+async function logH(action,target,itemId){await sb.from('history').insert({user_name:curUser.name,action,target,item_id:itemId||null})}
 
 // 변경 감지
 window.markDirty=()=>{
@@ -142,7 +142,7 @@ window.saveAllChanges=async(itemId)=>{
   if(title&&_origItem&&title!==_origItem.text)updates.text=title
   const {error}=await sb.from('checklist_items').update(updates).eq('id',itemId)
   if(error){toast('저장 실패: '+error.message,false);return}
-  await logH('항목 수정',title||itemId)
+  await logH('항목 수정',title||itemId,itemId)
   _dirty=false
   document.getElementById('save-bar')?.classList.remove('show')
   toast('저장됐어요')
@@ -320,11 +320,24 @@ function renderItemDetail(item,subs,comments,cats){
     ${comments.length?comments.map(c=>{
       let text=c.text, link=c.link, fileData=null
       try{const p=JSON.parse(c.text);if(p.text!==undefined){text=p.text;link=p.link||c.link;fileData=p.file||null}}catch{}
-      return`<div class="comment">
-      <div class="cauth">${avEl(c.user_name,28)}<div><div>${c.user_name}</div><div class="ctime">${new Date(c.created_at).toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}</div></div></div>
+      const canDel=c.user_name===curUser.name
+      return`<div class="comment" id="cmt-${c.id}">
+      <div class="cauth" style="display:flex;align-items:center;justify-content:space-between">
+        <div style="display:flex;align-items:center;gap:8px">${avEl(c.user_name,28)}<div><div>${c.user_name}</div><div class="ctime">${new Date(c.created_at).toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}</div></div></div>
+        ${canDel?`<button onclick="deleteCmt('${c.id}','${item.id}')" style="background:none;border:none;cursor:pointer;color:var(--muted);padding:2px 6px;border-radius:4px;font-size:11px" title="삭제" onmouseover="this.style.color='#A32D2D'" onmouseout="this.style.color='var(--muted)'"><i class="ti ti-trash" style="font-size:13px"></i></button>`:''}
+      </div>
       <div class="ctext">${text.replace(/@(\S+)/g,"<span style=\"color:var(--o);font-weight:500\">@$1</span>")}</div>
       ${link?`<a href="${link}" target="_blank" class="comment-link"><i class="ti ti-external-link"></i> ${link.length>50?link.slice(0,50)+'...':link}</a>`:''}
-      ${fileData?fileData.type?.startsWith('image/')?`<div style="margin-top:8px"><img src="${fileData.data}" style="max-width:100%;max-height:200px;border-radius:8px;cursor:pointer" onclick="downloadFile('${fileData.name}','${fileData.data}')" title="클릭해서 다운로드"><div style="font-size:11px;color:var(--muted);margin-top:3px"><i class="ti ti-download"></i> ${fileData.name} — 클릭해서 다운로드</div></div>`:`<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--sf);border-radius:8px;margin-top:8px;cursor:pointer" onclick="downloadFile('${fileData.name}','${fileData.data}')"><i class="ti ti-file-download" style="font-size:18px;color:var(--o)"></i><div><div style="font-size:12px;font-weight:500">${fileData.name}</div><div style="font-size:11px;color:var(--muted)">클릭해서 다운로드</div></div></div>`:''}
+      ${fileData?fileData.type?.startsWith('image/')?
+        `<div style="margin-top:8px">
+          <img src="${fileData.data}" style="max-width:100%;max-height:200px;border-radius:8px;cursor:pointer;display:block" onclick="previewImage('${fileData.data}','${fileData.name}')" title="클릭해서 미리보기">
+          <div style="font-size:11px;color:var(--muted);margin-top:4px;display:flex;align-items:center;gap:8px">
+            <span><i class="ti ti-zoom-in"></i> ${fileData.name}</span>
+            <span style="cursor:pointer;color:var(--o)" onclick="downloadFile('${fileData.name}','${fileData.data}')"><i class="ti ti-download"></i> 다운로드</span>
+          </div>
+        </div>`
+        :`<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--sf);border-radius:8px;margin-top:8px;cursor:pointer" onclick="downloadFile('${fileData.name}','${fileData.data}')"><i class="ti ti-file-download" style="font-size:18px;color:var(--o)"></i><div><div style="font-size:12px;font-weight:500">${fileData.name}</div><div style="font-size:11px;color:var(--muted)">클릭해서 다운로드</div></div></div>`
+      :''}
       </div>`
     }).join(''):`<div style="text-align:center;padding:24px;color:var(--muted)">아직 댓글이 없어요.<br>아래에서 첫 댓글을 남겨보세요.</div>`}
 
@@ -357,19 +370,19 @@ function renderItemDetail(item,subs,comments,cats){
   // window 함수들
   window.updateField=async(id,field,val)=>{
     await sb.from('checklist_items').update({[field]:val||null,updated_at:new Date().toISOString()}).eq('id',id)
-    await logH(`${field} 변경`,item.text);await loadItemDetail(id)
+    await logH(`${field} 변경`,item.text,id);await loadItemDetail(id)
   }
   window.toggleSub=async(sid,itemId,checked)=>{
     await sb.from('checklist_subs').update({done:checked,done_by:checked?curUser.name:null,verified:false}).eq('id',sid)
-    await logH(`세부 ${checked?'완료':'취소'}`,item.text);await loadItemDetail(itemId)
+    await logH(`세부 ${checked?'완료':'취소'}`,item.text,itemId);await loadItemDetail(itemId)
   }
   window.verifySub=async(sid,itemId)=>{
     await sb.from('checklist_subs').update({verified:true,verified_by:curUser.name,verified_at:new Date().toISOString()}).eq('id',sid)
-    await logH('검증 완료',item.text);toast('✓ 검증 완료');await loadItemDetail(itemId)
+    await logH('검증 완료',item.text,itemId);toast('✓ 검증 완료');await loadItemDetail(itemId)
   }
   window.verifyItem=async(itemId)=>{
     await sb.from('checklist_items').update({status:'검증완료',verified_by:curUser.name,verified_at:new Date().toISOString(),updated_at:new Date().toISOString()}).eq('id',itemId)
-    await logH(`검증완료 (${curUser.name})`,item.text);toast('✓ 검증 완료');await loadItemDetail(itemId)
+    await logH(`검증완료 (${curUser.name})`,item.text,itemId);toast('✓ 검증 완료');await loadItemDetail(itemId)
   }
   window.updateSubField=async(sid,field,val)=>{
     await sb.from('checklist_subs').update({[field]:val||null}).eq('id',sid);toast('저장됨')
@@ -377,11 +390,11 @@ function renderItemDetail(item,subs,comments,cats){
   window.addSub=async(itemId)=>{
     const inp=document.getElementById('new-sub-inp');if(!inp?.value.trim())return
     await sb.from('checklist_subs').insert({item_id:itemId,text:inp.value.trim(),verifier:curUser.name})
-    await logH('세부 추가',item.text);inp.value='';toast('추가됨');await loadItemDetail(itemId)
+    await logH('세부 추가',item.text,itemId);inp.value='';toast('추가됨');await loadItemDetail(itemId)
   }
   window.deleteSub=async(sid,itemId)=>{
     const s=subs.find(s=>s.id===sid);if(!s||!confirm(`"${s.text}" 삭제?`))return
-    await sb.from('checklist_subs').delete().eq('id',sid);await logH('세부 삭제',s.text);await loadItemDetail(itemId)
+    await sb.from('checklist_subs').delete().eq('id',sid);await logH('세부 삭제',s.text,itemId);await loadItemDetail(itemId)
   }
 
 
@@ -394,7 +407,7 @@ function renderItemDetail(item,subs,comments,cats){
     owners.push(name)
     try{await sb.from('checklist_items').update({owners,owner:owners[0],updated_at:new Date().toISOString()}).eq('id',itemId)}
     catch{await sb.from('checklist_items').update({owner:owners[0],updated_at:new Date().toISOString()}).eq('id',itemId)}
-    await logH('담당자 추가: '+name,it.text);toast('담당자 추가됨');await loadItemDetail(itemId)
+    await logH('담당자 추가: '+name,it.text,itemId);toast('담당자 추가됨');await loadItemDetail(itemId)
   }
   window.detRemoveOwner=async(itemId,name,el)=>{
     const {data:it}=await sb.from('checklist_items').select('*').eq('id',itemId).single()
@@ -403,8 +416,15 @@ function renderItemDetail(item,subs,comments,cats){
     owners=owners.filter(o=>o!==name)
     try{await sb.from('checklist_items').update({owners,owner:owners[0]||null,updated_at:new Date().toISOString()}).eq('id',itemId)}
     catch{await sb.from('checklist_items').update({owner:owners[0]||null,updated_at:new Date().toISOString()}).eq('id',itemId)}
-    await logH('담당자 제거: '+name,it.text);toast('담당자 제거됨');await loadItemDetail(itemId)
+    await logH('담당자 제거: '+name,it.text,itemId);toast('담당자 제거됨');await loadItemDetail(itemId)
   }
+  // ── 댓글 삭제 ──
+  window.deleteCmt=async(cmtId,itemId)=>{
+    if(!confirm('댓글을 삭제할까요?'))return
+    await sb.from('checklist_comments').delete().eq('id',cmtId)
+    toast('삭제됨');await loadItemDetail(itemId)
+  }
+
   // ── 멘션 자동완성 ──
   let _mentionStart=-1
   window.handleMentionInput=(ta)=>{
@@ -470,7 +490,7 @@ window.submitComment=async(itemId)=>{
     const{error:cmtErr}=await sb.from('checklist_comments').insert({item_id:itemId,user_name:curUser.name,text:commentText,link:commentLink})
     if(cmtErr){toast('댓글 저장 실패: '+cmtErr.message,false);console.error(cmtErr);return}
     if(ns)await sb.from('checklist_items').update({status:ns,updated_at:new Date().toISOString()}).eq('id',itemId)
-    await logH('댓글 등록',itemId);toast('등록됨');await loadItemDetail(itemId)
+    await logH('댓글 등록','댓글',itemId);toast('등록됨');await loadItemDetail(itemId)
   }
 async function loadUXDetail(q,idx){
   const question=decodeURIComponent(q||'')
