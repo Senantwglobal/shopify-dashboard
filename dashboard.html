@@ -1305,9 +1305,11 @@ window.deleteKPIItem=(id)=>{
 }
 
 window.openKPIInput=()=>{
-  const KPI_LABELS={revenue:'일평균 매출',order_count:'일평균 주문수',aov:'평균 주문액',cvr:'전환율',cart_abandon:'장바구니 이탈률',checkout_drop:'체크아웃 이탈률',pay_fail:'결제 실패율',err_404:'404 오류 수',supla_miss:'SUPLA 누락률',login_ok:'로그인 성공률',cs_count:'CS 문의량',seo_index:'검색 색인 수',organic:'유기 검색 유입'}
-  const KPI_UNITS={revenue:'원',order_count:'건',aov:'원',cvr:'%',cart_abandon:'%',checkout_drop:'%',pay_fail:'%',err_404:'건',supla_miss:'%',login_ok:'%',cs_count:'건',seo_index:'개',organic:'명'}
-  const ids=Object.keys(KPI_LABELS)
+  // 현재 등록된 KPI 지표 기준으로 동적 생성
+  const KPI_DEF=getKPIDef()
+  const KPI_LABELS=Object.fromEntries(KPI_DEF.map(k=>[k.id,k.label]))
+  const KPI_UNITS=Object.fromEntries(KPI_DEF.map(k=>[k.id,k.unit]))
+  const ids=KPI_DEF.map(k=>k.id)
   const todayStr=new Date().toISOString().slice(0,10)
 
   // 오늘 기존 입력값
@@ -1343,7 +1345,7 @@ window.openKPIInput=()=>{
 window.refreshKPIInputVals=()=>{
   const date=document.getElementById('kpi-date')?.value
   if(!date)return
-  const ids=['revenue','order_count','aov','cvr','cart_abandon','checkout_drop','pay_fail','err_404','supla_miss','login_ok','cs_count','seo_index','organic']
+  const ids=getKPIDef().map(k=>k.id)
   ids.forEach(id=>{
     const r=(D.kpiDaily||[]).find(d=>d.metric===id&&d.record_date===date)
     const inp=document.getElementById('ki-'+id)
@@ -1354,7 +1356,7 @@ window.refreshKPIInputVals=()=>{
 window.saveKPIDaily=async()=>{
   const date=document.getElementById('kpi-date')?.value
   if(!date){toast('날짜를 선택해주세요.',false);return}
-  const ids=['revenue','order_count','aov','cvr','cart_abandon','checkout_drop','pay_fail','err_404','supla_miss','login_ok','cs_count','seo_index','organic']
+  const ids=getKPIDef().map(k=>k.id)
   const rows=ids.map(id=>{
     const v=document.getElementById('ki-'+id)?.value
     if(v===''||v===null||v===undefined)return null
