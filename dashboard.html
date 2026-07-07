@@ -1102,119 +1102,189 @@ async function saveKPIDef(defs){
 }
 
 function renderKPITab(){
-  const KPI_DEF=getKPIDef()
-  const IS_LOW_BETTER=['pay_fail','cart_abandon','checkout_drop','err_404','supla_miss','cs_count']
-  const catGroups=[...new Set(KPI_DEF.map(k=>k.cat))]
+  const DAYS=['월','화','수','목','금','토','일']
+  const METRICS=[
+    {id:'revenue', label:'매출', unit:'원', color:'#E8680A', icon:'ti-chart-bar'},
+    {id:'orders',  label:'주문건수', unit:'건', color:'#185FA5', icon:'ti-shopping-cart'},
+    {id:'aov',     label:'AOV (평균주문액)', unit:'원', color:'#3B6D11', icon:'ti-receipt'},
+  ]
+
+  // 기준값: app_settings에서 로드 (키: kpi_dow_baseline)
+  function getBaseline(){
+    try{
+      const row=(D.appSettings||[]).find(r=>r.key==='kpi_dow_baseline')
+      return row?JSON.parse(row.value):{}
+    }catch{return{}}
+  }
+
+  // 이번 주 실적: kpi_daily에서 로드
+  // record_date 기준으로 요일 매핑
+  function getWeekData(){
+    const daily=D.kpiDaily||[]
+    // 이번 주 월~일 날짜 계산
+    const today=new Date()
+    const dow=today.getDay()===0?6:today.getDay()-1 // 0=월
+    const monday=new Date(today); monday.setDate(today.getDate()-dow)
+    const week=DAYS.map((_,i)=>{
+      const d=new Date(monday); d.setDate(monday.getDate()+i)
+      return d.toISOString().slice(0,10)
+    })
+    return week
+  }
+
+  const baseline=getBaseline()
+  const weekDates=getWeekData()
   const daily=D.kpiDaily||[]
-  const dates=[...new Set(daily.map(d=>d.record_date))].sort()
-  const baselineDate=dates[0]||null
+  const activeMetric=window._kpiMetric||'revenue'
+  const metric=METRICS.find(m=>m.id===activeMetric)||METRICS[0]
 
-  function getVal(id,date){return daily.find(d=>d.metric===id&&d.record_date===date)?.value??null}
-  function getLatest(id){const rows=daily.filter(d=>d.metric===id).sort((a,b)=>b.record_date.localeCompare(a.record_date));return rows[0]?.value??null}
-  function getBaseline(id){return baselineDate?getVal(id,baselineDate):null}
-  function calcChange(id){
-    const base=getBaseline(id),cur=getLatest(id)
-    if(base===null||cur===null||base===0)return null
-    const pct=parseFloat(((cur-base)/Math.abs(base)*100).toFixed(1))
-    const isLowBetter=IS_LOW_BETTER.includes(id)
-    const isGood=isLowBetter?pct<=0:pct>=0
-    const th=getThresh();return{pct,isGood,isCrit:!isGood&&Math.abs(pct)>=th.crit,isWarn:!isGood&&Math.abs(pct)>=th.warn}
-  }
-  function miniChart(id,color){
-    const rows=daily.filter(d=>d.metric===id).sort((a,b)=>a.record_date.localeCompare(b.record_date))
-    if(rows.length<2)return''
-    const vals=rows.map(r=>Number(r.value))
-    const min=Math.min(...vals),max=Math.max(...vals),range=max-min||1
-    const W=140,H=36,p=4
-    const pts=vals.map((v,i)=>`${p+i*(W-p*2)/(vals.length-1)},${H-p-(v-min)/range*(H-p*2)}`).join(' ')
-    return`<svg width="${W}" height="${H}" style="overflow:visible;display:block;margin-top:6px"><polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg>`
+  // 그래프 SVG 생성
+  function buildChart(metricId, color){
+    const base=baseline[metricId]||{}
+    const W=560, H=200, PL=60, PR=20, PT=20, PB=40
+    const cw=W-PL-PR, ch=H-PT-PB
+    const vals=DAYS.map((_,i)=>{
+      const date=weekDates[i]
+      const row=daily.find(d=>d.metric===metricId&&d.record_date===date)
+      return row?Number(row.value):null
+    })
+    const bases=DAYS.map((_,d)=>base[d]||null)
+    const allVals=[...vals.filter(v=>v!==null),...bases.filter(v=>v!==null)]
+    if(!allVals.length)return`<div style="text-align:center;padding:40px;color:var(--muted);font-size:13px">기준값을 먼저 입력하세요</div>`
+
+    const maxV=Math.max(...allVals)*1.15||1
+    const barW=cw/7*0.5
+    const barGap=cw/7
+
+    const bars=DAYS.map((d,i)=>{
+      const v=vals[i], b=bases[i]
+      const x=PL+i*barGap+barGap/2
+      if(v===null)return`<text x="${x}" y="${H-PB+16}" text-anchor="middle" font-size="11" fill="var(--muted)">${d}</text>`
+      const bh=Math.max((v/maxV)*ch,2)
+      const by=PT+ch-bh
+      const isGood=v>=b
+      const fill=b===null?color:isGood?'#3B6D11':'#A32D2D'
+      const baseY=b!==null?PT+ch-(b/maxV)*ch:null
+      return`
+        <rect x="${x-barW/2}" y="${by}" width="${barW}" height="${bh}" fill="${fill}" rx="3" opacity="0.85"/>
+        ${b!==null?`<line x1="${x-barW/2-4}" y1="${baseY}" x2="${x+barW/2+4}" y2="${baseY}" stroke="${color}" stroke-width="2" stroke-dasharray="4,2"/>`:''}
+        <text x="${x}" y="${H-PB+16}" text-anchor="middle" font-size="11" fill="var(--muted)">${d}</text>
+        <text x="${x}" y="${by-5}" text-anchor="middle" font-size="9" fill="${fill}">${v>=1000?Math.round(v/1000)+'K':v}</text>`
+    }).join('')
+
+    // Y축 눈금
+    const yTicks=[0,0.25,0.5,0.75,1].map(t=>{
+      const val=Math.round(maxV*t)
+      const y=PT+ch*(1-t)
+      const label=val>=1000000?(val/1000000).toFixed(1)+'M':val>=1000?(val/1000).toFixed(0)+'K':val
+      return`<line x1="${PL}" y1="${y}" x2="${W-PR}" y2="${y}" stroke="var(--bd)" stroke-width="0.5"/>
+        <text x="${PL-6}" y="${y+4}" text-anchor="end" font-size="9" fill="var(--muted)">${label}</text>`
+    }).join('')
+
+    return`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;overflow:visible">
+      ${yTicks}${bars}
+      <text x="${PL}" y="12" font-size="10" fill="var(--muted)">── 기준선 (요일 평균)</text>
+    </svg>`
   }
 
-  // 헤더 임계값 레이블 업데이트
   setTimeout(()=>{
-    const th=getThresh()
     const el=document.getElementById('kpi-thresh-label')
-    if(el)el.textContent=`-${th.crit}% 초과 시 즉시 대응 (주의: -${th.warn}%)`
+    const th=getThresh()
+    if(el)el.textContent=`-${th.crit}% 초과 시 즉시 대응`
   },0)
 
   return`
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px">
     <div>
       <div style="font-size:16px;font-weight:500">KPI 대시보드</div>
-      <div style="font-size:12px;color:var(--muted);margin-top:3px">전환 전 기준값 대비 실시간 추적 — <span id="kpi-thresh-label" style="color:#A32D2D;font-weight:500;cursor:pointer;text-decoration:underline dotted" onclick="openThreshEdit()" title="클릭해서 수정"></span></div>
+      <div style="font-size:12px;color:var(--muted);margin-top:2px">요일별 기준값 대비 이번 주 실적 추적</div>
     </div>
     <div style="display:flex;gap:7px">
-      <button class="btn" onclick="openAddKPIItem()"><i class="ti ti-plus"></i> 지표 추가</button>
+      <button class="btn" onclick="openDowBaselineEdit()"><i class="ti ti-adjustments"></i> 기준값 설정</button>
       <button class="btn btn-o" onclick="openKPIInput()"><i class="ti ti-pencil"></i> 수치 입력</button>
     </div>
   </div>
 
-  ${catGroups.map(cat=>{
-    const kpis=KPI_DEF.filter(k=>k.cat===cat)
-    return`<div style="margin-bottom:20px">
-    <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;padding-bottom:6px;border-bottom:0.5px solid var(--bd)">${cat}</div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px">
-    ${kpis.map(k=>{
-      const base=getBaseline(k.id),cur=getLatest(k.id),ch=calcChange(k.id)
-      const dispVal=cur??base
-      return`<div class="card" style="padding:14px;border-left:3px solid ${k.color};position:relative;cursor:pointer" onclick="openKPICardInput('${k.id}','${k.label}','${k.unit}')">
-        <!-- 삭제 버튼 -->
-        <button onclick="event.stopPropagation();deleteKPIItem('${k.id}')" style="position:absolute;top:8px;right:8px;width:20px;height:20px;border-radius:50%;border:none;background:var(--sf);color:var(--muted);cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s" class="kpi-del-btn">✕</button>
-        <div style="font-size:11px;color:var(--muted);margin-bottom:6px;display:flex;align-items:center;gap:4px">
-          <i class="ti ${k.icon}" style="color:${k.color}"></i>${k.label}
-        </div>
-        <div style="display:flex;align-items:flex-end;justify-content:space-between">
-          <div>
-            <div style="font-size:26px;font-weight:600;color:${dispVal!==null?k.color:'var(--muted)'};line-height:1.1">${dispVal!==null?Number(dispVal).toLocaleString():'—'}</div>
-            <div style="font-size:11px;color:var(--muted)">${dispVal!==null?k.unit+' '+(base!==null&&cur!==null&&cur!==base?`(기준 ${Number(base).toLocaleString()})`:base!==null?'기준값':''):''}</div>
-          </div>
-          ${ch?`<div style="text-align:right;flex-shrink:0;margin-left:8px">
-            <div style="font-size:15px;font-weight:700;color:${ch.isGood?'#3B6D11':ch.isCrit?'#A32D2D':'var(--o)'}">${ch.pct>0?'+':''}${ch.pct}%</div>
-            <div style="font-size:9px;color:${ch.isCrit?'#A32D2D':ch.isWarn?'var(--o)':'var(--muted)'}">${ch.isCrit?'⚠ 즉시대응':ch.isWarn?'△ 주의':'정상'}</div>
-          </div>`:''}
-        </div>
-        ${base!==null?`<div class="pgb" style="height:3px;margin-top:8px"><div class="pgf" style="width:${ch?Math.min(Math.abs(ch.pct)/(getThresh().crit)*100,100):0}%;background:${ch&&!ch.isGood?(ch.isCrit?'#A32D2D':ch.isWarn?'var(--o)':'#639922'):'#639922'}"></div></div>`:``}
-        ${miniChart(k.id,k.color)}
-        ${base===null?`<div style="font-size:11px;color:var(--o);margin-top:8px"><i class="ti ti-pencil"></i> 클릭해서 기준값 입력</div>`:''}
-      </div>`
-    }).join('')}
-    </div></div>`
-  }).join('')}
-
-  <style>.card:hover .kpi-del-btn{opacity:1!important}</style>
-
-  <!-- 추적표 -->
-  <div class="card" style="margin-top:8px">
-    <div class="sh"><span class="st"><i class="ti ti-table oi"></i> 날짜별 추적표</span>
-      ${baselineDate?`<span style="font-size:11px;color:var(--muted)">기준일: ${baselineDate}</span>`:''}
-    </div>
-    ${dates.length?`<div style="overflow-x:auto"><table class="kpi-tbl"><thead><tr>
-      <th style="min-width:130px">지표</th>
-      ${dates.map(d=>`<th style="text-align:center;min-width:85px">${d.slice(5)}<div style="font-size:9px;font-weight:400;color:var(--muted)">${d===baselineDate?'기준':''}</div></th>`).join('')}
-      <th style="text-align:center">변화율</th><th style="text-align:center">상태</th>
-    </tr></thead><tbody>
-    ${KPI_DEF.map(k=>{
-      const ch=calcChange(k.id)
-      return`<tr style="${ch?.isCrit?'background:#FEF2F2':ch?.isWarn?'background:#FFFBEB':''}">
-      <td style="font-weight:500;white-space:nowrap;font-size:12px"><i class="ti ${k.icon}" style="color:${k.color};font-size:10px"></i> ${k.label}</td>
-      ${dates.map(d=>{const v=getVal(k.id,d);return`<td style="text-align:center;font-size:12px;cursor:pointer" onclick="openKPICardInput('${k.id}','${k.label}','${k.unit}','${d}')">${v!==null?Number(v).toLocaleString()+k.unit:'<span style="color:var(--muted)">—</span>'}</td>`}).join('')}
-      <td style="text-align:center;font-weight:700;font-size:12px;color:${ch?(ch.isGood?'#3B6D11':ch.isCrit?'#A32D2D':'var(--o)'):'var(--muted)'}">${ch?`${ch.pct>0?'+':''}${ch.pct}%`:'—'}</td>
-      <td style="text-align:center">${ch?.isCrit?'<span class="badge br">⚠ 즉시대응</span>':ch?.isWarn?'<span class="badge bo">△ 주의</span>':ch?'<span class="badge bg">정상</span>':'<span class="badge bgr">미입력</span>'}</td>
-      </tr>`
-    }).join('')}
-    </tbody></table></div>`:`<div style="text-align:center;padding:30px;color:var(--muted)"><div style="font-size:32px;margin-bottom:10px">📊</div><div style="margin-bottom:12px">지표 카드를 클릭해서 기준값을 입력해보세요</div><button class="btn btn-o" onclick="openKPIInput()"><i class="ti ti-pencil"></i> 수치 입력</button></div>`}
+  <!-- 지표 탭 -->
+  <div style="display:flex;gap:8px;margin-bottom:16px">
+    ${METRICS.map(m=>`<button onclick="window._kpiMetric='${m.id}';showTab('kpi')" style="padding:7px 16px;border-radius:20px;border:1.5px solid ${m.id===activeMetric?m.color:'var(--bd)'};background:${m.id===activeMetric?m.color:'var(--card)'};color:${m.id===activeMetric?'#fff':'var(--text)'};font-size:13px;cursor:pointer;font-weight:${m.id===activeMetric?'600':'400'};transition:all .15s">
+      <i class="ti ${m.icon}"></i> ${m.label}
+    </button>`).join('')}
   </div>
 
-  <!-- 분석 -->
-  <div class="three" style="margin-top:14px">
-  <div class="card"><div class="sh"><span class="st"><i class="ti ti-trending-down oi"></i> 매출 하락 분석</span></div>
-  <textarea class="inp" style="min-height:110px;margin:0" placeholder="원인·기간·영역..." onchange="saveKA('sales_analysis',this.value)">${D.kpiAnalysis?.sales_analysis||''}</textarea></div>
-  <div class="card"><div class="sh"><span class="st"><i class="ti ti-calculator oi"></i> 손실 산정</span></div>
-  <textarea class="inp" style="min-height:110px;margin:0" placeholder="일매출×하락율×기간..." onchange="saveKA('loss_estimate',this.value)">${D.kpiAnalysis?.loss_estimate||''}</textarea></div>
-  <div class="card"><div class="sh"><span class="st"><i class="ti ti-trending-up oi"></i> 회복 계획</span></div>
-  <textarea class="inp" style="min-height:110px;margin:0" placeholder="D+7/D+14/D+30 목표..." onchange="saveKA('recovery_plan',this.value)">${D.kpiAnalysis?.recovery_plan||''}</textarea></div>
+  <!-- 메인 그래프 카드 -->
+  <div class="card" style="padding:20px;margin-bottom:14px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:${metric.color}"><i class="ti ${metric.icon}"></i> ${metric.label} — 이번 주</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">${weekDates[0]} ~ ${weekDates[6]}</div>
+      </div>
+      <div style="display:flex;gap:12px;font-size:11px">
+        <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:3px;background:#3B6D11;display:inline-block"></span>기준 이상</span>
+        <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:3px;background:#A32D2D;display:inline-block"></span>기준 미달</span>
+        <span style="display:flex;align-items:center;gap:4px"><span style="width:16px;height:0;border-top:2px dashed ${metric.color};display:inline-block"></span>기준선</span>
+      </div>
+    </div>
+    ${buildChart(metric.id, metric.color)}
+  </div>
+
+  <!-- 3개 요약 카드 -->
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px">
+    ${METRICS.map(m=>{
+      const base=getBaseline()[m.id]||{}
+      const today=new Date()
+      const todayDate=today.toISOString().slice(0,10)
+      const todayDow=today.getDay()===0?6:today.getDay()-1
+      const todayRow=daily.find(d=>d.metric===m.id&&d.record_date===todayDate)
+      const todayVal=todayRow?Number(todayRow.value):null
+      const todayBase=base[todayDow]||null
+      const diff=todayVal!==null&&todayBase?((todayVal-todayBase)/todayBase*100).toFixed(1):null
+      const isGood=diff===null||Number(diff)>=0
+      return`<div class="card" style="padding:14px;border-left:3px solid ${m.color};cursor:pointer" onclick="window._kpiMetric='${m.id}';showTab('kpi')">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px"><i class="ti ${m.icon}" style="color:${m.color}"></i> ${m.label}</div>
+        <div style="font-size:22px;font-weight:700;color:${todayVal!==null?m.color:'var(--muted)'}">
+          ${todayVal!==null?Number(todayVal).toLocaleString():'—'}<span style="font-size:11px;font-weight:400;margin-left:2px">${todayVal!==null?m.unit:''}</span>
+        </div>
+        <div style="font-size:11px;margin-top:4px;color:${diff!==null?(isGood?'#3B6D11':'#A32D2D'):'var(--muted)'}">
+          ${diff!==null?(isGood?'▲':'▼')+' '+Math.abs(diff)+'% vs 기준':'오늘 데이터 없음'}
+        </div>
+      </div>`
+    }).join('')}
+  </div>
+
+  <!-- 이번 주 테이블 -->
+  <div class="card">
+    <div class="sh"><span class="st"><i class="ti ti-table oi"></i> 이번 주 실적 vs 기준값</span></div>
+    <div style="overflow-x:auto">
+    <table class="kpi-tbl"><thead><tr>
+      <th>지표</th>
+      ${DAYS.map((d,i)=>`<th style="text-align:center">${d}<div style="font-size:9px;font-weight:400;color:var(--muted)">${weekDates[i].slice(5)}</div></th>`).join('')}
+    </tr></thead><tbody>
+    ${METRICS.map(m=>{
+      const base=getBaseline()[m.id]||{}
+      return`
+      <tr style="background:var(--sf)"><td colspan="8" style="font-size:11px;font-weight:600;color:${m.color};padding:6px 12px"><i class="ti ${m.icon}"></i> ${m.label} 기준값</td></tr>
+      <tr>
+        <td style="font-size:11px;color:var(--muted)">기준</td>
+        ${DAYS.map((_,i)=>`<td style="text-align:center;font-size:12px;color:var(--muted)">${base[i]!==undefined?Number(base[i]).toLocaleString()+m.unit:'—'}</td>`).join('')}
+      </tr>
+      <tr>
+        <td style="font-size:11px;font-weight:500">실적</td>
+        ${DAYS.map((_,i)=>{
+          const date=weekDates[i]
+          const row=daily.find(d=>d.metric===m.id&&d.record_date===date)
+          const v=row?Number(row.value):null
+          const b=base[i]
+          const good=v!==null&&b!==undefined?v>=b:null
+          return`<td style="text-align:center;font-size:12px;cursor:pointer;font-weight:500;color:${v!==null?(good?'#3B6D11':'#A32D2D'):'var(--muted)'}" onclick="openKPIInput('${date}')">${v!==null?Number(v).toLocaleString()+m.unit:'<span style=\"color:var(--o);font-size:10px\">입력</span>'}</td>`
+        }).join('')}
+      </tr>`
+    }).join('')}
+    </tbody></table>
+    </div>
   </div>`
 }
+
 
 // 카드 클릭 → 개별 지표 입력
 window.openKPICardInput=(id,label,unit,preDate)=>{
@@ -1323,15 +1393,70 @@ window.deleteKPIItem=(id)=>{
   sb.from('kpi_daily').delete().eq('metric',id).then(()=>{toast('삭제됐어요');loadAll()})
 }
 
-window.openKPIInput=()=>{
-  // 현재 등록된 KPI 지표 기준으로 동적 생성
-  const KPI_DEF=getKPIDef()
-  const KPI_LABELS=Object.fromEntries(KPI_DEF.map(k=>[k.id,k.label]))
-  const KPI_UNITS=Object.fromEntries(KPI_DEF.map(k=>[k.id,k.unit]))
-  const ids=KPI_DEF.map(k=>k.id)
-  const todayStr=new Date().toISOString().slice(0,10)
+window.openDowBaselineEdit=()=>{
+  const DAYS=['월','화','수','목','금','토','일']
+  const METRICS=[
+    {id:'revenue',label:'매출',unit:'원'},
+    {id:'orders',label:'주문건수',unit:'건'},
+    {id:'aov',label:'AOV',unit:'원'},
+  ]
+  let base={}
+  try{const row=(D.appSettings||[]).find(r=>r.key==='kpi_dow_baseline');if(row)base=JSON.parse(row.value)}catch{}
 
-  // 오늘 기존 입력값
+  const w=mkOv('dow-base-ov')
+  w.innerHTML=`<div class="modal" style="width:640px;max-width:95vw">
+  <div class="mh"><span style="font-weight:500"><i class="ti ti-adjustments" style="color:var(--o)"></i> 요일별 기준값 설정</span><button class="btn btn-g" onclick="document.getElementById('dow-base-ov').remove()"><i class="ti ti-x"></i></button></div>
+  <div class="mb" style="padding:14px 18px">
+    <div style="font-size:12px;color:var(--muted);margin-bottom:14px">최근 3개월 요일별 평균을 입력하세요. 실적 비교 기준선이 됩니다.</div>
+    ${METRICS.map(m=>`
+    <div style="margin-bottom:16px">
+      <div style="font-size:12px;font-weight:600;margin-bottom:8px;color:var(--text)">${m.label} (${m.unit})</div>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px">
+        ${DAYS.map((d,i)=>`<div>
+          <div style="font-size:10px;color:var(--muted);text-align:center;margin-bottom:3px">${d}</div>
+          <input class="inp" type="number" id="base-${m.id}-${i}" value="${base[m.id]?.[i]||''}" placeholder="—" style="margin:0;text-align:center;padding:6px 4px;font-size:12px">
+        </div>`).join('')}
+      </div>
+    </div>`).join('')}
+  </div>
+  <div class="mf">
+    <button class="btn" onclick="document.getElementById('dow-base-ov').remove()">취소</button>
+    <button class="btn btn-o" onclick="saveDowBaseline()"><i class="ti ti-device-floppy"></i> 저장</button>
+  </div>
+  </div>`
+  document.body.appendChild(w)
+}
+
+window.saveDowBaseline=async()=>{
+  const METRICS=['revenue','orders','aov']
+  let base={}
+  try{const row=(D.appSettings||[]).find(r=>r.key==='kpi_dow_baseline');if(row)base=JSON.parse(row.value)}catch{}
+  METRICS.forEach(id=>{
+    base[id]={}
+    for(let i=0;i<7;i++){
+      const v=document.getElementById(`base-${id}-${i}`)?.value
+      if(v!=='')base[id][i]=parseFloat(v)
+    }
+  })
+  const val=JSON.stringify(base)
+  localStorage.setItem('kpi_dow_baseline',val)
+  const{error}=await sb.from('app_settings').upsert({key:'kpi_dow_baseline',value:val,updated_at:new Date().toISOString()},{onConflict:'key'})
+  if(error)console.warn('기준값 저장 실패:',error.message)
+  const idx=(D.appSettings||[]).findIndex(r=>r.key==='kpi_dow_baseline')
+  if(idx>=0)D.appSettings[idx].value=val
+  else D.appSettings=[...(D.appSettings||[]),{key:'kpi_dow_baseline',value:val}]
+  document.getElementById('dow-base-ov')?.remove()
+  toast('기준값 저장됐어요 ✓')
+  showTab('kpi')
+}
+
+window.openKPIInput=(preDate)=>{
+  const KPI_LABELS={revenue:'매출',orders:'주문건수',aov:'AOV (평균주문액)'}
+  const KPI_UNITS={revenue:'원',orders:'건',aov:'원'}
+  const ids=['revenue','orders','aov']
+  const todayStr=preDate||new Date().toISOString().slice(0,10)
+
+  // 선택된 날짜의 기존 입력값
   function getCurVal(id){const r=(D.kpiDaily||[]).find(d=>d.metric===id&&d.record_date===todayStr);return r?.value??''}
 
   const w=mkOv('kpi-input-ov')
@@ -1364,7 +1489,7 @@ window.openKPIInput=()=>{
 window.refreshKPIInputVals=()=>{
   const date=document.getElementById('kpi-date')?.value
   if(!date)return
-  const ids=getKPIDef().map(k=>k.id)
+  const ids=['revenue','orders','aov']
   ids.forEach(id=>{
     const r=(D.kpiDaily||[]).find(d=>d.metric===id&&d.record_date===date)
     const inp=document.getElementById('ki-'+id)
@@ -1375,7 +1500,7 @@ window.refreshKPIInputVals=()=>{
 window.saveKPIDaily=async()=>{
   const date=document.getElementById('kpi-date')?.value
   if(!date){toast('날짜를 선택해주세요.',false);return}
-  const ids=getKPIDef().map(k=>k.id)
+  const ids=['revenue','orders','aov']
   const rows=ids.map(id=>{
     const v=document.getElementById('ki-'+id)?.value
     if(v===''||v===null||v===undefined)return null
