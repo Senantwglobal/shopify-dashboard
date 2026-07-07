@@ -226,7 +226,7 @@ window.setCkFilter=(key,val)=>{window.ckFilter[key]=val;render()}
 window.resetCkFilter=()=>{window.ckFilter={status:'',priority:'',owner:'',requester:''};render()}
 let calYear=2026, calMonth=6
 let notifOpen=false
-let D={cats:[],items:[],subs:[],comments:[],kpiRows:[],kpiAnalysis:{},actionItems:[],meetings:[],history:[]}
+let D={cats:[],items:[],subs:[],comments:[],kpiRows:[],kpiAnalysis:{},actionItems:[],meetings:[],history:[],appSettings:[]}
 
 // ── 인증 ──
 const {data:{session}}=await sb.auth.getSession()
@@ -330,7 +330,7 @@ function updateNotif(){
 
 // ── 데이터 로드 ──
 async function loadAll(){
-  const [cR,iR,sR,cmR,kR,kaR,aR,mR,hR,kdR]=await Promise.all([
+  const [cR,iR,sR,cmR,kR,kaR,aR,mR,hR,kdR,asR]=await Promise.all([
     sb.from('checklist_categories').select('*').order('sort_order'),
     sb.from('checklist_items').select('*').order('sort_order'),
     sb.from('checklist_subs').select('*').order('sort_order'),
@@ -341,8 +341,9 @@ async function loadAll(){
     sb.from('meetings').select('*').order('date',{ascending:false}),
     sb.from('history').select('*').order('created_at',{ascending:false}).limit(100),
     sb.from('kpi_daily').select('*').order('record_date'),
+    sb.from('app_settings').select('*'),
   ])
-  D={cats:cR.data||[],items:iR.data||[],subs:sR.data||[],comments:cmR.data||[],kpiRows:kR.data||[],kpiAnalysis:kaR.data||{},actionItems:aR.data||[],meetings:mR.data||[],history:hR.data||[],kpiDaily:kdR.data||[]}
+  D={cats:cR.data||[],items:iR.data||[],subs:sR.data||[],comments:cmR.data||[],kpiRows:kR.data||[],kpiAnalysis:kaR.data||{},actionItems:aR.data||[],meetings:mR.data||[],history:hR.data||[],kpiDaily:kdR.data||[],appSettings:asR?.data||[]}
   updateNotif();render()
   document.body.style.visibility='visible'
 }
@@ -1058,29 +1059,47 @@ window.saveAICmt=async(id)=>{
 // ══════════════════════
 // KPI 탭
 // ══════════════════════
-function getKPIDef(){
-  // localStorage에 저장된 커스텀 KPI 목록 반환
-  const defaults=[
-    {id:'revenue',     label:'일평균 매출',    unit:'원', cat:'매출',   icon:'ti-coin',            color:'#3B6D11'},
-    {id:'order_count', label:'일평균 주문수',   unit:'건', cat:'매출',   icon:'ti-shopping-cart',   color:'#185FA5'},
-    {id:'aov',         label:'평균 주문액(AOV)',unit:'원', cat:'매출',   icon:'ti-receipt',         color:'#0F6E56'},
-    {id:'cvr',         label:'전환율(CVR)',    unit:'%',  cat:'전환',   icon:'ti-arrows-right',    color:'#534AB7'},
-    {id:'cart_abandon',label:'장바구니 이탈률', unit:'%',  cat:'전환',   icon:'ti-shopping-cart-off',color:'#854F0B'},
-    {id:'checkout_drop',label:'체크아웃 이탈률',unit:'%', cat:'전환',   icon:'ti-door-exit',       color:'#A32D2D'},
-    {id:'pay_fail',    label:'결제 실패율',    unit:'%',  cat:'결제·기술',icon:'ti-credit-card-off',color:'#A32D2D'},
-    {id:'err_404',     label:'404 오류 수',   unit:'건', cat:'결제·기술',icon:'ti-error-404',      color:'#993556'},
-    {id:'supla_miss',  label:'SUPLA 누락률',  unit:'%',  cat:'결제·기술',icon:'ti-package-off',    color:'#854F0B'},
-    {id:'login_ok',    label:'로그인 성공률',  unit:'%',  cat:'회원·CS', icon:'ti-user-check',     color:'#0F6E56'},
-    {id:'cs_count',    label:'CS 문의량',     unit:'건', cat:'회원·CS', icon:'ti-headset',        color:'#993556'},
-    {id:'seo_index',   label:'검색 색인 수',  unit:'개', cat:'SEO',    icon:'ti-search',          color:'#185FA5'},
-    {id:'organic',     label:'유기 검색 유입', unit:'명', cat:'SEO',    icon:'ti-brand-google',    color:'#3B6D11'},
-  ]
+function getThresh(){
   try{
-    const custom=JSON.parse(localStorage.getItem('ople-kpi-def')||'[]')
-    return custom.length?custom:defaults
-  }catch{return defaults}
+    const dbRow=(D.appSettings||[]).find(r=>r.key==='kpi_thresh')
+    if(dbRow?.value)return JSON.parse(dbRow.value)
+    return getThresh()
+  }catch{return{crit:20,warn:15}}
 }
-function saveKPIDef(defs){localStorage.setItem('ople-kpi-def',JSON.stringify(defs))}
+function getKPIDef(){
+  const defaults=[
+    {id:'revenue',    label:'일평균 매출',    unit:'원', cat:'매출',  icon:'ti-chart-bar',       color:'#E8680A'},
+    {id:'order_count',label:'일평균 주문수',  unit:'건', cat:'매출',  icon:'ti-shopping-cart',   color:'#B84E06'},
+    {id:'aov',        label:'평균 주문액',    unit:'원', cat:'매출',  icon:'ti-receipt',         color:'#8B3A08'},
+    {id:'cvr',        label:'전환율',         unit:'%',  cat:'전환',  icon:'ti-percentage',      color:'#185FA5'},
+    {id:'cart_abandon',label:'장바구니 이탈률',unit:'%', cat:'전환',  icon:'ti-shopping-cart-off',color:'#A32D2D'},
+    {id:'checkout_drop',label:'체크아웃 이탈률',unit:'%',cat:'전환', icon:'ti-logout',          color:'#C0392B'},
+    {id:'pay_fail',   label:'결제 실패율',    unit:'%',  cat:'결제',  icon:'ti-credit-card-off', color:'#A32D2D'},
+    {id:'err_404',    label:'404 오류 수',    unit:'건', cat:'운영',  icon:'ti-alert-triangle',  color:'#8B3A08'},
+    {id:'supla_miss', label:'SUPLA 누락률',   unit:'%',  cat:'운영',  icon:'ti-alert-circle',    color:'#534AB7'},
+    {id:'login_ok',   label:'로그인 성공률',  unit:'%',  cat:'운영',  icon:'ti-login',           color:'#3B6D11'},
+    {id:'cs_count',   label:'CS 문의량',      unit:'건', cat:'운영',  icon:'ti-headset',         color:'#185FA5'},
+    {id:'seo_index',  label:'검색 색인 수',   unit:'개', cat:'SEO',   icon:'ti-search',          color:'#185FA5'},
+    {id:'organic',    label:'유기 검색 유입', unit:'명', cat:'SEO',   icon:'ti-brand-google',    color:'#3B6D11'},
+  ]
+  // DB 우선, 없으면 localStorage, 없으면 defaults
+  try{
+    const dbRow=(D.appSettings||[]).find(r=>r.key==='kpi_def')
+    if(dbRow?.value) return JSON.parse(dbRow.value)
+    const local=localStorage.getItem('ople-kpi-def')
+    if(local){const parsed=JSON.parse(local);return parsed.length?parsed:defaults}
+  }catch{}
+  return defaults
+}
+async function saveKPIDef(defs){
+  localStorage.setItem('ople-kpi-def',JSON.stringify(defs))
+  const{error}=await sb.from('app_settings').upsert({key:'kpi_def',value:JSON.stringify(defs),updated_at:new Date().toISOString()},{onConflict:'key'})
+  if(error){console.warn('app_settings 저장 실패(테이블 없음?):', error.message)}
+  // D 캐시 즉시 업데이트
+  const idx=(D.appSettings||[]).findIndex(r=>r.key==='kpi_def')
+  if(idx>=0)D.appSettings[idx].value=JSON.stringify(defs)
+  else D.appSettings=[...(D.appSettings||[]),{key:'kpi_def',value:JSON.stringify(defs)}]
+}
 
 function renderKPITab(){
   const KPI_DEF=getKPIDef()
@@ -1099,7 +1118,7 @@ function renderKPITab(){
     const pct=parseFloat(((cur-base)/Math.abs(base)*100).toFixed(1))
     const isLowBetter=IS_LOW_BETTER.includes(id)
     const isGood=isLowBetter?pct<=0:pct>=0
-    const th=JSON.parse(localStorage.getItem('ople-kpi-thresh')||'{"crit":20,"warn":15}');return{pct,isGood,isCrit:!isGood&&Math.abs(pct)>=th.crit,isWarn:!isGood&&Math.abs(pct)>=th.warn}
+    const th=getThresh();return{pct,isGood,isCrit:!isGood&&Math.abs(pct)>=th.crit,isWarn:!isGood&&Math.abs(pct)>=th.warn}
   }
   function miniChart(id,color){
     const rows=daily.filter(d=>d.metric===id).sort((a,b)=>a.record_date.localeCompare(b.record_date))
@@ -1113,7 +1132,7 @@ function renderKPITab(){
 
   // 헤더 임계값 레이블 업데이트
   setTimeout(()=>{
-    const th=JSON.parse(localStorage.getItem('ople-kpi-thresh')||'{"crit":20,"warn":15}')
+    const th=getThresh()
     const el=document.getElementById('kpi-thresh-label')
     if(el)el.textContent=`-${th.crit}% 초과 시 즉시 대응 (주의: -${th.warn}%)`
   },0)
@@ -1154,7 +1173,7 @@ function renderKPITab(){
             <div style="font-size:9px;color:${ch.isCrit?'#A32D2D':ch.isWarn?'var(--o)':'var(--muted)'}">${ch.isCrit?'⚠ 즉시대응':ch.isWarn?'△ 주의':'정상'}</div>
           </div>`:''}
         </div>
-        ${base!==null?`<div class="pgb" style="height:3px;margin-top:8px"><div class="pgf" style="width:${ch?Math.min(Math.abs(ch.pct)/(JSON.parse(localStorage.getItem('ople-kpi-thresh')||'{"crit":20}').crit)*100,100):0}%;background:${ch&&!ch.isGood?(ch.isCrit?'#A32D2D':ch.isWarn?'var(--o)':'#639922'):'#639922'}"></div></div>`:``}
+        ${base!==null?`<div class="pgb" style="height:3px;margin-top:8px"><div class="pgf" style="width:${ch?Math.min(Math.abs(ch.pct)/(getThresh().crit)*100,100):0}%;background:${ch&&!ch.isGood?(ch.isCrit?'#A32D2D':ch.isWarn?'var(--o)':'#639922'):'#639922'}"></div></div>`:``}
         ${miniChart(k.id,k.color)}
         ${base===null?`<div style="font-size:11px;color:var(--o);margin-top:8px"><i class="ti ti-pencil"></i> 클릭해서 기준값 입력</div>`:''}
       </div>`
@@ -1730,7 +1749,7 @@ window.confirmAddChecked=async()=>{
 }
 
 window.openThreshEdit=()=>{
-  const th=JSON.parse(localStorage.getItem('ople-kpi-thresh')||'{"crit":20,"warn":15}')
+  const th=getThresh()
   const w=mkOv('thresh-ov')
   w.innerHTML=`<div class="modal" style="width:340px">
   <div class="mh"><span style="font-weight:500"><i class="ti ti-adjustments" style="color:var(--o)"></i> KPI 임계값 설정</span><button class="btn btn-g" onclick="document.getElementById('thresh-ov').remove()"><i class="ti ti-x"></i></button></div>
@@ -1755,10 +1774,16 @@ window.openThreshEdit=()=>{
   </div>`
   document.body.appendChild(w)
 }
-window.saveThresh=()=>{
+window.saveThresh=async()=>{
   const crit=parseInt(document.getElementById('th-crit')?.value)||20
   const warn=parseInt(document.getElementById('th-warn')?.value)||15
-  localStorage.setItem('ople-kpi-thresh',JSON.stringify({crit,warn}))
+  const val=JSON.stringify({crit,warn})
+  localStorage.setItem('ople-kpi-thresh',val)
+  const{error}=await sb.from('app_settings').upsert({key:'kpi_thresh',value:val,updated_at:new Date().toISOString()},{onConflict:'key'})
+  if(error)console.warn('임계값 DB 저장 실패:',error.message)
+  const idx=(D.appSettings||[]).findIndex(r=>r.key==='kpi_thresh')
+  if(idx>=0)D.appSettings[idx].value=val
+  else D.appSettings=[...(D.appSettings||[]),{key:'kpi_thresh',value:val}]
   document.getElementById('thresh-ov')?.remove()
   toast('임계값 저장됨');showTab(activeTab)
 }
