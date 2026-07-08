@@ -355,6 +355,8 @@ sb.channel('rt')
   .on('postgres_changes',{event:'*',schema:'public',table:'action_items'},()=>loadAll())
   .on('postgres_changes',{event:'*',schema:'public',table:'meetings'},()=>loadAll())
   .on('postgres_changes',{event:'*',schema:'public',table:'history'},()=>loadAll())
+  .on('postgres_changes',{event:'*',schema:'public',table:'kpi_daily'},()=>loadAll())
+  .on('postgres_changes',{event:'*',schema:'public',table:'app_settings'},()=>loadAll())
   .subscribe()
 
 // ── 탭 ──
@@ -1417,8 +1419,9 @@ window.deleteKPIItem=(id)=>{
 }
 
 window.saveKpiNote=async(val)=>{
-  const{error}=await sb.from('app_settings').upsert({key:'kpi_note',value:val,updated_at:new Date().toISOString()},{onConflict:'key'})
-  if(error)console.warn('메모 저장 실패:',error.message)
+  await sb.from('app_settings').delete().eq('key','kpi_note')
+  const{error}=await sb.from('app_settings').insert({key:'kpi_note',value:val,updated_at:new Date().toISOString()})
+  if(error)await sb.from('app_settings').update({value:val,updated_at:new Date().toISOString()}).eq('key','kpi_note')
   const idx=(D.appSettings||[]).findIndex(r=>r.key==='kpi_note')
   if(idx>=0)D.appSettings[idx].value=val
   else D.appSettings=[...(D.appSettings||[]),{key:'kpi_note',value:val}]
@@ -1448,8 +1451,9 @@ window.openKpiAlertEdit=()=>{
 
 window.saveKpiAlertPct=async()=>{
   const val=parseFloat(document.getElementById('alert-pct-inp')?.value)||5
-  const{error}=await sb.from('app_settings').upsert({key:'kpi_alert_pct',value:String(val),updated_at:new Date().toISOString()},{onConflict:'key'})
-  if(error)console.warn('임계값 저장 실패:',error.message)
+  await sb.from('app_settings').delete().eq('key','kpi_alert_pct')
+  const{error}=await sb.from('app_settings').insert({key:'kpi_alert_pct',value:String(val),updated_at:new Date().toISOString()})
+  if(error)await sb.from('app_settings').update({value:String(val),updated_at:new Date().toISOString()}).eq('key','kpi_alert_pct')
   const idx=(D.appSettings||[]).findIndex(r=>r.key==='kpi_alert_pct')
   if(idx>=0)D.appSettings[idx].value=String(val)
   else D.appSettings=[...(D.appSettings||[]),{key:'kpi_alert_pct',value:String(val)}]
@@ -1495,7 +1499,6 @@ window.openDowBaselineEdit=()=>{
 window.saveDowBaseline=async()=>{
   const METRICS=['revenue','orders','aov']
   let base={}
-  try{const row=(D.appSettings||[]).find(r=>r.key==='kpi_dow_baseline');if(row)base=JSON.parse(row.value)}catch{}
   METRICS.forEach(id=>{
     base[id]={}
     for(let i=0;i<7;i++){
@@ -1504,14 +1507,19 @@ window.saveDowBaseline=async()=>{
     }
   })
   const val=JSON.stringify(base)
-  localStorage.setItem('kpi_dow_baseline',val)
-  const{error}=await sb.from('app_settings').upsert({key:'kpi_dow_baseline',value:val,updated_at:new Date().toISOString()},{onConflict:'key'})
-  if(error)console.warn('기준값 저장 실패:',error.message)
+  // delete 후 insert로 확실하게 저장 (upsert conflict 문제 방지)
+  await sb.from('app_settings').delete().eq('key','kpi_dow_baseline')
+  const{error}=await sb.from('app_settings').insert({key:'kpi_dow_baseline',value:val,updated_at:new Date().toISOString()})
+  if(error){
+    // insert 실패시 update 시도
+    await sb.from('app_settings').update({value:val,updated_at:new Date().toISOString()}).eq('key','kpi_dow_baseline')
+  }
+  document.getElementById('dow-base-ov')?.remove()
+  toast('기준값 저장됐어요 ✓ 모든 팀원에게 반영됩니다')
+  // realtime이 loadAll 트리거하므로 별도 호출 불필요, 즉시 반영용으로 D 캐시만 업데이트
   const idx=(D.appSettings||[]).findIndex(r=>r.key==='kpi_dow_baseline')
   if(idx>=0)D.appSettings[idx].value=val
   else D.appSettings=[...(D.appSettings||[]),{key:'kpi_dow_baseline',value:val}]
-  document.getElementById('dow-base-ov')?.remove()
-  toast('기준값 저장됐어요 ✓')
   showTab('kpi')
 }
 
