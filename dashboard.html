@@ -373,7 +373,15 @@ function render(){
   if(activeTab==='dash')mc.innerHTML=renderDash()
   else if(activeTab==='cal')mc.innerHTML=renderCal()
   else if(activeTab==='ck')mc.innerHTML=renderCK()
-  else if(activeTab==='kpi')mc.innerHTML=renderKPITab()
+  else if(activeTab==='kpi'){
+    const focusedNote=document.activeElement?.id==='kpi-note-ta'
+    const noteVal=focusedNote?document.getElementById('kpi-note-ta').value:null
+    mc.innerHTML=renderKPITab()
+    if(focusedNote&&noteVal!==null){
+      const ta=document.getElementById('kpi-note-ta')
+      if(ta){ta.value=noteVal;ta.focus()}
+    }
+  }
   else if(activeTab==='files')mc.innerHTML=renderFiles()
   else mc.innerHTML=renderMTG()
 }
@@ -1209,7 +1217,7 @@ function renderKPITab(){
 
   <!-- 메모 입력칸 -->
   <div style="margin-bottom:14px">
-    <textarea id="kpi-note-ta" class="inp" rows="2" style="margin:0;font-size:12px;resize:vertical" placeholder="이번 주 컨텍스트, 특이사항, 분석 메모..." onchange="saveKpiNote(this.value)">${kpiNote}</textarea>
+    <textarea id="kpi-note-ta" class="inp" rows="2" style="margin:0;font-size:12px;resize:vertical" placeholder="이번 주 컨텍스트, 특이사항, 분석 메모..." oninput="debounceSaveNote(this.value)">${kpiNote}</textarea>
   </div>
 
   <!-- 주 필터 + 지표 탭 -->
@@ -1418,6 +1426,11 @@ window.deleteKPIItem=(id)=>{
   sb.from('kpi_daily').delete().eq('metric',id).then(()=>{toast('삭제됐어요');loadAll()})
 }
 
+let _noteTimer=null
+window.debounceSaveNote=(val)=>{
+  clearTimeout(_noteTimer)
+  _noteTimer=setTimeout(()=>saveKpiNote(val),800)
+}
 window.saveKpiNote=async(val)=>{
   await sb.from('app_settings').delete().eq('key','kpi_note')
   const{error}=await sb.from('app_settings').insert({key:'kpi_note',value:val,updated_at:new Date().toISOString()})
