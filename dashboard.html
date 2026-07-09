@@ -212,8 +212,14 @@ const STATUS_LIST=['할 일','진행중','검증대기','보류','완료','검�
 const STATUS_NEXT={'할 일':'진행중','진행중':'검증대기','검증대기':'완료','완료':'완료','보류':'할 일','검증완료':'검증완료'}
 const TODAY=new Date()
 
+const DEFAULT_MEMBERS=[{name:'한덕희',email:'handeokhee@ople.co'},{name:'박영환',email:'younghwan@ople.co'},{name:'천세나',email:'sena@ople.co'},{name:'권현정',email:'hyunjeong@ople.co'},{name:'김현수',email:'hyunsu@ople.co'}]
 function getMembers(){
-  try{const s=localStorage.getItem('ople-members');return(s?JSON.parse(s):[{name:'한덕희',email:'handeokhee@ople.co'},{name:'박영환',email:'younghwan@ople.co'},{name:'천세나',email:'sena@ople.co'},{name:'권현정',email:'hyunjeong@ople.co'},{name:'김현수',email:'hyunsu@ople.co'}]).map((m,i)=>({...m,color:MC[i%MC.length]}))}catch{return[]}
+  try{
+    const dbRow=(D.appSettings||[]).find(r=>r.key==='members')
+    if(dbRow?.value){const parsed=JSON.parse(dbRow.value);if(parsed.length)return parsed.map((m,i)=>({...m,color:MC[i%MC.length]}))}
+    const s=localStorage.getItem('ople-members')
+    return(s?JSON.parse(s):DEFAULT_MEMBERS).map((m,i)=>({...m,color:MC[i%MC.length]}))
+  }catch{return DEFAULT_MEMBERS.map((m,i)=>({...m,color:MC[i%MC.length]}))}
 }
 
 // ── 상태 ──
@@ -234,6 +240,15 @@ if(!session){location.href='index.html';throw new Error()}
 const curEmail=session.user.email
 MEMBERS=getMembers()
 curUser=MEMBERS.find(m=>m.email===curEmail)||{name:curEmail.split('@')[0],color:'#888'}
+// localStorage 멤버를 DB에 동기화 (최초 1회)
+if(!(D.appSettings||[]).find(r=>r.key==='members')){
+  const localMembers=localStorage.getItem('ople-members')
+  if(localMembers){
+    sb.from('app_settings').insert({key:'members',value:localMembers,updated_at:new Date().toISOString()}).then(({error})=>{
+      if(!error)D.appSettings=[...(D.appSettings||[]),{key:'members',value:localMembers}]
+    })
+  }
+}
 document.getElementById('user-av').textContent=curUser.name[0]
 document.getElementById('user-av').style.background=curUser.color
 document.getElementById('user-name').textContent=curUser.name

@@ -131,11 +131,36 @@ const DEFAULT_MEMBERS = [
   { name: '김현수',  email: 'hyunsu@ople.co' },
 ]
 
+async function loadMembersFromDB() {
+  try {
+    const { data } = await sb.from('app_settings').select('*').eq('key', 'members').single()
+    if (data?.value) {
+      const parsed = JSON.parse(data.value)
+      if (parsed.length) {
+        localStorage.setItem('ople-members', data.value)
+        return parsed
+      }
+    }
+  } catch {}
+  return null
+}
+
 function getMembers() {
   try { const s = localStorage.getItem('ople-members'); return s ? JSON.parse(s) : DEFAULT_MEMBERS }
   catch { return DEFAULT_MEMBERS }
 }
-function saveMembers(m) { localStorage.setItem('ople-members', JSON.stringify(m)) }
+
+async function saveMembersToDB(members) {
+  const val = JSON.stringify(members)
+  localStorage.setItem('ople-members', val)
+  // DB에 저장 (delete + insert)
+  await sb.from('app_settings').delete().eq('key', 'members')
+  await sb.from('app_settings').insert({ key: 'members', value: val, updated_at: new Date().toISOString() })
+}
+
+function saveMembers(m) {
+  saveMembersToDB(m)  // localStorage + DB 동시 저장
+}
 
 function nameToEmail(name) {
   const m = getMembers().find(m => m.name === name)
@@ -193,6 +218,9 @@ window.login = async () => {
   if (!name) { showErr(err, '이름을 입력해주세요.'); return }
   if (!pw)   { showErr(err, '비밀번호를 입력해주세요.'); return }
 
+  // DB에서 최신 멤버 재확인
+  const dbM = await loadMembersFromDB()
+  if (dbM) localStorage.setItem('ople-members', JSON.stringify(dbM))
   const email = nameToEmail(name)
   if (!email) { showErr(err, `"${name}"은 등록되지 않은 팀원입니다. 아래에서 팀원을 추가해주세요.`); return }
 
@@ -271,7 +299,12 @@ window.skipPwChange = async () => {
 
 function showErr(el, msg) { el.textContent = msg; el.style.display = 'block' }
 
-renderGrid()
+;(async () => {
+  // DB에서 최신 멤버 로드 후 렌더
+  const dbMembers = await loadMembersFromDB()
+  if (dbMembers) localStorage.setItem('ople-members', JSON.stringify(dbMembers))
+  renderGrid()
+})()
 </script>
 </body>
 </html>
