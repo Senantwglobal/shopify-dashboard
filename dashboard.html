@@ -1156,7 +1156,7 @@ function renderKPITab(){
 
   function buildChart(metricId,color){
     const base=baseline[metricId]||{}
-    const W=560,H=200,PL=60,PR=20,PT=20,PB=40
+    const W=560,H=160,PL=55,PR=20,PT=16,PB=40
     const cw=W-PL-PR,ch=H-PT-PB
     const vals=DAYS.map((_,i)=>{
       const row=daily.find(d=>d.metric===metricId&&d.record_date===weekDates[i])
@@ -1181,7 +1181,7 @@ function renderKPITab(){
       const isWarn=pctDiff!=null&&pctDiff<0&&!isCrit
       const fill=b==null?color:pctDiff>=0?'#3B6D11':isCrit?'#A32D2D':'var(--o)'
       const baseY=b!=null?PT+ch-(b/maxV)*ch:null
-      const dispVal=v>=1000000?(v/1000000).toFixed(1)+'M':v>=1000?Math.round(v/1000)+'K':v
+      const dispVal=v>=100000000?(v/100000000).toFixed(1)+'억':v>=10000?Math.round(v/10000)+'만':v
       return`<rect x="${x-barW/2}" y="${by}" width="${barW}" height="${bh}" fill="${fill}" rx="3" opacity="0.85"/>
         ${baseY!=null?`<line x1="${x-barW/2-4}" y1="${baseY}" x2="${x+barW/2+4}" y2="${baseY}" stroke="${color}" stroke-width="2" stroke-dasharray="4,2"/>`:''}
         ${isCrit?`<text x="${x}" y="${by-14}" text-anchor="middle" font-size="9" fill="#A32D2D" font-weight="600">⚠ 주의</text>`:''}
@@ -1190,7 +1190,7 @@ function renderKPITab(){
     }).join('')
     const yTicks=[0,0.25,0.5,0.75,1].map(t=>{
       const val=Math.round(maxV*t),y=PT+ch*(1-t)
-      const label=val>=1000000?(val/1000000).toFixed(1)+'M':val>=1000?(val/1000).toFixed(0)+'K':val
+      const label=val>=100000000?(val/100000000).toFixed(1)+'억':val>=10000?Math.round(val/10000)+'만':val
       return`<line x1="${PL}" y1="${y}" x2="${W-PR}" y2="${y}" stroke="var(--bd)" stroke-width="0.5"/><text x="${PL-6}" y="${y+4}" text-anchor="end" font-size="9" fill="var(--muted)">${label}</text>`
     }).join('')
     return`<svg viewBox="0 0 ${W} ${H+10}" style="width:100%;height:auto;overflow:visible">${yTicks}${bars}</svg>`
