@@ -1838,8 +1838,24 @@ window.runAIMtg=async()=>{
   try{
     const resp=await fetch('/api/summarize',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:raw})})
     const rawText=await resp.text()
-    const cleanText=rawText.replace(/^```json\s*/,'').replace(/^```\s*/,'').replace(/```\s*$/,'').trim()
-    let respData;try{respData=JSON.parse(cleanText)}catch{throw new Error('JSON 파싱 실패: '+cleanText.slice(0,80))}
+    // 백틱 블록 제거 (멀티라인 포함)
+    const cleanText=rawText
+      .replace(/^\s*```(?:json)?\s*\n?/,'')  // 시작 백틱 제거
+      .replace(/\n?```\s*$/,'')               // 끝 백틱 제거
+      .replace(/^```json/,'').replace(/^```/,'') // 인라인 백틱 제거
+      .trim()
+    let respData
+    try{
+      respData=JSON.parse(cleanText)
+    }catch{
+      // JSON 블록만 추출 시도 ({ ... })
+      const jsonMatch=cleanText.match(/\{[\s\S]*\}/)
+      if(jsonMatch){
+        try{respData=JSON.parse(jsonMatch[0])}catch{throw new Error('JSON 파싱 실패: '+cleanText.slice(0,120))}
+      }else{
+        throw new Error('JSON 파싱 실패: '+cleanText.slice(0,120))
+      }
+    }
     if(!resp.ok||respData.error)throw new Error(respData.error||'서버 오류 '+resp.status)
     const p=respData
     window._parsedMtg={...p,title:document.getElementById('aim-title')?.value.trim()||'AI 회의록',date:document.getElementById('aim-date')?.value,attendees:document.getElementById('aim-att')?.value.split(',').map(s=>s.trim()).filter(Boolean),raw}
