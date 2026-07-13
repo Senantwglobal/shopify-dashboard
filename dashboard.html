@@ -188,6 +188,7 @@ select.inp{cursor:pointer}
   <button class="nb" onclick="showTab('kpi')" id="tab-kpi"><i class="ti ti-chart-line"></i>KPI</button>
   <button class="nb" onclick="showTab('mtg')" id="tab-mtg"><i class="ti ti-notes"></i>회의록</button>
   <button class="nb" onclick="showTab('files')" id="tab-files"><i class="ti ti-paperclip"></i>파일 보관함</button>
+  <button class="nb" onclick="showTab('histlog')" id="tab-histlog"><i class="ti ti-history"></i>History Log</button>
 </div>
 
 <div class="cnt" id="mc">
@@ -229,6 +230,35 @@ window.activeCat='전체'
 window.setCat=(id)=>{window.activeCat=id;render()}
 window.ckFilter={status:'',priority:'',owner:'',requester:'',keyword:''}
 window.setCkFilter=(key,val)=>{window.ckFilter[key]=val;render()}
+window.filterCkItems=()=>{
+  // 검색 시 포커스 유지하면서 체크리스트만 업데이트
+  const ckArea=document.getElementById('ck-items-area')
+  if(!ckArea){render();return}
+  const kw=window.ckFilter.keyword.toLowerCase().trim()
+  const allItems=D.cats.flatMap(cat=>D.items.filter(i=>i.category_id===cat.id))
+  let filtered=[...allItems]
+  if(window.ckFilter.status)filtered=filtered.filter(i=>(i.status||'할 일')===window.ckFilter.status)
+  if(window.ckFilter.priority)filtered=filtered.filter(i=>i.priority===window.ckFilter.priority)
+  if(window.ckFilter.owner)filtered=filtered.filter(i=>{const owners=Array.isArray(i.owners)&&i.owners.length?i.owners:i.owner?[i.owner]:[];return owners.includes(window.ckFilter.owner)})
+  if(window.ckFilter.requester)filtered=filtered.filter(i=>i.requester===window.ckFilter.requester)
+  if(kw){
+    filtered=filtered.filter(i=>{
+      if(i.text?.toLowerCase().includes(kw))return true
+      const owners=Array.isArray(i.owners)&&i.owners.length?i.owners:i.owner?[i.owner]:[]
+      if(owners.some(o=>o.toLowerCase().includes(kw)))return true
+      if(i.requester?.toLowerCase().includes(kw))return true
+      const itemCmts=D.comments.filter(c=>c.item_id===i.id)
+      if(itemCmts.some(c=>{let txt=c.text||'';try{const p=JSON.parse(c.text);txt=p.text||txt}catch{};return txt.toLowerCase().includes(kw)||c.user_name?.toLowerCase().includes(kw)}))return true
+      const subs=D.subs.filter(s=>s.item_id===i.id)
+      if(subs.some(s=>s.text?.toLowerCase().includes(kw)))return true
+      return false
+    })
+  }
+  ckArea.innerHTML=renderCheckItems(filtered)
+  // 포커스 복원
+  const si=document.getElementById('ck-search')
+  if(si){const pos=si.value.length;si.focus();si.setSelectionRange(pos,pos)}
+}
 window.resetCkFilter=()=>{window.ckFilter={status:'',priority:'',owner:'',requester:'',keyword:''};const ki=document.getElementById('ck-search');if(ki)ki.value='';render()}
 let calYear=2026, calMonth=6
 let notifOpen=false
@@ -398,6 +428,7 @@ function render(){
     }
   }
   else if(activeTab==='files')mc.innerHTML=renderFiles()
+  else if(activeTab==='histlog')mc.innerHTML=renderHistLog()
   else mc.innerHTML=renderMTG()
 }
 
@@ -462,11 +493,10 @@ ${(()=>{
     }catch{return false}
   }).sort((a,b)=>new Date(b.created_at)-new Date(a.created_at))
   if(!allMentionCmts.length)return''
-  const mentionLimit=window._mentionLimit||5
-  const mentionDateFrom=window._mentionDateFrom||''
-  const filtered=mentionDateFrom?allMentionCmts.filter(c=>c.created_at>=mentionDateFrom):allMentionCmts
-  const shown=filtered.slice(0,mentionLimit)
-  const hasMore=filtered.length>mentionLimit
+  const PAGE_SIZE=10
+  const mentionPage=window._mentionPage||0
+  const totalPages=Math.ceil(allMentionCmts.length/PAGE_SIZE)
+  const shown=allMentionCmts.slice(mentionPage*PAGE_SIZE,(mentionPage+1)*PAGE_SIZE)
   function renderMentionRow(c){
     const item=D.items.find(i=>i.id===c.item_id)
     let txt=c.text;try{const p=JSON.parse(c.text);txt=p.text||txt}catch{}
@@ -481,22 +511,18 @@ ${(()=>{
       <div style="font-size:13px;margin-left:28px;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${highlighted}</div>
     </div>`
   }
+  const pageNums=[...Array(totalPages).keys()].map(p=>`<button onclick="window._mentionPage=${p};render()" style="padding:3px 8px;border:0.5px solid ${p===mentionPage?'var(--o)':'var(--bd)'};border-radius:6px;background:${p===mentionPage?'var(--o)':'var(--sf)'};color:${p===mentionPage?'#fff':'var(--text)'};font-size:12px;cursor:pointer;min-width:28px">${p+1}</button>`).join('')
   return`<div class="card" style="border-left:3px solid var(--o)">
   <div class="sh">
     <span class="st"><i class="ti ti-at oi"></i> 나를 언급한 댓글</span>
-    <div style="display:flex;align-items:center;gap:6px">
-      <span class="badge bo">${filtered.length}건</span>
-      <input type="date" value="${mentionDateFrom}" onchange="window._mentionDateFrom=this.value;window._mentionLimit=5;render()"
-        style="font-size:11px;padding:2px 6px;border:0.5px solid var(--bd);border-radius:6px;background:var(--sf);color:var(--text);outline:none;cursor:pointer" title="기간 필터">
-      ${mentionDateFrom?`<span onclick="window._mentionDateFrom='';window._mentionLimit=5;render()" style="font-size:10px;cursor:pointer;color:#A32D2D">✕</span>`:''}
-    </div>
+    <span class="badge bo">${allMentionCmts.length}건</span>
   </div>
-  <div id="mention-list">
-    ${shown.map(renderMentionRow).join('')}
-  </div>
-  ${hasMore?`<button onclick="window._mentionLimit=(window._mentionLimit||5)+10;render()" style="width:100%;padding:8px;border:none;background:var(--sf);border-radius:8px;color:var(--muted);font-size:12px;cursor:pointer;margin-top:4px" onmouseover="this.style.background='var(--bd)'" onmouseout="this.style.background='var(--sf)'">
-    <i class="ti ti-chevron-down"></i> 더보기 (${filtered.length-mentionLimit}건 더)
-  </button>`:''}
+  ${shown.map(renderMentionRow).join('')}
+  ${totalPages>1?`<div style="display:flex;align-items:center;gap:4px;margin-top:10px;justify-content:center;flex-wrap:wrap">
+    <button onclick="window._mentionPage=Math.max(0,(window._mentionPage||0)-1);render()" style="padding:3px 8px;border:0.5px solid var(--bd);border-radius:6px;background:var(--sf);font-size:12px;cursor:pointer" ${mentionPage===0?'disabled style="opacity:.4"':''}>‹</button>
+    ${pageNums}
+    <button onclick="window._mentionPage=Math.min(${totalPages-1},(window._mentionPage||0)+1);render()" style="padding:3px 8px;border:0.5px solid var(--bd);border-radius:6px;background:var(--sf);font-size:12px;cursor:pointer" ${mentionPage===totalPages-1?'disabled style="opacity:.4"':''}>›</button>
+  </div>`:''}
   </div>`
 })()}
 
@@ -504,26 +530,23 @@ ${(()=>{
 <div class="card card-o">
   <div class="sh">
     <span class="st"><i class="ti ti-activity oi"></i> 최근 활동</span>
-    <div style="display:flex;align-items:center;gap:6px">
-      <span style="font-size:11px;color:var(--muted)"><span class="rdot"></span>실시간</span>
-      <input type="date" value="${window._actDateFrom||''}" onchange="window._actDateFrom=this.value;window._actLimit=3;render()"
-        style="font-size:11px;padding:2px 6px;border:0.5px solid var(--bd);border-radius:6px;background:var(--sf);color:var(--text);outline:none;cursor:pointer" title="기간 필터">
-      ${window._actDateFrom?`<span onclick="window._actDateFrom='';window._actLimit=3;render()" style="font-size:10px;cursor:pointer;color:#A32D2D">✕</span>`:''}
-    </div>
+    <span style="font-size:11px;color:var(--muted)"><span class="rdot"></span>실시간</span>
   </div>
   ${(()=>{
-    const actDateFrom=window._actDateFrom||''
-    const actLimit=window._actLimit||3
-    const filteredHistory=actDateFrom?D.history.filter(h=>h.created_at>=actDateFrom):D.history
-    if(!filteredHistory.length)return'<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px">활동 내역이 없어요</div>'
-    const shown=filteredHistory.slice(0,actLimit)
-    const hasMore=filteredHistory.length>actLimit
+    if(!D.history.length)return'<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px">활동 내역이 없어요</div>'
+    const ACT_SIZE=10
+    const actPage=window._actPage||0
+    const totalActPages=Math.ceil(D.history.length/ACT_SIZE)
+    const shown=D.history.slice(actPage*ACT_SIZE,(actPage+1)*ACT_SIZE)
+    const pageNums=[...Array(totalActPages).keys()].map(p=>`<button onclick="window._actPage=${p};render()" style="padding:3px 8px;border:0.5px solid ${p===actPage?'var(--o)':'var(--bd)'};border-radius:6px;background:${p===actPage?'var(--o)':'var(--sf)'};color:${p===actPage?'#fff':'var(--text)'};font-size:12px;cursor:pointer;min-width:28px">${p+1}</button>`).join('')
     return`<div id="activity-feed">
       ${shown.map((h,i)=>renderActivityItem(h,i,shown.length-1)).join('')}
     </div>
-    ${hasMore?`<button onclick="window._actLimit=(window._actLimit||3)+10;render()" style="width:100%;padding:8px;border:none;background:var(--sf);border-radius:8px;color:var(--muted);font-size:12px;cursor:pointer;margin-top:4px" onmouseover="this.style.background='var(--bd)'" onmouseout="this.style.background='var(--sf)'">
-      <i class="ti ti-chevron-down"></i> 더보기 (${filteredHistory.length-actLimit}건 더)
-    </button>`:''}`
+    ${totalActPages>1?`<div style="display:flex;align-items:center;gap:4px;margin-top:10px;justify-content:center;flex-wrap:wrap">
+      <button onclick="window._actPage=Math.max(0,(window._actPage||0)-1);render()" style="padding:3px 8px;border:0.5px solid var(--bd);border-radius:6px;background:var(--sf);font-size:12px;cursor:pointer" ${actPage===0?'disabled style="opacity:.4"':''}>‹</button>
+      ${pageNums}
+      <button onclick="window._actPage=Math.min(${totalActPages-1},(window._actPage||0)+1);render()" style="padding:3px 8px;border:0.5px solid var(--bd);border-radius:6px;background:var(--sf);font-size:12px;cursor:pointer" ${actPage===totalActPages-1?'disabled style="opacity:.4"':''}>›</button>
+    </div>`:''}`
   })()}
 </div>
 
@@ -801,8 +824,8 @@ function renderCK(){
         <i class="ti ti-search" style="color:var(--muted);font-size:12px;flex-shrink:0"></i>
         <input id="ck-search" type="text" placeholder="키워드·담당자 검색..." value="${window.ckFilter.keyword||''}"
           style="border:none;background:none;outline:none;font-size:12px;color:var(--text);width:100%;min-width:0"
-          oninput="window.ckFilter.keyword=this.value;render()">
-        ${window.ckFilter.keyword?`<span onclick="window.ckFilter.keyword='';document.getElementById('ck-search').value='';render()" style="cursor:pointer;color:var(--muted);font-size:12px;flex-shrink:0">✕</span>`:''}
+          oninput="window.ckFilter.keyword=this.value;filterCkItems()">
+        ${window.ckFilter.keyword?`<span onclick="window.ckFilter.keyword='';document.getElementById('ck-search').value='';filterCkItems()" style="cursor:pointer;color:var(--muted);font-size:12px;flex-shrink:0">✕</span>`:''}
       </div>
     </div>
     ${kpiNote}
@@ -835,7 +858,7 @@ function renderCK(){
         }).join('')}
       </div>`
     })()}
-    ${renderCheckItems(items)}
+    <div id="ck-items-area">${renderCheckItems(items)}</div>
   </div>
   </div>`
 }
@@ -902,8 +925,12 @@ function renderCheckItems(items){
     <div class="ck-right" onclick="event.stopPropagation()">
       ${item.status==='완료'?`<button class="btn verify-btn" data-id="${item.id}" style="padding:3px 8px;font-size:11px;background:#FEF0E6;color:#B84E06;border-color:#F5C49A;cursor:pointer"><i class="ti ti-clock" style="pointer-events:none"></i> <span style="pointer-events:none">검증대기</span></button>`:''}
       ${item.status==='검증완료'?`<span style="font-size:11px;color:#3B6D11;font-weight:500;white-space:nowrap;display:flex;align-items:center;gap:3px"><i class="ti ti-shield-check"></i> 검증완료 ${item.verified_by||''}</span>`:''}
+      ${cmts.length?`<div style="display:flex;align-items:center;gap:2px;flex-shrink:0">
+        ${[...new Set(cmts.map(c=>c.user_name))].slice(0,3).map(name=>avEl(name,18)).join('')}
+        <span style="font-size:10px;color:var(--muted);margin-left:2px">${cmts.length}</span>
+      </div>`:''}
       <button class="btn btn-g" style="padding:3px 8px;font-size:11px" onclick="location.href='detail.html?type=item&id=${item.id}'">
-        <i class="ti ti-pencil"></i>${cmts.length?' '+cmts.length:''}
+        <i class="ti ti-pencil"></i>
       </button>
       <button class="btn btn-g" style="padding:3px 6px;font-size:11px;color:#A32D2D" onclick="deleteItem('${item.id}')"><i class="ti ti-trash"></i></button>
     </div>
@@ -928,7 +955,7 @@ function renderActionItems(){
   if(!items.length)return`<div style="text-align:center;padding:40px;color:var(--muted);font-size:14px">회의록에서 추가된 액션아이템이 없어요.</div>`
   const cats=[...new Set(items.map(a=>a.cat))]
   return cats.map(cat=>{
-    const its=items.filter(a=>a.cat===cat).sort((a,b)=>{const o={'완료':3,'검증대기':2,'진행중':1,'할 일':0};return(o[a.status]||0)-(o[b.status]||0)})
+    const its=items.filter(a=>a.cat===cat).sort((a,b)=>new Date(b.created_at||0)-new Date(a.created_at||0))
     return`<div style="margin-bottom:16px">
     <div style="font-size:11px;font-weight:500;color:var(--muted);padding:4px 8px;background:var(--sf);border-radius:7px;margin-bottom:6px">${cat}</div>
     ${its.map(a=>{
@@ -1711,6 +1738,127 @@ window.saveKPIDaily=async()=>{
   document.getElementById('kpi-input-ov').remove()
   toast('저장됐어요 ✓')
   await loadAll()
+}
+
+// ══════════════════════
+// History Log
+// ══════════════════════
+function renderHistLog(){
+  const selMember=window._histLogMember||''
+  const selType=window._histLogType||''
+
+  // 활동 데이터 수집
+  const historyRows=(D.history||[]).map(h=>({
+    type:'history',
+    user:h.user_name,
+    action:h.action,
+    target:h.target||'',
+    item_id:h.item_id,
+    date:h.created_at,
+    icon:'ti-activity',
+    color:'var(--o)'
+  }))
+  const commentRows=(D.comments||[]).map(c=>{
+    let txt=c.text||''
+    try{const p=JSON.parse(c.text);txt=p.text||txt}catch{}
+    return{
+      type:'comment',
+      user:c.user_name,
+      action:'댓글 등록',
+      target:txt.slice(0,60)+(txt.length>60?'...':''),
+      item_id:c.item_id,
+      date:c.created_at,
+      icon:'ti-message',
+      color:'#185FA5'
+    }
+  })
+
+  let allRows=[...historyRows,...commentRows].sort((a,b)=>new Date(b.date)-new Date(a.date))
+
+  // 필터
+  if(selMember)allRows=allRows.filter(r=>r.user===selMember)
+  if(selType==='history')allRows=allRows.filter(r=>r.type==='history')
+  if(selType==='comment')allRows=allRows.filter(r=>r.type==='comment')
+
+  // 페이지
+  const PAGE=20
+  const page=window._histLogPage||0
+  const totalPages=Math.ceil(allRows.length/PAGE)
+  const shown=allRows.slice(page*PAGE,(page+1)*PAGE)
+
+  // 멤버별 통계
+  const memberStats=MEMBERS.map(m=>{
+    const mHist=(D.history||[]).filter(h=>h.user_name===m.name).length
+    const mCmt=(D.comments||[]).filter(c=>c.user_name===m.name).length
+    return{...m,total:mHist+mCmt,hist:mHist,cmt:mCmt}
+  }).sort((a,b)=>b.total-a.total)
+
+  return`
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+    <div style="font-size:16px;font-weight:500"><i class="ti ti-history" style="color:var(--o)"></i> History Log</div>
+    <div style="font-size:12px;color:var(--muted)">전체 ${allRows.length}건</div>
+  </div>
+
+  <!-- 멤버 카드 -->
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+    <div onclick="window._histLogMember='';window._histLogPage=0;showTab('histlog')"
+      style="display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:10px;border:1.5px solid ${!selMember?'var(--o)':'var(--bd)'};background:${!selMember?'var(--ol)':'var(--card)'};cursor:pointer">
+      <span style="font-size:12px;font-weight:${!selMember?'600':'400'}">전체</span>
+      <span class="badge bgr">${historyRows.length+commentRows.length}</span>
+    </div>
+    ${memberStats.map(m=>`
+    <div onclick="window._histLogMember='${m.name}';window._histLogPage=0;showTab('histlog')"
+      style="display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:10px;border:1.5px solid ${selMember===m.name?'var(--o)':'var(--bd)'};background:${selMember===m.name?'var(--ol)':'var(--card)'};cursor:pointer">
+      ${avEl(m.name,24)}
+      <div>
+        <div style="font-size:12px;font-weight:${selMember===m.name?'600':'400'}">${m.name}</div>
+        <div style="font-size:10px;color:var(--muted)">${m.hist}활동 · ${m.cmt}댓글</div>
+      </div>
+    </div>`).join('')}
+  </div>
+
+  <!-- 타입 필터 -->
+  <div style="display:flex;gap:6px;margin-bottom:14px">
+    ${[['','전체'],['history','활동'],['comment','댓글']].map(([v,l])=>`
+    <button onclick="window._histLogType='${v}';window._histLogPage=0;showTab('histlog')"
+      style="padding:5px 14px;border-radius:20px;border:1px solid ${selType===v?'var(--o)':'var(--bd)'};background:${selType===v?'var(--o)':'var(--card)'};color:${selType===v?'#fff':'var(--text)'};font-size:12px;cursor:pointer">${l}</button>
+    `).join('')}
+  </div>
+
+  <!-- 로그 목록 -->
+  <div class="card" style="padding:0;overflow:hidden">
+    ${shown.length?shown.map((r,i)=>{
+      const resolvedId=r.item_id||(r.target&&D.items.find(it=>it.text&&it.text.trim()===r.target.trim())?.id)||null
+      const item=resolvedId?D.items.find(it=>it.id===resolvedId):null
+      return`<div style="display:flex;align-items:flex-start;gap:12px;padding:12px 16px;border-bottom:0.5px solid var(--bd);cursor:${resolvedId?'pointer':'default'};transition:background .1s" ${resolvedId?`onclick="location.href='detail.html?type=item&id=${resolvedId}'"`:''} onmouseover="this.style.background='var(--sf)'" onmouseout="this.style.background=''">
+        <div style="width:32px;height:32px;border-radius:50%;background:${r.color}1a;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">
+          <i class="ti ${r.icon}" style="color:${r.color};font-size:14px"></i>
+        </div>
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:3px">
+            ${avEl(r.user,20)}
+            <span style="font-size:12px;font-weight:500">${r.user}</span>
+            <span class="badge ${r.type==='comment'?'bb':'bgr'}" style="font-size:9px">${r.type==='comment'?'댓글':'활동'}</span>
+            <span style="font-size:11px;font-weight:500;color:var(--text)">${r.action}</span>
+          </div>
+          ${r.target?`<div style="font-size:12px;color:var(--muted);margin-left:28px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:500px">${r.target}</div>`:''}
+          ${item?`<div style="font-size:11px;color:var(--o);margin-left:28px;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><i class="ti ti-file-text" style="font-size:10px"></i> ${item.text}</div>`:''}
+        </div>
+        <div style="font-size:10px;color:var(--muted);white-space:nowrap;flex-shrink:0">
+          ${new Date(r.date).toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}
+          ${resolvedId?'<i class="ti ti-chevron-right" style="margin-left:4px"></i>':''}
+        </div>
+      </div>`
+    }).join(''):`<div style="text-align:center;padding:40px;color:var(--muted);font-size:13px">활동 내역이 없어요</div>`}
+  </div>
+
+  <!-- 페이지네이션 -->
+  ${totalPages>1?`<div style="display:flex;align-items:center;gap:4px;margin-top:12px;justify-content:center;flex-wrap:wrap">
+    <button onclick="window._histLogPage=Math.max(0,(window._histLogPage||0)-1);showTab('histlog')" style="padding:4px 10px;border:0.5px solid var(--bd);border-radius:6px;background:var(--sf);font-size:12px;cursor:pointer" ${page===0?'disabled':''}><i class="ti ti-chevron-left"></i></button>
+    ${[...Array(totalPages).keys()].map(p=>`<button onclick="window._histLogPage=${p};showTab('histlog')" style="padding:4px 10px;border:1px solid ${p===page?'var(--o)':'var(--bd)'};border-radius:6px;background:${p===page?'var(--o)':'var(--sf)'};color:${p===page?'#fff':'var(--text)'};font-size:12px;cursor:pointer;min-width:32px">${p+1}</button>`).join('')}
+    <button onclick="window._histLogPage=Math.min(${totalPages-1},(window._histLogPage||0)+1);showTab('histlog')" style="padding:4px 10px;border:0.5px solid var(--bd);border-radius:6px;background:var(--sf);font-size:12px;cursor:pointer" ${page===totalPages-1?'disabled':''}><i class="ti ti-chevron-right"></i></button>
+  </div>`:''}
+  `
 }
 
 // ══════════════════════
