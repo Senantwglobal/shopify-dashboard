@@ -227,9 +227,9 @@ let MEMBERS=[], curUser=null, activeTab='dash'
 let expandCks={}
 window.activeCat='전체'
 window.setCat=(id)=>{window.activeCat=id;render()}
-window.ckFilter={status:'',priority:'',owner:'',requester:''}
+window.ckFilter={status:'',priority:'',owner:'',requester:'',keyword:''}
 window.setCkFilter=(key,val)=>{window.ckFilter[key]=val;render()}
-window.resetCkFilter=()=>{window.ckFilter={status:'',priority:'',owner:'',requester:''};render()}
+window.resetCkFilter=()=>{window.ckFilter={status:'',priority:'',owner:'',requester:'',keyword:''};const ki=document.getElementById('ck-search');if(ki)ki.value='';render()}
 let calYear=2026, calMonth=6
 let notifOpen=false
 let D={cats:[],items:[],subs:[],comments:[],kpiRows:[],kpiAnalysis:{},actionItems:[],meetings:[],history:[],appSettings:[]}
@@ -455,19 +455,21 @@ function renderDash(){
 
 <!-- 멘션 알림 -->
 ${(()=>{
-  const mentionCmts=D.comments.filter(c=>{
+  const allMentionCmts=D.comments.filter(c=>{
     try{
       let mentions=[];try{const p=JSON.parse(c.text);const t=p.text||c.text;mentions=[...t.matchAll(/@(\S+)/g)].map(m=>m[1])}catch{mentions=typeof c.text==='string'?[...c.text.matchAll(/@(\S+)/g)].map(m=>m[1]):[]}
       return mentions.includes(curUser.name)
     }catch{return false}
-  }).sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,5)
-  if(!mentionCmts.length)return''
-  return`<div class="card" style="border-left:3px solid var(--o)">
-  <div class="sh"><span class="st"><i class="ti ti-at oi"></i> 나를 언급한 댓글</span><span class="badge bo">${mentionCmts.length}</span></div>
-  ${mentionCmts.map(c=>{
+  }).sort((a,b)=>new Date(b.created_at)-new Date(a.created_at))
+  if(!allMentionCmts.length)return''
+  const mentionLimit=window._mentionLimit||5
+  const mentionDateFrom=window._mentionDateFrom||''
+  const filtered=mentionDateFrom?allMentionCmts.filter(c=>c.created_at>=mentionDateFrom):allMentionCmts
+  const shown=filtered.slice(0,mentionLimit)
+  const hasMore=filtered.length>mentionLimit
+  function renderMentionRow(c){
     const item=D.items.find(i=>i.id===c.item_id)
-    let txt=c.text
-    try{const p=JSON.parse(c.text);txt=p.text||txt}catch{}
+    let txt=c.text;try{const p=JSON.parse(c.text);txt=p.text||txt}catch{}
     const highlighted=txt.replace(/@(\S+)/g,'<span style="color:var(--o);font-weight:600">@$1</span>')
     return`<div style="padding:10px 0;border-bottom:0.5px solid var(--bd);cursor:pointer" onclick="location.href='detail.html?type=item&id=${c.item_id}'">
       <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
@@ -475,10 +477,26 @@ ${(()=>{
         <span style="font-size:12px;font-weight:500">${c.user_name}</span>
         <span style="font-size:11px;color:var(--muted)">${new Date(c.created_at).toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}</span>
       </div>
-      <div style="font-size:12px;color:var(--muted);margin-left:28px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${item?`<i class="ti ti-file-text" style="font-size:10px"></i> ${item.text} ·`:''}</div>
+      <div style="font-size:12px;color:var(--muted);margin-left:28px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${item?`<i class="ti ti-file-text" style="font-size:10px"></i> ${item.text}`:''}</div>
       <div style="font-size:13px;margin-left:28px;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${highlighted}</div>
     </div>`
-  }).join('')}
+  }
+  return`<div class="card" style="border-left:3px solid var(--o)">
+  <div class="sh">
+    <span class="st"><i class="ti ti-at oi"></i> 나를 언급한 댓글</span>
+    <div style="display:flex;align-items:center;gap:6px">
+      <span class="badge bo">${filtered.length}건</span>
+      <input type="date" value="${mentionDateFrom}" onchange="window._mentionDateFrom=this.value;window._mentionLimit=5;render()"
+        style="font-size:11px;padding:2px 6px;border:0.5px solid var(--bd);border-radius:6px;background:var(--sf);color:var(--text);outline:none;cursor:pointer" title="기간 필터">
+      ${mentionDateFrom?`<span onclick="window._mentionDateFrom='';window._mentionLimit=5;render()" style="font-size:10px;cursor:pointer;color:#A32D2D">✕</span>`:''}
+    </div>
+  </div>
+  <div id="mention-list">
+    ${shown.map(renderMentionRow).join('')}
+  </div>
+  ${hasMore?`<button onclick="window._mentionLimit=(window._mentionLimit||5)+10;render()" style="width:100%;padding:8px;border:none;background:var(--sf);border-radius:8px;color:var(--muted);font-size:12px;cursor:pointer;margin-top:4px" onmouseover="this.style.background='var(--bd)'" onmouseout="this.style.background='var(--sf)'">
+    <i class="ti ti-chevron-down"></i> 더보기 (${filtered.length-mentionLimit}건 더)
+  </button>`:''}
   </div>`
 })()}
 
@@ -486,14 +504,27 @@ ${(()=>{
 <div class="card card-o">
   <div class="sh">
     <span class="st"><i class="ti ti-activity oi"></i> 최근 활동</span>
-    <span style="font-size:11px;color:var(--muted)"><span class="rdot"></span>실시간 업데이트</span>
+    <div style="display:flex;align-items:center;gap:6px">
+      <span style="font-size:11px;color:var(--muted)"><span class="rdot"></span>실시간</span>
+      <input type="date" value="${window._actDateFrom||''}" onchange="window._actDateFrom=this.value;window._actLimit=3;render()"
+        style="font-size:11px;padding:2px 6px;border:0.5px solid var(--bd);border-radius:6px;background:var(--sf);color:var(--text);outline:none;cursor:pointer" title="기간 필터">
+      ${window._actDateFrom?`<span onclick="window._actDateFrom='';window._actLimit=3;render()" style="font-size:10px;cursor:pointer;color:#A32D2D">✕</span>`:''}
+    </div>
   </div>
-  ${D.history.length?`<div id="activity-feed">
-  ${D.history.slice(0,3).map((h,i)=>renderActivityItem(h,i,2)).join('')}
-  </div>
-  ${D.history.length>3?`<button onclick="toggleActivityFeed()" id="activity-more-btn" style="width:100%;padding:8px;border:none;background:var(--sf);border-radius:8px;color:var(--muted);font-size:12px;cursor:pointer;margin-top:4px;transition:background .15s" onmouseover="this.style.background='var(--bd)'" onmouseout="this.style.background='var(--sf)'">
-    <i class="ti ti-chevron-down" id="activity-more-icon"></i> 더보기 (${D.history.length-3}건 더)
-  </button>`:''}`:`<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px">아직 활동 내역이 없어요</div>`}
+  ${(()=>{
+    const actDateFrom=window._actDateFrom||''
+    const actLimit=window._actLimit||3
+    const filteredHistory=actDateFrom?D.history.filter(h=>h.created_at>=actDateFrom):D.history
+    if(!filteredHistory.length)return'<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px">활동 내역이 없어요</div>'
+    const shown=filteredHistory.slice(0,actLimit)
+    const hasMore=filteredHistory.length>actLimit
+    return`<div id="activity-feed">
+      ${shown.map((h,i)=>renderActivityItem(h,i,shown.length-1)).join('')}
+    </div>
+    ${hasMore?`<button onclick="window._actLimit=(window._actLimit||3)+10;render()" style="width:100%;padding:8px;border:none;background:var(--sf);border-radius:8px;color:var(--muted);font-size:12px;cursor:pointer;margin-top:4px" onmouseover="this.style.background='var(--bd)'" onmouseout="this.style.background='var(--sf)'">
+      <i class="ti ti-chevron-down"></i> 더보기 (${filteredHistory.length-actLimit}건 더)
+    </button>`:''}`
+  })()}
 </div>
 
 <div class="two">
@@ -757,7 +788,7 @@ function renderCK(){
         <option value="high" ${window.ckFilter.priority==='high'?'selected':''}>중요</option>
         <option value="medium" ${window.ckFilter.priority==='medium'?'selected':''}>보통</option>
       </select>
-      <select style="font-size:12px;padding:4px 8px;border:0.5px solid var(--bd);border-radius:7px;background:var(--sf);color:var(--text);outline:none;cursor:pointer" onchange="setCkFilter('owner',this.value)">
+      <select style="font-size:12px;padding:4px 8px;border:0.5px solid var(--bd);border-radius:7px;background:var(--sf);color:var(--text);outline:none;cursor:pointer" onchange="setCkFilter('owner',this.value);window._ownerPanel=this.value;render()">
         <option value="">전체 담당자</option>
         ${MEMBERS.map(m=>`<option value="${m.name}" ${window.ckFilter.owner===m.name?'selected':''}>${m.name}</option>`).join('')}
       </select>
@@ -766,8 +797,44 @@ function renderCK(){
         ${MEMBERS.map(m=>`<option value="${m.name}" ${window.ckFilter.requester===m.name?'selected':''}>${m.name}</option>`).join('')}
       </select>
       ${Object.values(window.ckFilter).some(v=>v)?'<button onclick="resetCkFilter()" style="font-size:11px;padding:4px 10px;border:0.5px solid #A32D2D;border-radius:7px;background:#FCEBEB;color:#A32D2D;cursor:pointer"><i class="ti ti-x"></i> 필터 초기화</button>':''}
+      <div style="display:flex;align-items:center;gap:5px;flex:1;min-width:160px;background:var(--sf);border:0.5px solid var(--bd);border-radius:7px;padding:3px 8px">
+        <i class="ti ti-search" style="color:var(--muted);font-size:12px;flex-shrink:0"></i>
+        <input id="ck-search" type="text" placeholder="키워드·담당자 검색..." value="${window.ckFilter.keyword||''}"
+          style="border:none;background:none;outline:none;font-size:12px;color:var(--text);width:100%;min-width:0"
+          oninput="window.ckFilter.keyword=this.value;render()">
+        ${window.ckFilter.keyword?`<span onclick="window.ckFilter.keyword='';document.getElementById('ck-search').value='';render()" style="cursor:pointer;color:var(--muted);font-size:12px;flex-shrink:0">✕</span>`:''}
+      </div>
     </div>
     ${kpiNote}
+    ${(()=>{
+      const op=window._ownerPanel
+      if(!op)return''
+      // 해당 담당자의 활동(history + comments) 모두 수집
+      const memberHistory=(D.history||[]).filter(h=>h.user_name===op).slice(0,30)
+      const memberCmts=(D.comments||[]).filter(c=>c.user_name===op).slice(0,20)
+      const combined=[
+        ...memberHistory.map(h=>({type:'history',text:h.action+(h.target?` — ${h.target.slice(0,30)}`:''),date:h.created_at,item_id:h.item_id,target:h.target})),
+        ...memberCmts.map(c=>{let txt=c.text;try{const p=JSON.parse(c.text);txt=p.text||txt}catch{};return{type:'comment',text:'댓글: '+txt.slice(0,40),date:c.created_at,item_id:c.item_id}})
+      ].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,25)
+      if(!combined.length)return`<div class="card" style="padding:14px;margin-bottom:10px"><div style="font-size:13px;color:var(--muted);text-align:center">${op}님의 활동 없음</div></div>`
+      return`<div class="card" style="margin-bottom:10px;border-left:3px solid var(--o)">
+        <div class="sh" style="margin-bottom:8px">
+          <span class="st"><i class="ti ti-activity oi"></i> ${op}님 활동 (최근 ${combined.length}건)</span>
+          <button onclick="window._ownerPanel='';render()" style="font-size:11px;padding:2px 8px;border:0.5px solid var(--bd);border-radius:6px;background:var(--sf);cursor:pointer">닫기</button>
+        </div>
+        ${combined.map(a=>{
+          const resolvedId=a.item_id||(a.target?D.items.find(i=>i.text&&i.text.trim()===a.target?.trim())?.id:null)
+          return`<div style="display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:0.5px solid var(--bd);cursor:${resolvedId?'pointer':'default'}" ${resolvedId?`onclick="location.href='detail.html?type=item&id=${resolvedId}'"`:''}>
+            <span style="font-size:10px;padding:2px 6px;border-radius:5px;background:${a.type==='comment'?'#E6F1FB':'var(--ol)'};color:${a.type==='comment'?'#185FA5':'var(--od)'};white-space:nowrap;flex-shrink:0">${a.type==='comment'?'댓글':'활동'}</span>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.text}</div>
+              <div style="font-size:10px;color:var(--muted);margin-top:2px">${new Date(a.date).toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}</div>
+            </div>
+            ${resolvedId?'<i class="ti ti-chevron-right" style="color:var(--muted);font-size:11px;flex-shrink:0"></i>':''}
+          </div>`
+        }).join('')}
+      </div>`
+    })()}
     ${renderCheckItems(items)}
   </div>
   </div>`
@@ -783,6 +850,29 @@ function renderCheckItems(items){
     return owners.includes(window.ckFilter.owner)
   })
   if(window.ckFilter.requester)filtered=filtered.filter(i=>i.requester===window.ckFilter.requester)
+  if(window.ckFilter.keyword){
+    const kw=window.ckFilter.keyword.toLowerCase().trim()
+    filtered=filtered.filter(i=>{
+      // 제목 검색
+      if(i.text?.toLowerCase().includes(kw))return true
+      // 담당자 이름 검색
+      const owners=Array.isArray(i.owners)&&i.owners.length?i.owners:i.owner?[i.owner]:[]
+      if(owners.some(o=>o.toLowerCase().includes(kw)))return true
+      // 요청자 검색
+      if(i.requester?.toLowerCase().includes(kw))return true
+      // 댓글 작성자 or 댓글 내용 검색
+      const itemCmts=D.comments.filter(c=>c.item_id===i.id)
+      if(itemCmts.some(c=>{
+        let txt=c.text||''
+        try{const p=JSON.parse(c.text);txt=p.text||txt}catch{}
+        return txt.toLowerCase().includes(kw)||c.user_name?.toLowerCase().includes(kw)
+      }))return true
+      // 세부항목 검색
+      const subs=D.subs.filter(s=>s.item_id===i.id)
+      if(subs.some(s=>s.text?.toLowerCase().includes(kw)))return true
+      return false
+    })
+  }
 
   if(!filtered.length){
     const hasFilter=Object.values(window.ckFilter).some(v=>v)
@@ -999,6 +1089,9 @@ window.addNiSub=()=>{
 }
 window.saveNewItem=async()=>{
   const text=document.getElementById('ni-text')?.value.trim();if(!text)return
+  // 저장 시 입력 중인 세부항목도 자동 포함
+  const pendingSub=document.getElementById('ni-sub-inp')?.value.trim()
+  if(pendingSub){window._niSubs=window._niSubs||[];window._niSubs.push(pendingSub)}
   const owners=(document.getElementById('ni-owners')?.value||'').split(',').filter(Boolean)
   const {data:ni}=await sb.from('checklist_items').insert({
     category_id:document.getElementById('ni-cat').value,text,
