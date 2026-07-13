@@ -412,7 +412,7 @@ window.showTab=t=>{
   render()
 }
 
-function render(){
+window.render=function render(){
   document.getElementById('dday-c').textContent=`D-${calcDD()} · ${getDday().slice(5).replace('-','/')}`
   const mc=document.getElementById('mc')
   if(activeTab==='dash')mc.innerHTML=renderDash()
@@ -1827,9 +1827,9 @@ function renderHistLog(){
 
   <!-- 페이지네이션 -->
   ${totalPages>1?`<div style="display:flex;align-items:center;gap:4px;margin-top:12px;justify-content:center;flex-wrap:wrap">
-    <button class="histlog-page-btn" data-p="${Math.max(0,page-1)}" style="padding:4px 10px;border:0.5px solid var(--bd);border-radius:6px;background:var(--sf);font-size:12px;cursor:pointer;opacity:${page===0?0.4:1}"><i class="ti ti-chevron-left"></i></button>
-    ${[...Array(totalPages).keys()].map(p=>`<button class="histlog-page-btn" data-p="${p}" style="padding:4px 10px;border:1px solid ${p===page?'var(--o)':'var(--bd)'};border-radius:6px;background:${p===page?'var(--o)':'var(--sf)'};color:${p===page?'#fff':'var(--text)'};font-size:12px;cursor:pointer;min-width:32px">${p+1}</button>`).join('')}
-    <button class="histlog-page-btn" data-p="${Math.min(totalPages-1,page+1)}" style="padding:4px 10px;border:0.5px solid var(--bd);border-radius:6px;background:var(--sf);font-size:12px;cursor:pointer;opacity:${page===totalPages-1?0.4:1}"><i class="ti ti-chevron-right"></i></button>
+    <button onclick="window._histLogPage=Math.max(0,(window._histLogPage||0)-1);showTab('histlog')" style="padding:4px 10px;border:0.5px solid var(--bd);border-radius:6px;background:var(--sf);font-size:12px;cursor:pointer" ${page===0?'disabled':''}><i class="ti ti-chevron-left"></i></button>
+    ${[...Array(totalPages).keys()].map(p=>`<button onclick="window._histLogPage=${p};showTab('histlog')" style="padding:4px 10px;border:1px solid ${p===page?'var(--o)':'var(--bd)'};border-radius:6px;background:${p===page?'var(--o)':'var(--sf)'};color:${p===page?'#fff':'var(--text)'};font-size:12px;cursor:pointer;min-width:32px">${p+1}</button>`).join('')}
+    <button onclick="window._histLogPage=Math.min(${totalPages-1},(window._histLogPage||0)+1);showTab('histlog')" style="padding:4px 10px;border:0.5px solid var(--bd);border-radius:6px;background:var(--sf);font-size:12px;cursor:pointer" ${page===totalPages-1?'disabled':''}><i class="ti ti-chevron-right"></i></button>
   </div>`:''}
   `
 }
@@ -2419,15 +2419,6 @@ await loadAll()
     render()
   }
 })()
-
-// HistLog 페이지네이션 이벤트 위임
-document.addEventListener('click', function(e){
-  const btn=e.target.closest('.histlog-page-btn')
-  if(!btn)return
-  e.stopPropagation()
-  const p=parseInt(btn.dataset.p)
-  if(!isNaN(p)){window._histLogPage=p;showTab('histlog')}
-}, true)
 
 // 검증대기 버튼 이벤트 위임 (capture phase)
 document.addEventListener('click', async function(e) {
