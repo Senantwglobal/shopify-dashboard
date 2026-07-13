@@ -156,12 +156,13 @@ document.getElementById('back-btn').addEventListener('click',e=>{
   if(_dirty){
     if(!confirm('저장하지 않으면 변경내용이 삭제됩니다. 뒤로 가시겠어요?')){e.preventDefault();return}
   }
-  // 이전 페이지 새로고침
+  // 항상 체크리스트 탭으로 돌아가기
   const ref=document.referrer
   if(ref&&ref.includes('dashboard.html')){
-    location.href=ref
+    // 체크리스트 탭 상태로 복원
+    location.href=ref.split('?')[0]+'?tab=ck'
   } else {
-    history.back()
+    location.href='dashboard.html?tab=ck'
   }
 })
 
@@ -224,7 +225,7 @@ function renderItemDetail(item,subs,comments,cats){
       onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}"
     >${item.text}</div>
     <div style="font-size:11px;color:var(--muted);margin-top:3px;margin-bottom:10px">클릭해서 제목 수정 가능</div>
-    <div class="meta-row">${pb(item.priority)}${sb2(item.status)}${dlc(item.deadline,item.done)}${item.done?`<span class="badge bg"><i class="ti ti-check"></i> 완료 · ${item.done_by||''}</span>`:''}
+    <div class="meta-row">${pb(item.priority)}${sb2(item.status)}${dlc(item.deadline,item.done)}${item.created_at?`<span style="font-size:11px;color:var(--muted)"><i class="ti ti-calendar-plus"></i> 생성 ${new Date(item.created_at).toLocaleDateString('ko-KR',{year:'numeric',month:'2-digit',day:'2-digit'})}</span>`:''}${item.done?`<span class="badge bg"><i class="ti ti-check"></i> 완료 · ${item.done_by||''}</span>`:''}
     ${item.status==='완료'?`<button class="btn" style="padding:3px 10px;font-size:11px;background:#FEF0E6;color:#B84E06;border-color:#F5C49A;cursor:pointer" onclick="verifyItem('${item.id}')"><i class="ti ti-clock"></i> 검증대기</button>`:''}
     ${item.status==='검증완료'?`<span style="font-size:12px;color:#3B6D11;font-weight:600;display:flex;align-items:center;gap:4px"><i class="ti ti-shield-check"></i> 검증완료 · ${item.verified_by||''}</span>`:''}</div>
 
