@@ -287,7 +287,13 @@ window.logout=async()=>{await sb.auth.signOut();location.href='index.html'}
 // ── 유틸 ──
 function ddu(ds){if(!ds)return 999;return Math.ceil((new Date(ds)-TODAY)/864e5)}
 function calcDD(){return Math.max(0,Math.ceil((new Date(getDday())-TODAY)/864e5))}
-function getDday(){return localStorage.getItem('ople-dday')||'2026-07-14'}
+function getDday(){
+  try{
+    const dbRow=(D.appSettings||[]).find(r=>r.key==='dday')
+    if(dbRow?.value)return dbRow.value
+  }catch{}
+  return localStorage.getItem('ople-dday')||'2026-07-14'
+}
 function setDday(d){localStorage.setItem('ople-dday',d)}
 function fmtDate(d){if(!d)return'—';return new Date(d).toLocaleDateString('ko-KR',{month:'2-digit',day:'2-digit'})}
 function ts(){return new Date().toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}
@@ -2396,11 +2402,24 @@ window.openMemberTasks=(name)=>{
   document.body.appendChild(w)
 }
 
+window.saveDdayDate=async()=>{
+  const v=document.getElementById('dday-inp')?.value
+  if(!v)return
+  setDday(v)
+  // DB에도 저장
+  await sb.from('app_settings').delete().eq('key','dday')
+  await sb.from('app_settings').insert({key:'dday',value:v,updated_at:new Date().toISOString()})
+  const idx=(D.appSettings||[]).findIndex(r=>r.key==='dday')
+  if(idx>=0)D.appSettings[idx].value=v
+  else D.appSettings=[...(D.appSettings||[]),{key:'dday',value:v}]
+  document.getElementById('dday-ov')?.remove()
+  window.render();toast('D-Day 설정됨')
+}
 window.openDdayEdit=()=>{
   const w=mkOv('dday-ov')
   w.innerHTML=`<div class="modal" style="width:320px"><div class="mh"><span style="font-weight:500">D-Day 날짜 설정</span><button class="btn btn-g" onclick="document.getElementById('dday-ov').remove()"><i class="ti ti-x"></i></button></div>
   <div class="mb"><input class="inp" type="date" id="dday-inp" value="${getDday()}"></div>
-  <div class="mf"><button class="btn btn-o" onclick="const v=document.getElementById('dday-inp').value;if(v){setDday(v);document.getElementById('dday-ov').remove();render();toast('D-Day 설정됨')}">저장</button></div>
+  <div class="mf"><button class="btn btn-o" onclick="saveDdayDate()">저장</button></div>
   </div>`
   document.body.appendChild(w)
 }
